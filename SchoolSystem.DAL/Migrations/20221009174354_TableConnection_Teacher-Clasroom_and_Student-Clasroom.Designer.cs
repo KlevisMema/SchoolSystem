@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolSystem.DAL.DataBase;
 
@@ -11,9 +12,10 @@ using SchoolSystem.DAL.DataBase;
 namespace SchoolSystem.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221009174354_TableConnection_Teacher-Clasroom_and_Student-Clasroom")]
+    partial class TableConnection_TeacherClasroom_and_StudentClasroom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,50 +42,6 @@ namespace SchoolSystem.DAL.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("Clasrooms");
-                });
-
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Exam", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Exams");
-                });
-
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Result", b =>
-                {
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Mark")
-                        .HasColumnType("int");
-
-                    b.HasKey("StudentId", "ExamId", "SubjectId");
-
-                    b.HasIndex("ExamId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.ToTable("Results");
                 });
 
             modelBuilder.Entity("SchoolSystem.DAL.Models.Student", b =>
@@ -143,30 +101,6 @@ namespace SchoolSystem.DAL.Migrations
                     b.ToTable("StudentClasrooms");
                 });
 
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Subject", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClasroomId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClasroomId");
-
-                    b.ToTable("Subjects");
-                });
-
             modelBuilder.Entity("SchoolSystem.DAL.Models.Teacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -216,33 +150,6 @@ namespace SchoolSystem.DAL.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Result", b =>
-                {
-                    b.HasOne("SchoolSystem.DAL.Models.Exam", "Exam")
-                        .WithMany("StudentSubjects")
-                        .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SchoolSystem.DAL.Models.Student", "Student")
-                        .WithMany("SubjectExams")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SchoolSystem.DAL.Models.Subject", "Subject")
-                        .WithMany("StudentExams")
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Exam");
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Subject");
-                });
-
             modelBuilder.Entity("SchoolSystem.DAL.Models.StudentClasroom", b =>
                 {
                     b.HasOne("SchoolSystem.DAL.Models.Clasroom", "Clasroom")
@@ -262,39 +169,14 @@ namespace SchoolSystem.DAL.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Subject", b =>
-                {
-                    b.HasOne("SchoolSystem.DAL.Models.Clasroom", "Clasroom")
-                        .WithMany("Subjects")
-                        .HasForeignKey("ClasroomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Clasroom");
-                });
-
             modelBuilder.Entity("SchoolSystem.DAL.Models.Clasroom", b =>
                 {
                     b.Navigation("Students");
-
-                    b.Navigation("Subjects");
-                });
-
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Exam", b =>
-                {
-                    b.Navigation("StudentSubjects");
                 });
 
             modelBuilder.Entity("SchoolSystem.DAL.Models.Student", b =>
                 {
                     b.Navigation("Clasrooms");
-
-                    b.Navigation("SubjectExams");
-                });
-
-            modelBuilder.Entity("SchoolSystem.DAL.Models.Subject", b =>
-                {
-                    b.Navigation("StudentExams");
                 });
 
             modelBuilder.Entity("SchoolSystem.DAL.Models.Teacher", b =>
