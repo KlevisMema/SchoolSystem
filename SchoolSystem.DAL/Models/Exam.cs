@@ -7,7 +7,7 @@
         public string Name { get; set; } = String.Empty;
         public int Type { get; set; }
 
-        // Relationship Property with result model M:M
+        // Relationship Property related with result model M:M
         public ICollection<Result>? StudentSubjects { get; set; }
     }
 }
