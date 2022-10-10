@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoolSystem.DAL", "SchoolS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoolSystem.BLL", "SchoolSystem.BLL\SchoolSystem.BLL.csproj", "{36F423DC-4A22-48EE-AAB7-A208B55CF21C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolSystem.DTO", "SchoolSystem.DTO\SchoolSystem.DTO.csproj", "{6D3E130A-7954-44B1-89F8-B2C44C84C3D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{36F423DC-4A22-48EE-AAB7-A208B55CF21C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36F423DC-4A22-48EE-AAB7-A208B55CF21C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36F423DC-4A22-48EE-AAB7-A208B55CF21C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3E130A-7954-44B1-89F8-B2C44C84C3D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3E130A-7954-44B1-89F8-B2C44C84C3D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3E130A-7954-44B1-89F8-B2C44C84C3D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3E130A-7954-44B1-89F8-B2C44C84C3D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
