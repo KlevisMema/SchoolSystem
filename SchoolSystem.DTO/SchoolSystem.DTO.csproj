@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SchoolSystem.DAL\SchoolSystem.DAL.csproj" />
-    <ProjectReference Include="..\SchoolSystem.DTO\SchoolSystem.DTO.csproj" />
   </ItemGroup>
 
 </Project>
