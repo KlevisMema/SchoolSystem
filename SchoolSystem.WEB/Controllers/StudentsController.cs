@@ -39,5 +39,49 @@ namespace SchoolSystem.WEB.Controllers
 
             return BadRequest(students.Message);
         }
+
+        /// <summary>
+        /// Get a specific by id 
+        /// </summary>
+        /// <param name="id"> Id of the student </param>
+        /// <returns> The student by that id </returns>
+        [HttpGet("GetSpecificStudent")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(StudentViewModel))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(StudentViewModel))]
+        public async Task<ActionResult<List<StudentViewModel>>> GetSpecificStudent(Guid id)
+        {
+            var student = await _studentService.GetSpecificStudent(id);
+
+            if (student.Success)
+                return Ok(student.Value);
+
+            if (student.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return NotFound(student.Message);
+
+            return BadRequest(student.Message);
+        }
+
+        /// <summary>
+        /// Create student
+        /// </summary>
+        /// <param name="newStudent"> Student object cotainig {FullName,Email,Password,Phone,Sex,Adress} </param>
+        /// <returns> The created student </returns>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(StudentViewModel))]
+        public async Task<ActionResult<StudentViewModel>> CreateStudent([FromForm] CreateStudentViewModel newStudent)
+        {
+            if (ModelState.IsValid)
+            {
+                var createStudent = await _studentService.CreateStudent(newStudent);
+
+                if (createStudent.Success)
+                    return Ok(createStudent.Value);
+
+                return BadRequest(createStudent.Message);
+            }
+            return BadRequest(ModelState);
+        }
     }
 }
