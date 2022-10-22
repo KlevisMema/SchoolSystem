@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.DTO.ViewModels;
+using SchoolSystem.DTO.ViewModels.Student;
 
 namespace SchoolSystem.WEB.Controllers
 {

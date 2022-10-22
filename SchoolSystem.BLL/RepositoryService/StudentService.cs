@@ -3,7 +3,7 @@ using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DTO.ObjectTransform;
-using SchoolSystem.DTO.ViewModels;
+using SchoolSystem.DTO.ViewModels.Student;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
