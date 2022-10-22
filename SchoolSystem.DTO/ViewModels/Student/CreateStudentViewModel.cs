@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using RequiredAttribute = System.ComponentModel.DataAnnotations.RequiredAttribute;
 
-namespace SchoolSystem.DTO.ViewModels
+namespace SchoolSystem.DTO.ViewModels.Student
 {
     public class CreateStudentViewModel
     {

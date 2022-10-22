@@ -9,21 +9,21 @@ namespace SchoolSystem.DAL.BaseModel
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        public string FullName { get; set; }  = String.Empty;
+        public string FullName { get; set; }  
 
         [DataType(DataType.EmailAddress)]
-        public string Email { get; set; } = String.Empty;
+        public string Email { get; set; } 
 
         [DataType(DataType.Password)]
-        public string Password { get; set; } = String.Empty;
+        public string Password { get; set; } 
 
         [DataType(DataType.PhoneNumber)]
-        public string Phone { get; set; } = String.Empty;
+        public string Phone { get; set; } 
 
         public DateTime Date_Of_Join { get; set; }
 
-        public string Sex { get; set; } = String.Empty;
+        public string Sex { get; set; } 
 
-        public string Adress { get; set; } = String.Empty;
+        public string Adress { get; set; } 
     }
 }

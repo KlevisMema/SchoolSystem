@@ -1,6 +1,6 @@
-﻿namespace SchoolSystem.DTO.ViewModels
+﻿namespace SchoolSystem.DTO.ViewModels.Teacher
 {
-    public class StudentViewModel
+    public class TeacherViewModel
     {
         public Guid Id { get; set; }
         public string FullName { get; set; }

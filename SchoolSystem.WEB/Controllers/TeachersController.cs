@@ -1,108 +1,114 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
+﻿using Microsoft.AspNetCore.Mvc;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.ViewModels.Teacher;
+using System.Net;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Teachers API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class TeachersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITeacherService _teacherService;
 
-        public TeachersController(ApplicationDbContext context)
+        /// <summary>
+        /// Inject teacher service 
+        /// </summary>
+        /// <param name="teacherService"></param>
+        public TeachersController(ITeacherService teacherService)
         {
-            _context = context;
+            _teacherService = teacherService;
         }
 
-        // GET: api/Teachers
+        /// <summary>
+        /// Get all Teachers
+        /// </summary>
+        /// <returns> All Students </returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Teacher>>> GetTeachers()
+        public async Task<ActionResult<IEnumerable<TeacherViewModel>>> GetTeachers()
         {
-            return await _context.Teachers.ToListAsync();
+            var teachers = await _teacherService.GetTeachers();
+
+            if (teachers.Success)
+                return Ok(teachers.Value);
+
+            return BadRequest(teachers.Message);
         }
 
-        // GET: api/Teachers/5
+        /// <summary>
+        /// Get a specific teacher
+        /// </summary>
+        /// <param name="id">Id of the teacher </param>
+        /// <returns> The teacher info </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Teacher>> GetTeacher(Guid id)
+        public async Task<ActionResult<TeacherViewModel>> GetTeacher(Guid id)
         {
-            var teacher = await _context.Teachers.FindAsync(id);
+            var teacher = await _teacherService.GetTeacher(id);
 
-            if (teacher == null)
-            {
-                return NotFound();
-            }
+            if (teacher.Success)
+                return Ok(teacher.Value);
 
-            return teacher;
+            if (teacher.StatusCode == HttpStatusCode.NotFound)
+                return NotFound(teacher.Message);
+
+            return BadRequest(teacher.Message);
         }
 
-        // PUT: api/Teachers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a teacher 
+        /// </summary>
+        /// <param name="id">Id of the teacher</param>
+        /// <param name="teacher"> Teacher object</param>
+        /// <returns>The updtated techer </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTeacher(Guid id, Teacher teacher)
+        public async Task<IActionResult> PutTeacher([FromRoute] Guid id, [FromForm] UpdateTeacherViewModel teacher)
         {
-            if (id != teacher.Id)
-            {
-                return BadRequest();
-            }
+            var updatedTeacher = await _teacherService.PutTeacher(id, teacher);
 
-            _context.Entry(teacher).State = EntityState.Modified;
+            if (updatedTeacher.Success)
+                return Ok(updatedTeacher.Value);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TeacherExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            if (updatedTeacher.StatusCode == HttpStatusCode.NotFound)
+                return NotFound(updatedTeacher.Message);
 
-            return NoContent();
+            return BadRequest(updatedTeacher.Message);
         }
 
-        // POST: api/Teachers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a teacher 
+        /// </summary>
+        /// <param name="teacher"> Teacher object </param>
+        /// <returns> The created techer </returns>
         [HttpPost]
-        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacher)
+        public async Task<ActionResult<TeacherViewModel>> PostTeacher([FromForm] CreateTeacherViewModel teacher)
         {
-            _context.Teachers.Add(teacher);
-            await _context.SaveChangesAsync();
+            var createTeacher = await _teacherService.PostTeacher(teacher);
 
-            return CreatedAtAction("GetTeacher", new { id = teacher.Id }, teacher);
+            if (createTeacher.Success)
+                return Ok(createTeacher.Value);
+
+            return BadRequest(createTeacher.Message);
         }
 
-        // DELETE: api/Teachers/5
+        /// <summary>
+        /// Delete a teacher
+        /// </summary>
+        /// <param name="id">Id of the teacher </param>
+        /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTeacher(Guid id)
         {
-            var teacher = await _context.Teachers.FindAsync(id);
-            if (teacher == null)
-            {
-                return NotFound();
-            }
+            var deleteTeacher = await _teacherService.DeleteTeacher(id);
 
-            _context.Teachers.Remove(teacher);
-            await _context.SaveChangesAsync();
+            if (deleteTeacher.Success)
+                return Ok(deleteTeacher.Message);
 
-            return NoContent();
-        }
+            return BadRequest(deleteTeacher.Message);
 
-        private bool TeacherExists(Guid id)
-        {
-            return _context.Teachers.Any(e => e.Id == id);
         }
     }
 }

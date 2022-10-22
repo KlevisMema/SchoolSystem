@@ -1,5 +1,7 @@
 ﻿using SchoolSystem.DAL.Models;
-using SchoolSystem.DTO.ViewModels;
+using SchoolSystem.DTO.ViewModels.Student;
+using SchoolSystem.DTO.ViewModels.Teacher;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SchoolSystem.DTO.ObjectTransform
 {
@@ -16,7 +18,8 @@ namespace SchoolSystem.DTO.ObjectTransform
                 Phone = student.Phone,
                 Date_Of_Join = student.Date_Of_Join,
                 Sex = student.Sex,
-                Adress = student.Adress
+                Adress = student.Adress,
+                ParentName = student.ParentName,
             };
         }
 

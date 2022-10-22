@@ -1,5 +1,5 @@
 ﻿using SchoolSystem.BLL.ResponseService;
-using SchoolSystem.DTO.ViewModels;
+using SchoolSystem.DTO.ViewModels.Student;
 
 namespace SchoolSystem.BLL.RepositoryServiceInterfaces
 {

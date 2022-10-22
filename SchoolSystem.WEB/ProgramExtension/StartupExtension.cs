@@ -37,9 +37,11 @@ namespace SchoolSystem.API.ProgramExtension
                 optios.IncludeXmlComments(xmlPath);
             });
 
+            services.AddAutoMapper(typeof(Program).Assembly);
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<ITeacherService, TeacherService>();
 
             return services;
         }
