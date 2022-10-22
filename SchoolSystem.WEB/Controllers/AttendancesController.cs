@@ -12,47 +12,47 @@ namespace SchoolSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TeachersController : ControllerBase
+    public class AttendancesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public TeachersController(ApplicationDbContext context)
+        public AttendancesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Teachers
+        // GET: api/Attendances
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Teacher>>> GetTeachers()
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetAttendances()
         {
-            return await _context.Teachers.ToListAsync();
+            return await _context.Attendances.ToListAsync();
         }
 
-        // GET: api/Teachers/5
+        // GET: api/Attendances/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Teacher>> GetTeacher(Guid id)
+        public async Task<ActionResult<Attendance>> GetAttendance(Guid id)
         {
-            var teacher = await _context.Teachers.FindAsync(id);
+            var attendance = await _context.Attendances.FindAsync(id);
 
-            if (teacher == null)
+            if (attendance == null)
             {
                 return NotFound();
             }
 
-            return teacher;
+            return attendance;
         }
 
-        // PUT: api/Teachers/5
+        // PUT: api/Attendances/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTeacher(Guid id, Teacher teacher)
+        public async Task<IActionResult> PutAttendance(Guid id, Attendance attendance)
         {
-            if (id != teacher.Id)
+            if (id != attendance.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(teacher).State = EntityState.Modified;
+            _context.Entry(attendance).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace SchoolSystem.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TeacherExists(id))
+                if (!AttendanceExists(id))
                 {
                     return NotFound();
                 }
@@ -73,36 +73,36 @@ namespace SchoolSystem.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Teachers
+        // POST: api/Attendances
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacher)
+        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendance)
         {
-            _context.Teachers.Add(teacher);
+            _context.Attendances.Add(attendance);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTeacher", new { id = teacher.Id }, teacher);
+            return CreatedAtAction("GetAttendance", new { id = attendance.Id }, attendance);
         }
 
-        // DELETE: api/Teachers/5
+        // DELETE: api/Attendances/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTeacher(Guid id)
+        public async Task<IActionResult> DeleteAttendance(Guid id)
         {
-            var teacher = await _context.Teachers.FindAsync(id);
-            if (teacher == null)
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null)
             {
                 return NotFound();
             }
 
-            _context.Teachers.Remove(teacher);
+            _context.Attendances.Remove(attendance);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool TeacherExists(Guid id)
+        private bool AttendanceExists(Guid id)
         {
-            return _context.Teachers.Any(e => e.Id == id);
+            return _context.Attendances.Any(e => e.Id == id);
         }
     }
 }
