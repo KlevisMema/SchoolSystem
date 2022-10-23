@@ -65,7 +65,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacher"> Teacher object</param>
         /// <returns>The updtated techer </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTeacher([FromRoute] Guid id, [FromForm] UpdateTeacherViewModel teacher)
+        public async Task<ActionResult<TeacherViewModel>> PutTeacher([FromRoute] Guid id, [FromForm] UpdateTeacherViewModel teacher)
         {
             var updatedTeacher = await _teacherService.PutTeacher(id, teacher);
 
@@ -100,7 +100,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the teacher </param>
         /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTeacher(Guid id)
+        public async Task<ActionResult<TeacherViewModel>> DeleteTeacher(Guid id)
         {
             var deleteTeacher = await _teacherService.DeleteTeacher(id);
 

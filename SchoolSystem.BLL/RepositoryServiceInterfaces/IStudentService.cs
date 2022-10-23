@@ -8,5 +8,7 @@ namespace SchoolSystem.BLL.RepositoryServiceInterfaces
         Task<Response<List<StudentViewModel>>> GetStudets();
         Task<Response<StudentViewModel>> GetSpecificStudent(Guid id);
         Task<Response<StudentViewModel>> CreateStudent(CreateStudentViewModel newStudent);
+        Task<Response<StudentViewModel>> PutStudent(Guid id, CreateStudentViewModel student);
+        Task<Response<StudentViewModel>> DeleteStudent(Guid id);
     }
 }

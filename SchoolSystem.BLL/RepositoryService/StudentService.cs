@@ -69,5 +69,56 @@ namespace SchoolSystem.BLL.RepositoryService
                 return Response<StudentViewModel>.ErrorMsg(ex.Message);
             }
         }
+
+        // Update a student
+        public async Task<Response<StudentViewModel>> PutStudent(Guid id, CreateStudentViewModel student)
+        {
+            
+
+            try
+            {
+                var _student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
+
+                ArgumentNullException.ThrowIfNull(_student);
+
+                _context.Entry(_student).CurrentValues.SetValues(student);
+
+                await _context.SaveChangesAsync();
+
+                return await GetSpecificStudent(id);
+            }
+            catch (ArgumentNullException)
+            {
+                return Response<StudentViewModel>.NotFound("Student doesnt exists");
+            }
+            catch (Exception)
+            {
+                return Response<StudentViewModel>.ErrorMsg("Server error, couldn't update record, try again!!");
+            }
+        }
+
+        // Delete a student by id
+        public async Task<Response<StudentViewModel>> DeleteStudent(Guid id)
+        {
+            try
+            {
+                var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
+
+                ArgumentNullException.ThrowIfNull(student);
+
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+
+                return Response<StudentViewModel>.SuccessMessage("Student deleted successfully...");
+            }
+            catch (ArgumentNullException)
+            {
+                return Response<StudentViewModel>.NotFound("Student doesn't exists");
+            }
+            catch (Exception)
+            {
+                return Response<StudentViewModel>.ErrorMsg("Server error, could't delete try again!");
+            }
+        }
     }
 }

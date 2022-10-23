@@ -1,8 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryService;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.DataBase;
+using SchoolSystem.DTO.Mappings;
 using System.Reflection;
 
 namespace SchoolSystem.API.ProgramExtension
@@ -37,11 +41,24 @@ namespace SchoolSystem.API.ProgramExtension
                 optios.IncludeXmlComments(xmlPath);
             });
 
-            services.AddAutoMapper(typeof(Program).Assembly);
+            //services.AddAutoMapper(typeof(MappingsTeacher));
+
+            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new MappingsTeacher());
+            });
+
+            var mapper = config.CreateMapper();
+
+            services.AddSingleton(mapper);
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            services.AddScoped<IStudentService, StudentService>();
-            services.AddScoped<ITeacherService, TeacherService>();
+            services.AddTransient<IStudentService, StudentService>();
+            services.AddTransient<ITeacherService, TeacherService>();
+            services.AddTransient(typeof(StatusCodeResponse<>));
+            services.AddTransient(typeof(CRUD<,,,>));
 
             return services;
         }
