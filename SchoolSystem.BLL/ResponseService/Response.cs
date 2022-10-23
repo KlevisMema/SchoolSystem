@@ -23,11 +23,11 @@ namespace SchoolSystem.BLL.ResponseService
             StatusCode = statusCode;
         }
 
-        public Response(string? errorMessage, HttpStatusCode statusCode)
+        public Response(string? errorMessage, HttpStatusCode statusCode, bool success)
         {
             Message = errorMessage;
             Value = default;
-            Success = false;
+            Success = success;
             StatusCode = statusCode;
         }
 
@@ -39,17 +39,17 @@ namespace SchoolSystem.BLL.ResponseService
 
         public static Response<T> NotFound(string errorMessage)
         {
-            return new Response<T>(errorMessage, HttpStatusCode.NotFound);
+            return new Response<T>(errorMessage, HttpStatusCode.NotFound, false);
         }
 
         public static Response<T> SuccessMessage(string message)
         {
-            return new Response<T>(message, HttpStatusCode.OK);
+            return new Response<T>(message, HttpStatusCode.OK, true);
         }
 
         public static Response<T> ErrorMsg(string ThrowMessage)
         {
-            return new Response<T>(ThrowMessage);
+            return new Response<T>(ThrowMessage, HttpStatusCode.InternalServerError, false);
         }
     }
 }
