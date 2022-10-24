@@ -1,124 +1,74 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.ResponseService;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DTO.ObjectTransform;
+using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Student;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
     public class StudentService : IStudentService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICRUD<StudentViewModel, Student, CreateStudentViewModel, UpdateStudentViewModel> _CRUD;
 
-        public StudentService(ApplicationDbContext context)
+        public StudentService(
+            ICRUD<StudentViewModel, Student, CreateStudentViewModel, UpdateStudentViewModel> CRUD)
         {
-            _context = context;
+            _CRUD = CRUD;
         }
 
-        // Get all students from Students table
+        /// <summary>
+        /// Get all student from database
+        /// </summary>
+        /// <returns> a list of all student</returns>
         public async Task<Response<List<StudentViewModel>>> GetStudets()
         {
-            try
-            {
-                var students = await _context.Students.ToListAsync();
-
-                if (students is null)
-                    return Response<List<StudentViewModel>>.ErrorMsg("Server error.. . . .");
-
-                return Response<List<StudentViewModel>>
-                            .Ok(students.Select(objTransform => objTransform.AsStudentViewModel())
-                            .ToList());
-            }
-            catch (Exception ex)
-            {
-                return Response<List<StudentViewModel>>.ErrorMsg(ex.Message);
-            }
+            var getAllStudents = await _CRUD.GetAll();
+            return getAllStudents;
         }
 
-        // Get a specific student by id
+        /// <summary>
+        /// Get a single student
+        /// </summary>
+        /// <param name="id"> Id of a student</param>
+        /// <returns> The object of a specific student</returns>
         public async Task<Response<StudentViewModel>> GetSpecificStudent(Guid id)
         {
-            try
-            {
-                var student = await _context.Students.FirstOrDefaultAsync(x=>x.Id == id);
-
-                if (student is null)
-                    return Response<StudentViewModel>.NotFound("Student doesn't exists");
-
-                return Response<StudentViewModel>.Ok(student.AsStudentViewModel());
-            }
-            catch (Exception ex)
-            {
-                return Response<StudentViewModel>.ErrorMsg(ex.Message);
-            }
+            var getStudent = await _CRUD.GetSpecificRecord(id, "Student");
+            return getStudent;
         }
 
-        // Create student 
+        /// <summary>
+        /// Creates a new student 
+        /// </summary>
+        /// <param name="teacher">Teacher object </param>
+        /// <returns>The created student</returns>
         public async Task<Response<StudentViewModel>> CreateStudent(CreateStudentViewModel newStudent)
         {
-            try
-            {
-                await _context.Students.AddAsync(newStudent.AsStudent());
-                await _context.SaveChangesAsync();
-
-                return Response<StudentViewModel>.Ok(newStudent.AsStudent().AsStudentViewModel());
-            }
-            catch (Exception ex)
-            {
-                return Response<StudentViewModel>.ErrorMsg(ex.Message);
-            }
+            var createNewStudent = await _CRUD.PostRecord(newStudent, "Student");
+            return createNewStudent;
         }
 
-        // Update a student
-        public async Task<Response<StudentViewModel>> PutStudent(Guid id, CreateStudentViewModel student)
+        /// <summary>
+        /// Updates a student  
+        /// </summary>
+        /// <param name="id">Id of a student</param>
+        /// <param name="teacher">Object that holds the new values of student </param>
+        /// <returns>The updated student</returns>
+        public async Task<Response<StudentViewModel>> PutStudent(Guid id, UpdateStudentViewModel student)
         {
-            
-
-            try
-            {
-                var _student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
-
-                ArgumentNullException.ThrowIfNull(_student);
-
-                _context.Entry(_student).CurrentValues.SetValues(student);
-
-                await _context.SaveChangesAsync();
-
-                return await GetSpecificStudent(id);
-            }
-            catch (ArgumentNullException)
-            {
-                return Response<StudentViewModel>.NotFound("Student doesnt exists");
-            }
-            catch (Exception)
-            {
-                return Response<StudentViewModel>.ErrorMsg("Server error, couldn't update record, try again!!");
-            }
+            var updateStudent = await _CRUD.PutRecord(id, student, "Student");
+            return updateStudent;
         }
 
-        // Delete a student by id
+        /// <summary>
+        /// Deletes a student 
+        /// </summary>
+        /// <param name="id">Id of the student</param>
+        /// <returns>A message telling if the student was deleted or not</returns>
         public async Task<Response<StudentViewModel>> DeleteStudent(Guid id)
         {
-            try
-            {
-                var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
-
-                ArgumentNullException.ThrowIfNull(student);
-
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
-
-                return Response<StudentViewModel>.SuccessMessage("Student deleted successfully...");
-            }
-            catch (ArgumentNullException)
-            {
-                return Response<StudentViewModel>.NotFound("Student doesn't exists");
-            }
-            catch (Exception)
-            {
-                return Response<StudentViewModel>.ErrorMsg("Server error, could't delete try again!");
-            }
+            var deleteStudent = await _CRUD.DeleteRecord(id, "Student");
+            return deleteStudent;
         }
     }
 }

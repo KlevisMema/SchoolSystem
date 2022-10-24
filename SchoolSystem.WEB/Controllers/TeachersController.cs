@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
+using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Teacher;
-using System.Net;
 
 namespace SchoolSystem.API.Controllers
 {
@@ -14,14 +15,27 @@ namespace SchoolSystem.API.Controllers
     public class TeachersController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
+        private readonly IValidator<CreateTeacherViewModel> _createModelValidator;
+        private readonly IValidator<UpdateTeacherViewModel> _updateModelValidator;
+        private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
 
         /// <summary>
         /// Inject teacher service 
         /// </summary>
+        /// <param name="statusCodeResponse"></param>
         /// <param name="teacherService"></param>
-        public TeachersController(ITeacherService teacherService)
+        /// <param name="createModelValidator"></param>
+        /// <param name="updateModelValidator"></param>
+        public TeachersController(
+            ITeacherService teacherService,
+            StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> statusCodeResponse,
+            IValidator<CreateTeacherViewModel> createModelValidator,
+            IValidator<UpdateTeacherViewModel> updateModelValidator)
         {
             _teacherService = teacherService;
+            _statusCodeResponse = statusCodeResponse;
+            _createModelValidator = createModelValidator;
+            _updateModelValidator = updateModelValidator;
         }
 
         /// <summary>
@@ -29,14 +43,10 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <returns> All Students </returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TeacherViewModel>>> GetTeachers()
+        public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers()
         {
             var teachers = await _teacherService.GetTeachers();
-
-            if (teachers.Success)
-                return Ok(teachers.Value);
-
-            return BadRequest(teachers.Message);
+            return _statusCodeResponse.ControllerResponse(teachers);
         }
 
         /// <summary>
@@ -48,14 +58,7 @@ namespace SchoolSystem.API.Controllers
         public async Task<ActionResult<TeacherViewModel>> GetTeacher(Guid id)
         {
             var teacher = await _teacherService.GetTeacher(id);
-
-            if (teacher.Success)
-                return Ok(teacher.Value);
-
-            if (teacher.StatusCode == HttpStatusCode.NotFound)
-                return NotFound(teacher.Message);
-
-            return BadRequest(teacher.Message);
+            return _statusCodeResponse.ControllerResponse(teacher); 
         }
 
         /// <summary>
@@ -67,15 +70,12 @@ namespace SchoolSystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<TeacherViewModel>> PutTeacher([FromRoute] Guid id, [FromForm] UpdateTeacherViewModel teacher)
         {
+            ValidationResult validationResult = await _updateModelValidator.ValidateAsync(teacher);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
             var updatedTeacher = await _teacherService.PutTeacher(id, teacher);
-
-            if (updatedTeacher.Success)
-                return Ok(updatedTeacher.Value);
-
-            if (updatedTeacher.StatusCode == HttpStatusCode.NotFound)
-                return NotFound(updatedTeacher.Message);
-
-            return BadRequest(updatedTeacher.Message);
+            return _statusCodeResponse.ControllerResponse(updatedTeacher);
         }
 
         /// <summary>
@@ -86,12 +86,12 @@ namespace SchoolSystem.API.Controllers
         [HttpPost]
         public async Task<ActionResult<TeacherViewModel>> PostTeacher([FromForm] CreateTeacherViewModel teacher)
         {
+            ValidationResult validationResult = await _createModelValidator.ValidateAsync(teacher);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
             var createTeacher = await _teacherService.PostTeacher(teacher);
-
-            if (createTeacher.Success)
-                return Ok(createTeacher.Value);
-
-            return BadRequest(createTeacher.Message);
+            return _statusCodeResponse.ControllerResponse(createTeacher);
         }
 
         /// <summary>
@@ -103,12 +103,7 @@ namespace SchoolSystem.API.Controllers
         public async Task<ActionResult<TeacherViewModel>> DeleteTeacher(Guid id)
         {
             var deleteTeacher = await _teacherService.DeleteTeacher(id);
-
-            if (deleteTeacher.Success)
-                return Ok(deleteTeacher.Message);
-
-            return BadRequest(deleteTeacher.Message);
-
+            return _statusCodeResponse.ControllerResponse(deleteTeacher);
         }
     }
 }

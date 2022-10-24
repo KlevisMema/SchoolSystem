@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using static SchoolSystem.DAL.Enums.GenderEnum;
-using RequiredAttribute = System.ComponentModel.DataAnnotations.RequiredAttribute;
 
 namespace SchoolSystem.DTO.ViewModels.Student
 {
-    public class CreateStudentViewModel
+    public class UpdateStudentViewModel
     {
         [Required(ErrorMessage = "Full name field is required")]
         [Display(Name = "Full name")]

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SchoolSystem.API.ControllerRespose;
@@ -6,7 +6,10 @@ using SchoolSystem.BLL.RepositoryService;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.DataBase;
+using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.FluentValidation.Teacher;
 using SchoolSystem.DTO.Mappings;
+using SchoolSystem.DTO.ViewModels.Teacher;
 using System.Reflection;
 
 namespace SchoolSystem.API.ProgramExtension
@@ -24,6 +27,7 @@ namespace SchoolSystem.API.ProgramExtension
         /// <returns></returns>
         public static IServiceCollection InjectServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Swagger configuration
             services.AddSwaggerGen(optios =>
             {
                 optios.SwaggerDoc("v1", new OpenApiInfo
@@ -41,24 +45,23 @@ namespace SchoolSystem.API.ProgramExtension
                 optios.IncludeXmlComments(xmlPath);
             });
 
-            //services.AddAutoMapper(typeof(MappingsTeacher));
+            // AutoMapper service registration
+            services.AddAutoMapper(typeof(MappingsTeacher));
+            services.AddAutoMapper(typeof(MappingsStudent));
 
-            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MappingsTeacher());
-            });
-
-            var mapper = config.CreateMapper();
-
-            services.AddSingleton(mapper);
-
+            // Database registration
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            
+            // Services registration
             services.AddTransient<IStudentService, StudentService>();
             services.AddTransient<ITeacherService, TeacherService>();
-            services.AddTransient(typeof(StatusCodeResponse<>));
-            services.AddTransient(typeof(CRUD<,,,>));
+
+            // Generic serivces registration
+            services.AddTransient(typeof(StatusCodeResponse<,>));
+            services.AddTransient(typeof(ICRUD<,,,>), typeof(CRUD<,,,>));
+
+            // FluentValidation services registration
+            services.AddScoped<IValidator<CreateTeacherViewModel>, CreateTeacherViewModelValidation>();
 
             return services;
         }
