@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.Student;
-using System.Net;
 
 namespace SchoolSystem.WEB.Controllers
 {
@@ -15,23 +13,19 @@ namespace SchoolSystem.WEB.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IStudentService _studentService;
-        private readonly StatusCodeResponse<StudentViewModel> _student;
-        private readonly StatusCodeResponse<List<StudentViewModel>> _listStudents;
+        private readonly StatusCodeResponse<StudentViewModel, List<StudentViewModel>> _statusCodeResponse;
 
         /// <summary>
         /// Inject Student Services 
         /// </summary>
         /// <param name="studentService"></param>
-        /// <param name="student"></param>
-        /// <param name="listStudents"></param>
+        /// <param name="statusCodeResponse"></param>
         public StudentsController(
             IStudentService studentService, 
-            StatusCodeResponse<StudentViewModel> student, 
-            StatusCodeResponse<List<StudentViewModel>> listStudents)
+            StatusCodeResponse<StudentViewModel, List<StudentViewModel>> statusCodeResponse)
         {
             _studentService = studentService;
-            _student = student;
-            _listStudents = listStudents;
+            _statusCodeResponse = statusCodeResponse;
         }
 
         /// <summary>
@@ -44,7 +38,7 @@ namespace SchoolSystem.WEB.Controllers
         public async Task<ActionResult<List<StudentViewModel>>> GetStudents()
         {
             var students  = await _studentService.GetStudets();
-            return _listStudents.ControllerResponse(students);
+            return _statusCodeResponse.ControllerResponse(students);
         }
 
         /// <summary>
@@ -59,7 +53,7 @@ namespace SchoolSystem.WEB.Controllers
         public async Task<ActionResult<List<StudentViewModel>>> GetSpecificStudent(Guid id)
         {
             var student = await _studentService.GetSpecificStudent(id);
-            return _student.ControllerResponse(student);
+            return _statusCodeResponse.ControllerResponse(student);
         }
 
         /// <summary>
@@ -73,7 +67,7 @@ namespace SchoolSystem.WEB.Controllers
         public async Task<ActionResult<StudentViewModel>> CreateStudent([FromForm] CreateStudentViewModel newStudent)
         {
             var createStudent = await _studentService.CreateStudent(newStudent);
-            return _student.ControllerResponse(createStudent);
+            return _statusCodeResponse.ControllerResponse(createStudent);
         }
 
         /// <summary>
@@ -86,10 +80,10 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public async Task<ActionResult<StudentViewModel>> PutStudent([FromRoute] Guid id, [FromForm] CreateStudentViewModel student)
+        public async Task<ActionResult<StudentViewModel>> PutStudent([FromRoute] Guid id, [FromForm] UpdateStudentViewModel student)
         {
             var updatedStudent = await _studentService.PutStudent(id, student);
-            return _student.ControllerResponse(updatedStudent);
+            return _statusCodeResponse.ControllerResponse(updatedStudent);
         }
 
         /// <summary>
@@ -105,7 +99,7 @@ namespace SchoolSystem.WEB.Controllers
         public async Task<ActionResult<StudentViewModel>> DeleteStudent(Guid id)
         {
             var deleteStudent = await _studentService.DeleteStudent(id);
-            return _student.ControllerResponse(deleteStudent);
+            return _statusCodeResponse.ControllerResponse(deleteStudent);
         }
     }
 }

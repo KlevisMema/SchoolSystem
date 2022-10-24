@@ -5,14 +5,16 @@ using SchoolSystem.DAL.DataBase;
 
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
-    public class CRUD<ReturnType, 
-                      ModelType, 
+    public class CRUD<ReturnType,
+                      ModelType,
                       PostModelType,
                       UpdateModelType> 
                       
-                      where ReturnType      : class
-                      where ModelType       : class
-                      where PostModelType   : class
+                      : ICRUD<ReturnType, ModelType, PostModelType, UpdateModelType> 
+
+                      where ReturnType : class
+                      where ModelType : class
+                      where PostModelType : class
                       where UpdateModelType : class
     {
         private readonly ApplicationDbContext _context;
@@ -29,9 +31,11 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         {
             try
             {
-                var recordsFromDb = await _context.Set<ModelType>().ToListAsync();
+                List<ModelType> recordsFromDb = await _context.Set<ModelType>().ToListAsync();
 
-                return _mapper.Map<Response<List<ReturnType>>>(recordsFromDb);
+                List<ReturnType> trasfromObjectToReturnType = _mapper.Map<List<ReturnType>>(recordsFromDb);
+
+                return Response<List<ReturnType>>.Ok(trasfromObjectToReturnType);
             }
             catch (Exception)
             {
@@ -44,11 +48,13 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         {
             try
             {
-                var recordFromDb = await _context.Set<ModelType>().FindAsync(id);
+                ModelType recordFromDb = await _context.Set<ModelType>().FindAsync(id);
 
                 ArgumentNullException.ThrowIfNull(recordFromDb);
 
-                return Response<ReturnType>.Ok(_mapper.Map<ReturnType>(recordFromDb));
+                ReturnType transformObjectToReturnType = _mapper.Map<ReturnType>(recordFromDb);
+
+                return Response<ReturnType>.Ok(transformObjectToReturnType);
             }
             catch (ArgumentNullException)
             {
@@ -59,13 +65,16 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
                 return Response<ReturnType>.ErrorMsg("Server error, try again !!");
             }
         }
-        
+
         // Create a record of an entity
         public async Task<Response<ReturnType>> PostRecord(PostModelType record, string customMessage)
         {
             try
             {
-                _context.Set<ModelType>().Add(_mapper.Map<ModelType>(record));
+                ModelType transformObjectToModelType = _mapper.Map<ModelType>(record);
+
+                _context.Set<ModelType>().Add(transformObjectToModelType);
+
                 await _context.SaveChangesAsync();
 
                 return Response<ReturnType>.SuccessMessage($"{customMessage} created succsessuflly");
@@ -81,11 +90,12 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         {
             try
             {
-                var _recordFromDb = await _context.Set<ModelType>().FindAsync(id);
+                ModelType _recordFromDb = await _context.Set<ModelType>().FindAsync(id);
 
                 ArgumentNullException.ThrowIfNull(_recordFromDb);
 
                 _context.Entry(_recordFromDb).CurrentValues.SetValues(recordFromClient);
+
                 await _context.SaveChangesAsync();
 
                 return await GetSpecificRecord(id, string.Empty);
@@ -105,11 +115,12 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         {
             try
             {
-                var record = await _context.Set<ModelType>().FindAsync(id);
+                ModelType record = await _context.Set<ModelType>().FindAsync(id);
 
                 ArgumentNullException.ThrowIfNull(record);
 
                 _context.Set<ModelType>().Remove(record);
+
                 await _context.SaveChangesAsync();
 
                 return Response<ReturnType>.SuccessMessage($"{customMessage} deleted successfully...");

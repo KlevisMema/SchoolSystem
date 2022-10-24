@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static SchoolSystem.DAL.Enums.GenderEnum;
 
 namespace SchoolSystem.DAL.BaseModel
 {
@@ -22,7 +23,7 @@ namespace SchoolSystem.DAL.BaseModel
 
         public DateTime Date_Of_Join { get; set; }
 
-        public string Sex { get; set; } 
+        public Gender Sex { get; set; } 
 
         public string Adress { get; set; } 
     }

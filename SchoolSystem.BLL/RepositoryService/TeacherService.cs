@@ -8,10 +8,10 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class TeacherService : ITeacherService
     {
-        private readonly CRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> _CRUD;
+        private readonly ICRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> _CRUD;
 
         public TeacherService(
-            CRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> CRUD)
+            ICRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> CRUD)
         {
             _CRUD = CRUD;
         }
@@ -22,8 +22,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all teachers</returns>
         public async Task<Response<List<TeacherViewModel>>> GetTeachers()
         {
-            var response = await _CRUD.GetAll();
-            return response;
+            var getAllTeachers = await _CRUD.GetAll();
+            return getAllTeachers;
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific teacher</returns>
         public async Task<Response<TeacherViewModel>> GetTeacher(Guid id)
         {
-            var response = await _CRUD.GetSpecificRecord(id, "Teacher");
-            return response;
+            var getTeacher = await _CRUD.GetSpecificRecord(id, "Teacher");
+            return getTeacher;
         }
 
         /// <summary>
@@ -45,8 +45,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The updated teacher</returns>
         public async Task<Response<TeacherViewModel>> PutTeacher(Guid id, UpdateTeacherViewModel teacher)
         {
-            var response = await _CRUD.PutRecord(id, teacher, "Teacher");
-            return response;
+            var updateTeacher = await _CRUD.PutRecord(id, teacher, "Teacher");
+            return updateTeacher;
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created teacher</returns>
         public async Task<Response<TeacherViewModel>> PostTeacher(CreateTeacherViewModel teacher)
         {
-            var responsePostMethod = await _CRUD.PostRecord(teacher, "Teacher");
-            return responsePostMethod;
+            var postTeacher = await _CRUD.PostRecord(teacher, "Teacher");
+            return postTeacher;
         }
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the teacher was deleted or not</returns>
         public async Task<Response<TeacherViewModel>> DeleteTeacher(Guid id)
         {
-            var deleteResponse = await _CRUD.DeleteRecord(id, "Teacher");
-            return deleteResponse;
+            var deleteTeacher= await _CRUD.DeleteRecord(id, "Teacher");
+            return deleteTeacher;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static SchoolSystem.DAL.Enums.GenderEnum;
 
 namespace SchoolSystem.DTO.ViewModels.Teacher
 {
@@ -22,7 +23,7 @@ namespace SchoolSystem.DTO.ViewModels.Teacher
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "Sex field is required")]
-        public string Sex { get; set; }
+        public Gender Sex { get; set; }
 
         [Required(ErrorMessage = "Adress field is required")]
         public string Adress { get; set; }

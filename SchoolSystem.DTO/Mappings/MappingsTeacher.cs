@@ -8,12 +8,10 @@ namespace SchoolSystem.DTO.Mappings
     {
         public MappingsTeacher()
         {
-            //CreateMap<CreateTeacherViewModel, Teacher>()
-            //    .ForMember(dest => dest.Date_Of_Join, opt => opt.MapFrom(src => DateTime.UtcNow));
-
             CreateMap<Teacher, TeacherViewModel>();
 
-            
+            CreateMap<CreateTeacherViewModel, Teacher>()
+                .ForMember(dest => dest.Date_Of_Join, opt => opt.MapFrom(src => DateTime.UtcNow));
         }
     }
 }
