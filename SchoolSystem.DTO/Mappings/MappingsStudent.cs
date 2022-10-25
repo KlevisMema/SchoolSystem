@@ -10,7 +10,7 @@ namespace SchoolSystem.DTO.Mappings
         {
             CreateMap<Student, StudentViewModel>();
 
-            CreateMap<CreateStudentViewModel, Student>()
+            CreateMap<CreateUpdateStudentViewModel, Student>()
                 .ForMember(dest => dest.Date_Of_Join, opt => opt.MapFrom(src => DateTime.UtcNow));
         }
     }

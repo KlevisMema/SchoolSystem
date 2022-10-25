@@ -1,101 +1,124 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.ViewModels.Exam;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Exam API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ExamsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IExamService _examService;
+        private readonly IValidator<CreateUpdateExamViewModel> _modelValidator;
+        private readonly StatusCodeResponse<ExamViewModel, List<ExamViewModel>> _statusCodeResponse;
 
-        public ExamsController(ApplicationDbContext context)
+        /// <summary>
+        /// Inject services 
+        /// </summary>
+        /// <param name="examService">Exam service</param>
+        /// <param name="statusCodeResponse">status code response service</param>
+        /// <param name="modelValidator">Model validation service</param>
+        public ExamsController(
+            IExamService examService,
+            StatusCodeResponse<ExamViewModel, List<ExamViewModel>> statusCodeResponse,
+            IValidator<CreateUpdateExamViewModel> modelValidator)
         {
-            _context = context;
+            _examService = examService;
+            _statusCodeResponse = statusCodeResponse;
+            _modelValidator = modelValidator;
         }
 
+        /// <summary>
+        /// Get all Exams
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Exam>>> GetExams()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<ExamViewModel>>> GetExams()
         {
-            return await _context.Exams.ToListAsync();
+            var exams = await _examService.GetExams();
+            return _statusCodeResponse.ControllerResponse(exams);
         }
 
+        /// <summary>
+        /// Get an exam
+        /// </summary>
+        /// <param name="id">Id of the exam</param>
+        /// <returns>Details of that exam</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Exam>> GetExam(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<ExamViewModel>> GetExam([FromRoute] Guid id)
         {
-            var exam = await _context.Exams.FindAsync(id);
-
-            if (exam == null)
-            {
-                return NotFound();
-            }
-
-            return exam;
+            var exam = await _examService.GetExam(id);
+            return _statusCodeResponse.ControllerResponse(exam);
         }
 
+        /// <summary>
+        /// Update an exam
+        /// </summary>
+        /// <param name="id">Id of the  exam</param>
+        /// <param name="exam">Exam object from client</param>
+        /// <returns>The updated exam </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutExam(Guid id, Exam exam)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> PutExam([FromRoute] Guid id,[FromForm] CreateUpdateExamViewModel exam)
         {
-            if (id != exam.Id)
-            {
-                return BadRequest();
-            }
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            _context.Entry(exam).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ExamExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedExam = await _examService.PutExam(id, exam);
+            return _statusCodeResponse.ControllerResponse(updatedExam);
         }
 
+        /// <summary>
+        /// Creates an exam 
+        /// </summary>
+        /// <param name="exam">Exam object from client</param>
+        /// <returns>A message id exam was created or not</returns>
         [HttpPost]
-        public async Task<ActionResult<Exam>> PostExam(Exam exam)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<Exam>> PostExam([FromForm] CreateUpdateExamViewModel exam)
         {
-            _context.Exams.Add(exam);
-            await _context.SaveChangesAsync();
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            return CreatedAtAction("GetExam", new { id = exam.Id }, exam);
+            var createStudent = await _examService.PostExam(exam);
+            return _statusCodeResponse.ControllerResponse(createStudent);
         }
 
+        /// <summary>
+        /// Deletes an exam
+        /// </summary>
+        /// <param name="id">Id of the exam</param>
+        /// <returns>A message if the exam was deleted or not</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteExam(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> DeleteExam([FromRoute] Guid id)
         {
-            var exam = await _context.Exams.FindAsync(id);
-            if (exam == null)
-            {
-                return NotFound();
-            }
-
-            _context.Exams.Remove(exam);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ExamExists(Guid id)
-        {
-            return _context.Exams.Any(e => e.Id == id);
+            var deleteExam = await _examService.DeleteExam(id);
+            return _statusCodeResponse.ControllerResponse(deleteExam);
         }
     }
 }

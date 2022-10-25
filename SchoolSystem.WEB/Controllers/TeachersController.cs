@@ -3,6 +3,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Teacher;
 
 namespace SchoolSystem.API.Controllers
@@ -15,8 +16,7 @@ namespace SchoolSystem.API.Controllers
     public class TeachersController : ControllerBase
     {
         private readonly ITeacherService _teacherService;
-        private readonly IValidator<CreateTeacherViewModel> _createModelValidator;
-        private readonly IValidator<UpdateTeacherViewModel> _updateModelValidator;
+        private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
         private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
 
         /// <summary>
@@ -24,18 +24,16 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="statusCodeResponse"></param>
         /// <param name="teacherService"></param>
-        /// <param name="createModelValidator"></param>
-        /// <param name="updateModelValidator"></param>
+        /// <param name="modelValidator"></param>
         public TeachersController(
             ITeacherService teacherService,
-            StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> statusCodeResponse,
-            IValidator<CreateTeacherViewModel> createModelValidator,
-            IValidator<UpdateTeacherViewModel> updateModelValidator)
+            StatusCodeResponse<TeacherViewModel,
+            List<TeacherViewModel>> statusCodeResponse,
+            IValidator<CreateUpdateTeacherViewModel> modelValidator)
         {
             _teacherService = teacherService;
             _statusCodeResponse = statusCodeResponse;
-            _createModelValidator = createModelValidator;
-            _updateModelValidator = updateModelValidator;
+            _modelValidator = modelValidator;
         }
 
         /// <summary>
@@ -43,6 +41,9 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <returns> All Students </returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers()
         {
             var teachers = await _teacherService.GetTeachers();
@@ -55,6 +56,10 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the teacher </param>
         /// <returns> The teacher info </returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> GetTeacher(Guid id)
         {
             var teacher = await _teacherService.GetTeacher(id);
@@ -68,9 +73,13 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacher"> Teacher object</param>
         /// <returns>The updtated techer </returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<TeacherViewModel>> PutTeacher([FromRoute] Guid id, [FromForm] UpdateTeacherViewModel teacher)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<TeacherViewModel>> PutTeacher([FromRoute] Guid id, [FromForm] CreateUpdateTeacherViewModel teacher)
         {
-            ValidationResult validationResult = await _updateModelValidator.ValidateAsync(teacher);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
@@ -84,9 +93,12 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacher"> Teacher object </param>
         /// <returns> The created techer </returns>
         [HttpPost]
-        public async Task<ActionResult<TeacherViewModel>> PostTeacher([FromForm] CreateTeacherViewModel teacher)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<TeacherViewModel>> PostTeacher([FromForm] CreateUpdateTeacherViewModel teacher)
         {
-            ValidationResult validationResult = await _createModelValidator.ValidateAsync(teacher);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
@@ -100,6 +112,10 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the teacher </param>
         /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> DeleteTeacher(Guid id)
         {
             var deleteTeacher = await _teacherService.DeleteTeacher(id);

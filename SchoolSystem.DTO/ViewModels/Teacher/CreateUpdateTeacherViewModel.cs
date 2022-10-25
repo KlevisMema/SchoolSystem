@@ -2,7 +2,7 @@
 
 namespace SchoolSystem.DTO.ViewModels.Teacher
 {
-    public class CreateTeacherViewModel
+    public class CreateUpdateTeacherViewModel
     {
         public string FullName { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;

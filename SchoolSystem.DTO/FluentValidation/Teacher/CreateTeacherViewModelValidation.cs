@@ -3,7 +3,7 @@ using SchoolSystem.DTO.ViewModels.Teacher;
 
 namespace SchoolSystem.DTO.FluentValidation.Teacher
 {
-    public class CreateTeacherViewModelValidation : AbstractValidator<CreateTeacherViewModel>
+    public class CreateTeacherViewModelValidation : AbstractValidator<CreateUpdateTeacherViewModel>
     {
         public CreateTeacherViewModelValidation()
         {

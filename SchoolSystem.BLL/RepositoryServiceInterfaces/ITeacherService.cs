@@ -8,7 +8,7 @@ namespace SchoolSystem.BLL.RepositoryServiceInterfaces
         Task<Response<TeacherViewModel>> DeleteTeacher(Guid id);
         Task<Response<TeacherViewModel>> GetTeacher(Guid id);
         Task<Response<List<TeacherViewModel>>> GetTeachers();
-        Task<Response<TeacherViewModel>> PostTeacher(CreateTeacherViewModel teacher);
-        Task<Response<TeacherViewModel>> PutTeacher(Guid id, UpdateTeacherViewModel teacher);
+        Task<Response<TeacherViewModel>> PostTeacher(CreateUpdateTeacherViewModel teacher);
+        Task<Response<TeacherViewModel>> PutTeacher(Guid id, CreateUpdateTeacherViewModel teacher);
     }
 }
