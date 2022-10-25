@@ -7,15 +7,13 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
     public class CRUD<ReturnType,
                       ModelType,
-                      PostModelType,
-                      UpdateModelType> 
+                      PostUpdateModelType> 
                       
-                      : ICRUD<ReturnType, ModelType, PostModelType, UpdateModelType> 
+                      : ICRUD<ReturnType, ModelType, PostUpdateModelType> 
 
                       where ReturnType : class
                       where ModelType : class
-                      where PostModelType : class
-                      where UpdateModelType : class
+                      where PostUpdateModelType : class
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
@@ -67,7 +65,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Create a record of an entity
-        public async Task<Response<ReturnType>> PostRecord(PostModelType record, string customMessage)
+        public async Task<Response<ReturnType>> PostRecord(PostUpdateModelType record, string customMessage)
         {
             try
             {
@@ -86,7 +84,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Upadate a record of an Entity 
-        public async Task<Response<ReturnType>> PutRecord(Guid id, UpdateModelType recordFromClient, string customMessage)
+        public async Task<Response<ReturnType>> PutRecord(Guid id, PostUpdateModelType recordFromClient, string customMessage)
         {
             try
             {

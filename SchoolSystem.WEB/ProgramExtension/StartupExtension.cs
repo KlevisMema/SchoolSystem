@@ -6,9 +6,12 @@ using SchoolSystem.BLL.RepositoryService;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.FluentValidation.Exam;
+using SchoolSystem.DTO.FluentValidation.Student;
 using SchoolSystem.DTO.FluentValidation.Teacher;
 using SchoolSystem.DTO.Mappings;
+using SchoolSystem.DTO.ViewModels.Exam;
+using SchoolSystem.DTO.ViewModels.Student;
 using SchoolSystem.DTO.ViewModels.Teacher;
 using System.Reflection;
 
@@ -48,6 +51,7 @@ namespace SchoolSystem.API.ProgramExtension
             // AutoMapper service registration
             services.AddAutoMapper(typeof(MappingsTeacher));
             services.AddAutoMapper(typeof(MappingsStudent));
+            services.AddAutoMapper(typeof(MappingsExam));
 
             // Database registration
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -55,13 +59,16 @@ namespace SchoolSystem.API.ProgramExtension
             // Services registration
             services.AddTransient<IStudentService, StudentService>();
             services.AddTransient<ITeacherService, TeacherService>();
+            services.AddTransient<IExamService, ExamService>();
 
             // Generic serivces registration
             services.AddTransient(typeof(StatusCodeResponse<,>));
-            services.AddTransient(typeof(ICRUD<,,,>), typeof(CRUD<,,,>));
+            services.AddTransient(typeof(ICRUD<,,>), typeof(CRUD<,,>));
 
             // FluentValidation services registration
-            services.AddScoped<IValidator<CreateTeacherViewModel>, CreateTeacherViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateTeacherViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateStudentViewModel>, CreateUpdateStudentViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
 
             return services;
         }

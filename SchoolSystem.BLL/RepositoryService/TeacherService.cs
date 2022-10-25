@@ -8,10 +8,10 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class TeacherService : ITeacherService
     {
-        private readonly ICRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> _CRUD;
+        private readonly ICRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
 
         public TeacherService(
-            ICRUD<TeacherViewModel, Teacher, CreateTeacherViewModel, UpdateTeacherViewModel> CRUD)
+            ICRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD)
         {
             _CRUD = CRUD;
         }
@@ -43,7 +43,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a teacher</param>
         /// <param name="teacher">Object that holds the new values of teacher </param>
         /// <returns>The updated teacher</returns>
-        public async Task<Response<TeacherViewModel>> PutTeacher(Guid id, UpdateTeacherViewModel teacher)
+        public async Task<Response<TeacherViewModel>> PutTeacher(Guid id, CreateUpdateTeacherViewModel teacher)
         {
             var updateTeacher = await _CRUD.PutRecord(id, teacher, "Teacher");
             return updateTeacher;
@@ -54,7 +54,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="teacher">Teacher object </param>
         /// <returns>The created teacher</returns>
-        public async Task<Response<TeacherViewModel>> PostTeacher(CreateTeacherViewModel teacher)
+        public async Task<Response<TeacherViewModel>> PostTeacher(CreateUpdateTeacherViewModel teacher)
         {
             var postTeacher = await _CRUD.PostRecord(teacher, "Teacher");
             return postTeacher;
