@@ -57,13 +57,13 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             
             // Services registration
-            services.AddTransient<IStudentService, StudentService>();
-            services.AddTransient<ITeacherService, TeacherService>();
-            services.AddTransient<IExamService, ExamService>();
+            services.AddTransient<ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel>, StudentService>();
+            services.AddTransient<ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel>,TeacherService>();
+            services.AddTransient<ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel>, ExamService>();
 
             // Generic serivces registration
             services.AddTransient(typeof(StatusCodeResponse<,>));
-            services.AddTransient(typeof(ICRUD<,,>), typeof(CRUD<,,>));
+            services.AddTransient(typeof(CRUD<,,>));
 
             // FluentValidation services registration
             services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateTeacherViewModelValidation>();

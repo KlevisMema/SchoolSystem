@@ -6,12 +6,12 @@ using SchoolSystem.DTO.ViewModels.Exam;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class ExamService : IExamService
+    public class ExamService : ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel>
     {
-        private readonly ICRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
+        private readonly CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
 
         public ExamService(
-            ICRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD)
+            CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD)
         {
             _CRUD = CRUD;
         }
@@ -20,7 +20,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Get all exams from database
         /// </summary>
         /// <returns> a list of all exams</returns>
-        public async Task<Response<List<ExamViewModel>>> GetExams()
+        public async Task<Response<List<ExamViewModel>>> GetRecords()
         {
             var getAllExams = await _CRUD.GetAll();
             return getAllExams;
@@ -31,9 +31,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id"> Id of a exam</param>
         /// <returns> The object of a specific teacher</returns>
-        public async Task<Response<ExamViewModel>> GetExam(Guid id)
+        public async Task<Response<ExamViewModel>> GetRecord(Guid id)
         {
-            var getExam = await _CRUD.GetSpecificRecord(id, "Teacher");
+            var getExam = await _CRUD.GetSpecificRecord(id, "Student");
             return getExam;
         }
 
@@ -43,9 +43,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a exam</param>
         /// <param name="examViewModel">Object that holds the new values of exam </param>
         /// <returns>The updated exam</returns>
-        public async Task<Response<ExamViewModel>> PutExam(Guid id, CreateUpdateExamViewModel examViewModel)
+        public async Task<Response<ExamViewModel>> PutRecord(Guid id, CreateUpdateExamViewModel viewModel)
         {
-            var updateExam = await _CRUD.PutRecord(id, examViewModel, "Exam");
+            var updateExam = await _CRUD.PutRecord(id, viewModel, "Student");
             return updateExam;
         }
 
@@ -54,9 +54,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="examViewModel">Exam object </param>
         /// <returns>The created exam</returns>
-        public async Task<Response<ExamViewModel>> PostExam(CreateUpdateExamViewModel examViewModel)
+        public async Task<Response<ExamViewModel>> PostRecord(CreateUpdateExamViewModel viewModel)
         {
-            var postExam = await _CRUD.PostRecord(examViewModel, "Exam");
+            var postExam = await _CRUD.PostRecord(viewModel, "Student");
             return postExam;
         }
 
@@ -65,10 +65,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id">Id of the exam</param>
         /// <returns>A message telling if the exam was deleted or not</returns>
-        public async Task<Response<ExamViewModel>> DeleteExam(Guid id)
+        public async Task<Response<ExamViewModel>> DeleteRecord(Guid id)
         {
-            var deleteExam = await _CRUD.DeleteRecord(id, "Exam");
-            return deleteExam;
+            var deletExam = await _CRUD.DeleteRecord(id, "Student");
+            return deletExam;
         }
     }
 }

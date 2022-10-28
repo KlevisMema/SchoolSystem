@@ -15,18 +15,19 @@ namespace SchoolSystem.API.Controllers
     [ApiController]
     public class TeachersController : ControllerBase
     {
-        private readonly ITeacherService _teacherService;
+        private readonly ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
         private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
         private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
 
         /// <summary>
         /// Inject teacher service 
         /// </summary>
+        /// <param name=""></param>
         /// <param name="statusCodeResponse"></param>
         /// <param name="teacherService"></param>
         /// <param name="modelValidator"></param>
         public TeachersController(
-            ITeacherService teacherService,
+            ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService,
             StatusCodeResponse<TeacherViewModel,
             List<TeacherViewModel>> statusCodeResponse,
             IValidator<CreateUpdateTeacherViewModel> modelValidator)
@@ -46,7 +47,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers()
         {
-            var teachers = await _teacherService.GetTeachers();
+            var teachers = await _teacherService.GetRecords();
             return _statusCodeResponse.ControllerResponse(teachers);
         }
 
@@ -62,7 +63,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> GetTeacher(Guid id)
         {
-            var teacher = await _teacherService.GetTeacher(id);
+            var teacher = await _teacherService.GetRecord(id);
             return _statusCodeResponse.ControllerResponse(teacher); 
         }
 
@@ -83,7 +84,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedTeacher = await _teacherService.PutTeacher(id, teacher);
+            var updatedTeacher = await _teacherService.PutRecord(id, teacher);
             return _statusCodeResponse.ControllerResponse(updatedTeacher);
         }
 
@@ -102,7 +103,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createTeacher = await _teacherService.PostTeacher(teacher);
+            var createTeacher = await _teacherService.PostRecord(teacher);
             return _statusCodeResponse.ControllerResponse(createTeacher);
         }
 
@@ -118,7 +119,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> DeleteTeacher(Guid id)
         {
-            var deleteTeacher = await _teacherService.DeleteTeacher(id);
+            var deleteTeacher = await _teacherService.DeleteRecord(id);
             return _statusCodeResponse.ControllerResponse(deleteTeacher);
         }
     }
