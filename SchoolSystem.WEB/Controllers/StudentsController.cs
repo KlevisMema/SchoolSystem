@@ -14,7 +14,7 @@ namespace SchoolSystem.WEB.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly IStudentService _studentService;
+        private readonly ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel> _studentService;
         private readonly IValidator<CreateUpdateStudentViewModel> _modelValidator;
         private readonly StatusCodeResponse<StudentViewModel, List<StudentViewModel>> _statusCodeResponse;
 
@@ -25,7 +25,7 @@ namespace SchoolSystem.WEB.Controllers
         /// <param name="statusCodeResponse"></param>
         /// <param name="modelValidator"></param>
         public StudentsController(
-            IStudentService studentService,
+            ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel> studentService,
             StatusCodeResponse<StudentViewModel, List<StudentViewModel>> statusCodeResponse,
             IValidator<CreateUpdateStudentViewModel> modelValidator)
         {
@@ -44,7 +44,7 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<StudentViewModel>>> GetStudents()
         {
-            var students  = await _studentService.GetStudets();
+            var students  = await _studentService.GetRecords();
             return _statusCodeResponse.ControllerResponse(students);
         }
 
@@ -60,7 +60,7 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<StudentViewModel>>> GetSpecificStudent(Guid id)
         {
-            var student = await _studentService.GetSpecificStudent(id);
+            var student = await _studentService.GetRecord(id);
             return _statusCodeResponse.ControllerResponse(student);
         }
 
@@ -79,7 +79,7 @@ namespace SchoolSystem.WEB.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudent = await _studentService.CreateStudent(newStudent);
+            var createStudent = await _studentService.PostRecord(newStudent);
             return _statusCodeResponse.ControllerResponse(createStudent);
         }
 
@@ -100,7 +100,7 @@ namespace SchoolSystem.WEB.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedStudent = await _studentService.PutStudent(id, student);
+            var updatedStudent = await _studentService.PutRecord(id, student);
             return _statusCodeResponse.ControllerResponse(updatedStudent);
         }
 
@@ -116,7 +116,7 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<StudentViewModel>> DeleteStudent(Guid id)
         {
-            var deleteStudent = await _studentService.DeleteStudent(id);
+            var deleteStudent = await _studentService.DeleteRecord(id);
             return _statusCodeResponse.ControllerResponse(deleteStudent);
         }
     }

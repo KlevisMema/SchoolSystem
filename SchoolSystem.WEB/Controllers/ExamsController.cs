@@ -16,7 +16,7 @@ namespace SchoolSystem.API.Controllers
     [ApiController]
     public class ExamsController : ControllerBase
     {
-        private readonly IExamService _examService;
+        private readonly ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel> _examService;
         private readonly IValidator<CreateUpdateExamViewModel> _modelValidator;
         private readonly StatusCodeResponse<ExamViewModel, List<ExamViewModel>> _statusCodeResponse;
 
@@ -27,7 +27,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="statusCodeResponse">status code response service</param>
         /// <param name="modelValidator">Model validation service</param>
         public ExamsController(
-            IExamService examService,
+            ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel> examService,
             StatusCodeResponse<ExamViewModel, List<ExamViewModel>> statusCodeResponse,
             IValidator<CreateUpdateExamViewModel> modelValidator)
         {
@@ -45,7 +45,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<ExamViewModel>>> GetExams()
         {
-            var exams = await _examService.GetExams();
+            var exams = await _examService.GetRecords();
             return _statusCodeResponse.ControllerResponse(exams);
         }
 
@@ -61,7 +61,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ExamViewModel>> GetExam([FromRoute] Guid id)
         {
-            var exam = await _examService.GetExam(id);
+            var exam = await _examService.GetRecord(id);
             return _statusCodeResponse.ControllerResponse(exam);
         }
 
@@ -82,7 +82,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedExam = await _examService.PutExam(id, exam);
+            var updatedExam = await _examService.PutRecord(id, exam);
             return _statusCodeResponse.ControllerResponse(updatedExam);
         }
 
@@ -101,7 +101,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudent = await _examService.PostExam(exam);
+            var createStudent = await _examService.PostRecord(exam);
             return _statusCodeResponse.ControllerResponse(createStudent);
         }
 
@@ -117,7 +117,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteExam([FromRoute] Guid id)
         {
-            var deleteExam = await _examService.DeleteExam(id);
+            var deleteExam = await _examService.DeleteRecord(id);
             return _statusCodeResponse.ControllerResponse(deleteExam);
         }
     }

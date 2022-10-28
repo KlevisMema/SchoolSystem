@@ -7,9 +7,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
     public class CRUD<ReturnType,
                       ModelType,
-                      PostUpdateModelType> 
-                      
-                      : ICRUD<ReturnType, ModelType, PostUpdateModelType> 
+                      PostUpdateModelType>
 
                       where ReturnType : class
                       where ModelType : class

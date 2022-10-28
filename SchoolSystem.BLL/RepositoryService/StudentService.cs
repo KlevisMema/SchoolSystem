@@ -6,12 +6,12 @@ using SchoolSystem.DTO.ViewModels.Student;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class StudentService : IStudentService
+    public class StudentService : ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel>
     {
-        private readonly ICRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
+        private readonly CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
 
         public StudentService(
-            ICRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD)
+            CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD)
         {
             _CRUD = CRUD;
         }
@@ -20,7 +20,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Get all student from database
         /// </summary>
         /// <returns> a list of all student</returns>
-        public async Task<Response<List<StudentViewModel>>> GetStudets()
+        public async Task<Response<List<StudentViewModel>>> GetRecords()
         {
             var getAllStudents = await _CRUD.GetAll();
             return getAllStudents;
@@ -31,7 +31,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id"> Id of a student</param>
         /// <returns> The object of a specific student</returns>
-        public async Task<Response<StudentViewModel>> GetSpecificStudent(Guid id)
+        public async Task<Response<StudentViewModel>> GetRecord(Guid id)
         {
             var getStudent = await _CRUD.GetSpecificRecord(id, "Student");
             return getStudent;
@@ -42,10 +42,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="teacher">Teacher object </param>
         /// <returns>The created student</returns>
-        public async Task<Response<StudentViewModel>> CreateStudent(CreateUpdateStudentViewModel newStudent)
+        public async Task<Response<StudentViewModel>> PostRecord(CreateUpdateStudentViewModel viewModel)
         {
-            var createNewStudent = await _CRUD.PostRecord(newStudent, "Student");
-            return createNewStudent;
+            var postStudent = await _CRUD.PostRecord(viewModel, "Student");
+            return postStudent;
         }
 
         /// <summary>
@@ -54,9 +54,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a student</param>
         /// <param name="teacher">Object that holds the new values of student </param>
         /// <returns>The updated student</returns>
-        public async Task<Response<StudentViewModel>> PutStudent(Guid id, CreateUpdateStudentViewModel student)
+        public async Task<Response<StudentViewModel>> PutRecord(Guid id, CreateUpdateStudentViewModel viewModel)
         {
-            var updateStudent = await _CRUD.PutRecord(id, student, "Student");
+            var updateStudent = await _CRUD.PutRecord(id, viewModel, "Student");
             return updateStudent;
         }
 
@@ -65,7 +65,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id">Id of the student</param>
         /// <returns>A message telling if the student was deleted or not</returns>
-        public async Task<Response<StudentViewModel>> DeleteStudent(Guid id)
+        public async Task<Response<StudentViewModel>> DeleteRecord(Guid id)
         {
             var deleteStudent = await _CRUD.DeleteRecord(id, "Student");
             return deleteStudent;

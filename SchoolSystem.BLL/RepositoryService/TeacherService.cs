@@ -6,12 +6,12 @@ using SchoolSystem.DTO.ViewModels.Teacher;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class TeacherService : ITeacherService
+    public class TeacherService : ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel>
     {
-        private readonly ICRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
+        private readonly CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
 
         public TeacherService(
-            ICRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD)
+            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD)
         {
             _CRUD = CRUD;
         }
@@ -20,7 +20,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Get all teachers from database
         /// </summary>
         /// <returns> a list of all teachers</returns>
-        public async Task<Response<List<TeacherViewModel>>> GetTeachers()
+        public async Task<Response<List<TeacherViewModel>>> GetRecords()
         {
             var getAllTeachers = await _CRUD.GetAll();
             return getAllTeachers;
@@ -31,10 +31,21 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id"> Id of a teacher</param>
         /// <returns> The object of a specific teacher</returns>
-        public async Task<Response<TeacherViewModel>> GetTeacher(Guid id)
+        public async Task<Response<TeacherViewModel>> GetRecord(Guid id)
         {
             var getTeacher = await _CRUD.GetSpecificRecord(id, "Teacher");
             return getTeacher;
+        }
+
+        /// <summary>
+        /// Creates a new teacher 
+        /// </summary>
+        /// <param name="teacher">Teacher object </param>
+        /// <returns>The created teacher</returns>
+        public async Task<Response<TeacherViewModel>> PostRecord(CreateUpdateTeacherViewModel viewModel)
+        {
+            var postTeacher = await _CRUD.PostRecord(viewModel, "Teacher");
+            return postTeacher;
         }
 
         /// <summary>
@@ -43,21 +54,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a teacher</param>
         /// <param name="teacher">Object that holds the new values of teacher </param>
         /// <returns>The updated teacher</returns>
-        public async Task<Response<TeacherViewModel>> PutTeacher(Guid id, CreateUpdateTeacherViewModel teacher)
+        public async Task<Response<TeacherViewModel>> PutRecord(Guid id, CreateUpdateTeacherViewModel examViewModel)
         {
-            var updateTeacher = await _CRUD.PutRecord(id, teacher, "Teacher");
+            var updateTeacher = await _CRUD.PutRecord(id, examViewModel, "Teacher");
             return updateTeacher;
-        }
-
-        /// <summary>
-        /// Creates a new teacher 
-        /// </summary>
-        /// <param name="teacher">Teacher object </param>
-        /// <returns>The created teacher</returns>
-        public async Task<Response<TeacherViewModel>> PostTeacher(CreateUpdateTeacherViewModel teacher)
-        {
-            var postTeacher = await _CRUD.PostRecord(teacher, "Teacher");
-            return postTeacher;
         }
 
         /// <summary>
@@ -65,9 +65,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id">Id of the teacher</param>
         /// <returns>A message telling if the teacher was deleted or not</returns>
-        public async Task<Response<TeacherViewModel>> DeleteTeacher(Guid id)
+        public async Task<Response<TeacherViewModel>> DeleteRecord(Guid id)
         {
-            var deleteTeacher= await _CRUD.DeleteRecord(id, "Teacher");
+            var deleteTeacher = await _CRUD.DeleteRecord(id, "Teacher");
             return deleteTeacher;
         }
     }
