@@ -1,108 +1,123 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.DTO.ViewModels.Subject;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Subject API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class SubjectsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel> _subjectService;
+        private readonly IValidator<CreateUpdateSubjectViewModel> _modelValidator;
+        private readonly StatusCodeResponse<SubjectViewModel, List<SubjectViewModel>> _statusCodeResponse;
 
-        public SubjectsController(ApplicationDbContext context)
+        /// <summary>
+        /// Inject services
+        /// </summary>
+        /// <param name="modelValidator"> ModelVlidator service</param>
+        /// <param name="statusCodeResponse"> Status Code response service</param>
+        /// <param name="subjectService"> Subject service </param>
+        public SubjectsController(
+            ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel> subjectService, 
+            IValidator<CreateUpdateSubjectViewModel> modelValidator, StatusCodeResponse<SubjectViewModel, 
+            List<SubjectViewModel>> statusCodeResponse)
         {
-            _context = context;
+            _subjectService = subjectService;
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
         }
 
-        // GET: api/Subjects
+        /// <summary>
+        /// Get all Subjects
+        /// </summary>
+        /// <returns> All subjects </returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Subject>>> GetSubjects()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubjectViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<SubjectViewModel>>> GetSubjects()
         {
-            return await _context.Subjects.ToListAsync();
+            var subjects = await _subjectService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(subjects);
         }
 
-        // GET: api/Subjects/5
+        /// <summary>
+        /// Get a specific subject
+        /// </summary>
+        /// <param name="id">Id of the subject </param>
+        /// <returns> The subject info </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Subject>> GetSubject(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubjectViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<SubjectViewModel>> GetSubject(Guid id)
         {
-            var subject = await _context.Subjects.FindAsync(id);
-
-            if (subject == null)
-            {
-                return NotFound();
-            }
-
-            return subject;
+            var subject = await _subjectService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(subject);
         }
 
-        // PUT: api/Subjects/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a subject 
+        /// </summary>
+        /// <param name="id">Id of the subject</param>
+        /// <param name="subject"> Subject object</param>
+        /// <returns>The updtated subject </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSubject(Guid id, Subject subject)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubjectViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<SubjectViewModel>> PutSubject([FromRoute] Guid id, [FromForm] CreateUpdateSubjectViewModel subject)
         {
-            if (id != subject.Id)
-            {
-                return BadRequest();
-            }
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(subject);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            _context.Entry(subject).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SubjectExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedSubject = await _subjectService.PutRecord(id, subject);
+            return _statusCodeResponse.ControllerResponse(updatedSubject);
         }
 
-        // POST: api/Subjects
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a subject 
+        /// </summary>
+        /// <param name="subject"> Subject object </param>
+        /// <returns> The created subject </returns>
         [HttpPost]
-        public async Task<ActionResult<Subject>> PostSubject(Subject subject)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubjectViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<SubjectViewModel>> PostSubject([FromForm] CreateUpdateSubjectViewModel subject)
         {
-            _context.Subjects.Add(subject);
-            await _context.SaveChangesAsync();
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(subject);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            return CreatedAtAction("GetSubject", new { id = subject.Id }, subject);
+            var createSubject = await _subjectService.PostRecord(subject);
+            return _statusCodeResponse.ControllerResponse(createSubject);
         }
 
-        // DELETE: api/Subjects/5
+        /// <summary>
+        /// Delete a subject
+        /// </summary>
+        /// <param name="id">Id of the subject </param>
+        /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSubject(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubjectViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<SubjectViewModel>> DeleteSubject(Guid id)
         {
-            var subject = await _context.Subjects.FindAsync(id);
-            if (subject == null)
-            {
-                return NotFound();
-            }
-
-            _context.Subjects.Remove(subject);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SubjectExists(Guid id)
-        {
-            return _context.Subjects.Any(e => e.Id == id);
+            var deleteSubject = await _subjectService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteSubject);
         }
     }
 }

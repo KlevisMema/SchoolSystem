@@ -3,7 +3,6 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Exam;
 
@@ -16,7 +15,7 @@ namespace SchoolSystem.API.Controllers
     [ApiController]
     public class ExamsController : ControllerBase
     {
-        private readonly ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel> _examService;
+        private readonly ICrudService<ExamViewModel, CreateUpdateExamViewModel> _examService;
         private readonly IValidator<CreateUpdateExamViewModel> _modelValidator;
         private readonly StatusCodeResponse<ExamViewModel, List<ExamViewModel>> _statusCodeResponse;
 
@@ -27,7 +26,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="statusCodeResponse">status code response service</param>
         /// <param name="modelValidator">Model validation service</param>
         public ExamsController(
-            ICrudInterfaces<ExamViewModel, CreateUpdateExamViewModel> examService,
+            ICrudService<ExamViewModel, CreateUpdateExamViewModel> examService,
             StatusCodeResponse<ExamViewModel, List<ExamViewModel>> statusCodeResponse,
             IValidator<CreateUpdateExamViewModel> modelValidator)
         {

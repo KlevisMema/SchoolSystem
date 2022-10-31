@@ -1,19 +1,25 @@
-﻿using SchoolSystem.BLL.RepositoryService.CrudService;
+﻿using Microsoft.EntityFrameworkCore;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.ResponseService;
+using SchoolSystem.BLL.ServiceInterfaces;
+using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Teacher;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class TeacherService : ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel>
+    public class TeacherService : ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>, I_Valid_Id<Teacher>
     {
         private readonly CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
+        private readonly ApplicationDbContext _context;
 
         public TeacherService(
-            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD)
+            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD, 
+            ApplicationDbContext context)
         {
             _CRUD = CRUD;
+            _context = context;
         }
 
         /// <summary>
@@ -40,7 +46,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <summary>
         /// Creates a new teacher 
         /// </summary>
-        /// <param name="teacher">Teacher object </param>
+        /// <param name="viewModel">Teacher object </param>
         /// <returns>The created teacher</returns>
         public async Task<Response<TeacherViewModel>> PostRecord(CreateUpdateTeacherViewModel viewModel)
         {
@@ -52,11 +58,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Updates a teacher  
         /// </summary>
         /// <param name="id">Id of a teacher</param>
-        /// <param name="teacher">Object that holds the new values of teacher </param>
+        /// <param name="viewModel">Object that holds the new values of teacher </param>
         /// <returns>The updated teacher</returns>
-        public async Task<Response<TeacherViewModel>> PutRecord(Guid id, CreateUpdateTeacherViewModel examViewModel)
+        public async Task<Response<TeacherViewModel>> PutRecord(Guid id, CreateUpdateTeacherViewModel viewModel)
         {
-            var updateTeacher = await _CRUD.PutRecord(id, examViewModel, "Teacher");
+            var updateTeacher = await _CRUD.PutRecord(id, viewModel, "Teacher");
             return updateTeacher;
         }
 
@@ -69,6 +75,18 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             var deleteTeacher = await _CRUD.DeleteRecord(id, "Teacher");
             return deleteTeacher;
+        }
+
+        public async Task<bool> Bool(Guid id)
+        {
+            try
+            {
+                return await _context.Teachers.AnyAsync(x => x.Id.Equals(id));
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

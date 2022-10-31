@@ -71,6 +71,8 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
 
                 _context.Set<ModelType>().Add(transformObjectToModelType);
 
+                Console.WriteLine(transformObjectToModelType);
+
                 await _context.SaveChangesAsync();
 
                 return Response<ReturnType>.SuccessMessage($"{customMessage} created succsessuflly");

@@ -14,7 +14,7 @@ namespace SchoolSystem.WEB.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel> _studentService;
+        private readonly ICrudService<StudentViewModel, CreateUpdateStudentViewModel> _studentService;
         private readonly IValidator<CreateUpdateStudentViewModel> _modelValidator;
         private readonly StatusCodeResponse<StudentViewModel, List<StudentViewModel>> _statusCodeResponse;
 
@@ -25,7 +25,7 @@ namespace SchoolSystem.WEB.Controllers
         /// <param name="statusCodeResponse"></param>
         /// <param name="modelValidator"></param>
         public StudentsController(
-            ICrudInterfaces<StudentViewModel, CreateUpdateStudentViewModel> studentService,
+            ICrudService<StudentViewModel, CreateUpdateStudentViewModel> studentService,
             StatusCodeResponse<StudentViewModel, List<StudentViewModel>> statusCodeResponse,
             IValidator<CreateUpdateStudentViewModel> modelValidator)
         {

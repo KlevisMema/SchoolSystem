@@ -2,7 +2,7 @@
 
 namespace SchoolSystem.BLL.RepositoryServiceInterfaces
 {
-    public interface ICrudInterfaces<TReturnType, TInputType> 
+    public interface ICrudService<TReturnType, TInputType> 
         where TReturnType : class
         where TInputType  : class
     {

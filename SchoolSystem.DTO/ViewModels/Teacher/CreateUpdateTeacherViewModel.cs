@@ -1,4 +1,4 @@
-﻿using static SchoolSystem.DAL.Enums.GenderEnum;
+﻿using SchoolSystem.DAL.Enums;
 
 namespace SchoolSystem.DTO.ViewModels.Teacher
 {
