@@ -12,14 +12,14 @@ using SchoolSystem.DAL.DataBase;
 namespace SchoolSystem.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221009211058_TableCreation_TimeTableForClasroom_AttendancesForStudentsAndTeachers_IssuesForStudents_withRelationshipsConfigured")]
-    partial class TableCreation_TimeTableForClasroom_AttendancesForStudentsAndTeachers_IssuesForStudents_withRelationshipsConfigured
+    [Migration("20221030150741_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.9")
+                .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -33,13 +33,13 @@ namespace SchoolSystem.DAL.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid?>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TeacherId")
+                    b.Property<Guid?>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -57,9 +57,8 @@ namespace SchoolSystem.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Grade")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -121,21 +120,27 @@ namespace SchoolSystem.DAL.Migrations
 
             modelBuilder.Entity("SchoolSystem.DAL.Models.Result", b =>
                 {
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ExamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Mark")
                         .HasColumnType("int");
 
-                    b.HasKey("StudentId", "ExamId", "SubjectId");
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ExamId");
+
+                    b.HasIndex("StudentId");
 
                     b.HasIndex("SubjectId");
 
@@ -175,9 +180,8 @@ namespace SchoolSystem.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Sex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Sex")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -220,12 +224,15 @@ namespace SchoolSystem.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClasroomId")
+                    b.Property<Guid?>("ClasroomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -267,9 +274,8 @@ namespace SchoolSystem.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Sex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Sex")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -301,15 +307,11 @@ namespace SchoolSystem.DAL.Migrations
                 {
                     b.HasOne("SchoolSystem.DAL.Models.Student", "Student")
                         .WithMany("Attendances")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StudentId");
 
                     b.HasOne("SchoolSystem.DAL.Models.Teacher", "Teacher")
                         .WithMany("Attendances")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TeacherId");
 
                     b.Navigation("Student");
 
@@ -404,9 +406,7 @@ namespace SchoolSystem.DAL.Migrations
                 {
                     b.HasOne("SchoolSystem.DAL.Models.Clasroom", "Clasroom")
                         .WithMany("Subjects")
-                        .HasForeignKey("ClasroomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClasroomId");
 
                     b.Navigation("Clasroom");
                 });

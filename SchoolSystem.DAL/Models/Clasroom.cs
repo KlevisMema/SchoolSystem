@@ -3,7 +3,7 @@
     public class Clasroom
     {
         public Guid Id { get; set; }
-        public string Grade { get; set; } = String.Empty;
+        public int Grade { get; set; }
 
         // Realtionship properties related with teacher model 1:M
         public Guid TeacherId { get; set; }

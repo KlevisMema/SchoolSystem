@@ -22,6 +22,9 @@ namespace SchoolSystem.DAL.DataBase
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
+            /// Relationship between models configuration
+            ///
+
             // 1:M Clasroom -> Teacher
             modelBuilder.Entity<Teacher>()
                 .HasMany(c => c.Clasrooms)
@@ -50,22 +53,30 @@ namespace SchoolSystem.DAL.DataBase
                 .WithMany(c => c.Clasrooms);
 
             // 1:M Student -> Attendance
+
+            modelBuilder.Entity<Attendance>()
+                .HasKey(x => x.Id);
+
             modelBuilder.Entity<Student>()
                 .HasMany(c => c.Attendances)
                 .WithOne(t => t.Student);
 
             modelBuilder.Entity<Attendance>()
                 .HasOne(t => t.Student)
-                .WithMany(c => c.Attendances);
+                .WithMany(c => c.Attendances)
+                .HasForeignKey(x => x.StudentId);
 
             // 1:M Teacher -> Attendance
+            modelBuilder.Entity<Attendance>();
+
             modelBuilder.Entity<Teacher>()
                 .HasMany(c => c.Attendances)
                 .WithOne(t => t.Teacher);
 
             modelBuilder.Entity<Attendance>()
                 .HasOne(t => t.Teacher)
-                .WithMany(c => c.Attendances);
+                .WithMany(c => c.Attendances)
+                .HasForeignKey(x=>x.TeacherId);
 
             // M:M Student -> Clasroom
             modelBuilder.Entity<StudentClasroom>()
@@ -83,7 +94,7 @@ namespace SchoolSystem.DAL.DataBase
 
             // M:M Student -> Subject -> Exam
             modelBuilder.Entity<Result>()
-                .HasKey(fk => new { fk.StudentId, fk.ExamId, fk.SubjectId });
+                .HasKey(pk => pk.Id);
 
             modelBuilder.Entity<Result>()
                 .HasOne(s => s.Student)

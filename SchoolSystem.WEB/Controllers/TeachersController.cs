@@ -15,7 +15,7 @@ namespace SchoolSystem.API.Controllers
     [ApiController]
     public class TeachersController : ControllerBase
     {
-        private readonly ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
+        private readonly ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
         private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
         private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
 
@@ -27,7 +27,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacherService"></param>
         /// <param name="modelValidator"></param>
         public TeachersController(
-            ICrudInterfaces<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService,
+            ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService,
             StatusCodeResponse<TeacherViewModel,
             List<TeacherViewModel>> statusCodeResponse,
             IValidator<CreateUpdateTeacherViewModel> modelValidator)
@@ -40,7 +40,7 @@ namespace SchoolSystem.API.Controllers
         /// <summary>
         /// Get all Teachers
         /// </summary>
-        /// <returns> All Students </returns>
+        /// <returns> All Teachers </returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]

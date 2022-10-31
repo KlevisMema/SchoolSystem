@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SchoolSystem.DAL.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static SchoolSystem.DAL.Enums.GenderEnum;
 
 namespace SchoolSystem.DAL.BaseModel
 {

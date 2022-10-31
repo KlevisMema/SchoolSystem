@@ -1,108 +1,156 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.ViewModels.Attendance;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Attendance API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AttendancesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public AttendancesController(ApplicationDbContext context)
+        private readonly ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel> _attendanceService;
+        private readonly IValidator<CreateUpdateAttendanceViewModel> _modelValidator;
+        private readonly StatusCodeResponse<AttendanceViewModel, List<AttendanceViewModel>> _statusCodeResponse;
+        private readonly I_Valid_Id<Teacher> _Teacher_Valid_Id;
+        private readonly I_Valid_Id<Student> _Student_Valid_Id;
+        private async Task<CustomMesageResponse> ValidateId(Guid teacherId, Guid studentId)
         {
-            _context = context;
+            var teacher = await _Teacher_Valid_Id.Bool(teacherId);
+            var student = await _Student_Valid_Id.Bool(studentId);
+
+            if (!teacher)
+                return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
+            if (!student)
+                return CustomMesageResponse.NotFound(student, "Invalid student id");
+
+            return CustomMesageResponse.Succsess();
         }
 
-        // GET: api/Attendances
+        /// <summary>
+        /// Inject services 
+        /// </summary>
+        /// <param name="attendanceService">Exam service</param>
+        /// <param name="statusCodeResponse">status code response service</param>
+        /// <param name="modelValidator">Model validation service</param>
+        /// <param name="Teacher_Valid_Id"></param>
+        /// <param name="student_Valid_Id"></param>
+        public AttendancesController(
+            ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel> attendanceService,
+            StatusCodeResponse<AttendanceViewModel, List<AttendanceViewModel>> statusCodeResponse,
+            IValidator<CreateUpdateAttendanceViewModel> modelValidator,
+            I_Valid_Id<Teacher> Teacher_Valid_Id,
+            I_Valid_Id<Student> student_Valid_Id)
+        {
+            _attendanceService = attendanceService;
+            _statusCodeResponse = statusCodeResponse;
+            _modelValidator = modelValidator;
+            _Teacher_Valid_Id = Teacher_Valid_Id;
+            _Student_Valid_Id = student_Valid_Id;
+        }
+
+        /// <summary>
+        /// Get all attendances
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attendance>>> GetAttendances()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<AttendanceViewModel>>> GetAttendances()
         {
-            return await _context.Attendances.ToListAsync();
+            var attendances = await _attendanceService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(attendances);
         }
 
-        // GET: api/Attendances/5
+        /// <summary>
+        /// Get an attendance
+        /// </summary>
+        /// <param name="id">Id of the attendance</param>
+        /// <returns>Details of that attendance</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Attendance>> GetAttendance(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<AttendanceViewModel>> GetAttendance([FromRoute] Guid id)
         {
-            var attendance = await _context.Attendances.FindAsync(id);
-
-            if (attendance == null)
-            {
-                return NotFound();
-            }
-
-            return attendance;
+            var attendance = await _attendanceService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(attendance);
         }
 
-        // PUT: api/Attendances/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update an attendance
+        /// </summary>
+        /// <param name="id">Id of the  attendance</param>
+        /// <param name="attendance">attendance object from client</param>
+        /// <returns>The updated attendance </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAttendance(Guid id, Attendance attendance)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> PutAttendance([FromRoute] Guid id, [FromForm] CreateUpdateAttendanceViewModel attendance)
         {
-            if (id != attendance.Id)
-            {
-                return BadRequest();
-            }
+            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            _context.Entry(attendance).State = EntityState.Modified;
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AttendanceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedAttendance = await _attendanceService.PutRecord(id, attendance);
+            return _statusCodeResponse.ControllerResponse(updatedAttendance);
         }
 
-        // POST: api/Attendances
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Creates an attendance 
+        /// </summary>
+        /// <param name="attendance">attendance object from client</param>
+        /// <remarks> 
+        ///  Role contains Teacher with value of 1 and Student with value 2,
+        ///  Status contains Present with value of 1 and Missing with value of 2
+        /// </remarks>
+        /// <returns>A message id attendance was created or not</returns>
         [HttpPost]
-        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendance)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<AttendanceViewModel>> PostAttendance([FromForm] CreateUpdateAttendanceViewModel attendance)
         {
-            _context.Attendances.Add(attendance);
-            await _context.SaveChangesAsync();
+            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            return CreatedAtAction("GetAttendance", new { id = attendance.Id }, attendance);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
+            var createAttendance = await _attendanceService.PostRecord(attendance);
+            return _statusCodeResponse.ControllerResponse(createAttendance);
         }
 
-        // DELETE: api/Attendances/5
+        /// <summary>
+        /// Deletes an attendance
+        /// </summary>
+        /// <param name="id">Id of the attendance</param>
+        /// <returns>A message if the attendance was deleted or not</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAttendance(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> DeleteAttendance([FromRoute] Guid id)
         {
-            var attendance = await _context.Attendances.FindAsync(id);
-            if (attendance == null)
-            {
-                return NotFound();
-            }
-
-            _context.Attendances.Remove(attendance);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AttendanceExists(Guid id)
-        {
-            return _context.Attendances.Any(e => e.Id == id);
+            var deleteAttendance = await _attendanceService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteAttendance);
         }
     }
 }

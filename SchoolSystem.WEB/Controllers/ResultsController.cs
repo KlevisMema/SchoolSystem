@@ -1,122 +1,141 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.ViewModels.Result;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Results API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ResultsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICrudService<ResultViewModel, CreateUpdateResultViewModel> _resultService;
+        private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
+        private readonly StatusCodeResponse<ResultViewModel, List<ResultViewModel>> _statusCodeResponse;
+        private readonly IExists _exists;
 
-        public ResultsController(ApplicationDbContext context)
+        /// <summary>
+        /// Inject Services
+        /// </summary>
+        /// <param name="resultService"> Result service </param>
+        /// <param name="modelValidator"> Validator service </param>
+        /// <param name="statusCodeResponse"> Status code response service </param>
+        /// <param name="exists">Exists service</param>
+        public ResultsController(
+            ICrudService<ResultViewModel, CreateUpdateResultViewModel> resultService,
+            IValidator<CreateUpdateResultViewModel> modelValidator, StatusCodeResponse<ResultViewModel,
+            List<ResultViewModel>> statusCodeResponse, 
+            IExists exists)
         {
-            _context = context;
+            _resultService = resultService;
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
+            _exists = exists;
         }
 
-        // GET: api/Results
+
+        /// <summary>
+        /// Get all results
+        /// </summary>
+        /// <returns> All results </returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Result>>> GetResults()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<Result>>> GetResults()
         {
-            return await _context.Results.ToListAsync();
+            var results = await _resultService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(results);
         }
 
-        // GET: api/Results/5
+        /// <summary>
+        /// Get a specific result
+        /// </summary>
+        /// <param name="id">Id of the result </param>
+        /// <returns> The result info </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Result>> GetResult(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<ResultViewModel>> GetResult(Guid id)
         {
-            var result = await _context.Results.FindAsync(id);
-
-            if (result == null)
-            {
-                return NotFound();
-            }
-
-            return result;
+            var result = await _resultService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(result);
         }
 
-        // PUT: api/Results/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a result 
+        /// </summary>
+        /// <param name="id">Id of the result </param>
+        /// <param name="result"> Result object </param>
+        /// <returns> The updtated result </returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutResult(Guid id, Result result)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<ResultViewModel>> PutResult([FromRoute]Guid id,[FromForm] CreateUpdateResultViewModel result)
         {
-            if (id != result.StudentId)
-            {
-                return BadRequest();
-            }
+            var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
 
-            _context.Entry(result).State = EntityState.Modified;
+            if (!checkIds)
+                return NotFound("Invalid ids!!");
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ResultExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(result);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            return NoContent();
+            var updatedResult = await _resultService.PutRecord(id, result);
+            return _statusCodeResponse.ControllerResponse(updatedResult);
         }
 
-        // POST: api/Results
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a result 
+        /// </summary>
+        /// <param name="result"> Result object </param>
+        /// <returns> The created result </returns>
         [HttpPost]
-        public async Task<ActionResult<Result>> PostResult(Result result)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<ResultViewModel>> PostResult([FromForm] CreateUpdateResultViewModel result)
         {
-            _context.Results.Add(result);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ResultExists(result.StudentId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
 
-            return CreatedAtAction("GetResult", new { id = result.StudentId }, result);
+            if (!checkIds)
+                return NotFound("Invalid ids!!");
+
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(result);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
+            var createResult = await _resultService.PostRecord(result);
+            return _statusCodeResponse.ControllerResponse(createResult);
         }
 
-        // DELETE: api/Results/5
+        /// <summary>
+        /// Delete a result
+        /// </summary>
+        /// <param name="id">Id of the result </param>
+        /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteResult(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<ResultViewModel>> DeleteResult(Guid id)
         {
-            var result = await _context.Results.FindAsync(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
-
-            _context.Results.Remove(result);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ResultExists(Guid id)
-        {
-            return _context.Results.Any(e => e.StudentId == id);
+            var deleteResult = await _resultService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteResult);
         }
     }
 }

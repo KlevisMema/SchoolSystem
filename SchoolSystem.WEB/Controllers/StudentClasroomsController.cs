@@ -1,122 +1,150 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DAL.Models;
+using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.DTO.ViewModels.StudentClasroom;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// StudentClasroom API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class StudentClasroomsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> _studentClasroomService;
+        private readonly IValidator<CreateUpdateStudentClasroomViewModel> _modelValidator;
+        private readonly StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> _statusCodeResponse;
 
-        public StudentClasroomsController(ApplicationDbContext context)
+        
+        private async Task<CustomMesageResponse> ValidateId(Guid teacherId, Guid studentId)
         {
-            _context = context;
+            //var teacher = await _Teacher_Valid_Id.Bool(teacherId);
+            //var student = await _Student_Valid_Id.Bool(studentId);
+
+            //if (!teacher)
+            //    return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
+            //if (!student)
+            //    return CustomMesageResponse.NotFound(student, "Invalid student id");
+
+            return CustomMesageResponse.Succsess();
         }
 
-        // GET: api/StudentClasrooms
+        /// <summary>
+        /// Inject services
+        /// </summary>
+        /// <param name="studentClasroomService"></param>
+        /// <param name="modelValidator"></param>
+        /// <param name="statusCodeResponse"></param>
+        /// <param name="teacher_Valid_Id"></param>
+        /// <param name="student_Valid_Id"></param>
+        public StudentClasroomsController
+        (
+            ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> studentClasroomService, 
+            IValidator<CreateUpdateStudentClasroomViewModel> modelValidator, 
+            StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> statusCodeResponse
+        )
+        {
+            _studentClasroomService = studentClasroomService;
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
+        }
+
+        /// <summary>
+        /// Get all student clasrooms
+        /// </summary>
+        /// <returns>All students with in a clasroom</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StudentClasroom>>> GetStudentClasrooms()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<StudentClasroom>>> GetStudentClasrooms()
         {
-            return await _context.StudentClasrooms.ToListAsync();
+            var studentClasrooms = await _studentClasroomService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(studentClasrooms);
         }
 
-        // GET: api/StudentClasrooms/5
+        /// <summary>
+        /// Get single student clasroom
+        /// </summary>
+        /// <param name="id">Id of the student</param>
+        /// <returns>A student in a clasroom</returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<StudentClasroom>> GetStudentClasroom(Guid id)
         {
-            var studentClasroom = await _context.StudentClasrooms.FindAsync(id);
-
-            if (studentClasroom == null)
-            {
-                return NotFound();
-            }
-
-            return studentClasroom;
+            var studentClasroom = await _studentClasroomService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(studentClasroom);
         }
 
-        // PUT: api/StudentClasrooms/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a studentclasroom record in StudentClasroom table
+        /// </summary>
+        /// <param name="studentClasroom">Data from client</param>
+        /// <returns>The updated record</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudentClasroom(Guid id, StudentClasroom studentClasroom)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> PutStudentClasroom([FromForm] CreateUpdateStudentClasroomViewModel studentClasroom)
         {
-            if (id != studentClasroom.StudentId)
-            {
-                return BadRequest();
-            }
+            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            _context.Entry(studentClasroom).State = EntityState.Modified;
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(studentClasroom);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentClasroomExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedAttendance = await _studentClasroomService.PutRecord(studentClasroom.StudentId, studentClasroom);
+            return _statusCodeResponse.ControllerResponse(updatedAttendance);
         }
 
-        // POST: api/StudentClasrooms
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a studentclasroom record in database
+        /// </summary>
+        /// <param name="studentClasroom">Data from client</param>
+        /// <returns>A message telling if the record was created or not</returns>
         [HttpPost]
-        public async Task<ActionResult<StudentClasroom>> PostStudentClasroom(StudentClasroom studentClasroom)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<StudentClasroom>> PostStudentClasroom([FromForm] CreateUpdateStudentClasroomViewModel studentClasroom)
         {
-            _context.StudentClasrooms.Add(studentClasroom);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (StudentClasroomExists(studentClasroom.StudentId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            return CreatedAtAction("GetStudentClasroom", new { id = studentClasroom.StudentId }, studentClasroom);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(studentClasroom);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
+            var createStudentClasroom = await _studentClasroomService.PostRecord(studentClasroom);
+            return _statusCodeResponse.ControllerResponse(createStudentClasroom);
         }
 
-        // DELETE: api/StudentClasrooms/5
+        /// <summary>
+        /// Deletes a studentClasroom form database
+        /// </summary>
+        /// <param name="id">Id of the student</param>
+        /// <returns>A message telling if the record was deleted succsessfully</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteStudentClasroom(Guid id)
         {
-            var studentClasroom = await _context.StudentClasrooms.FindAsync(id);
-            if (studentClasroom == null)
-            {
-                return NotFound();
-            }
-
-            _context.StudentClasrooms.Remove(studentClasroom);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentClasroomExists(Guid id)
-        {
-            return _context.StudentClasrooms.Any(e => e.StudentId == id);
+            var deleteStudentClasroom = await _studentClasroomService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteStudentClasroom);
         }
     }
 }

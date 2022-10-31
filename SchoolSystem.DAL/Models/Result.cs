@@ -3,6 +3,7 @@
     public class Result
     {
         public int Mark { get; set; }
+        public Guid Id { get; set; }
 
         // Relationship properties between Studet->Exam->Subject M:M relaionship
         public Guid ExamId { get; set; }
