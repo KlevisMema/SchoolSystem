@@ -19,7 +19,7 @@ namespace SchoolSystem.BLL.RepositoryService
         }
 
         /// <summary>
-        /// Get all clasrooms from time tables
+        /// Get all clasrooms
         /// </summary>
         /// <returns> a list of all time clasrooms</returns>
         public async Task<Response<List<ClasroomViewModel>>> GetRecords
@@ -75,7 +75,7 @@ namespace SchoolSystem.BLL.RepositoryService
         }
 
         /// <summary>
-        /// Deletes a time clasroom 
+        /// Deletes a clasroom 
         /// </summary>
         /// <param name="id">Id of the clasroom</param>
         /// <returns>A message telling if the clasroom was deleted or not</returns>
