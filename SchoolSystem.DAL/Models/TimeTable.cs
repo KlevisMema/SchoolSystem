@@ -3,8 +3,8 @@
     public class TimeTable
     {
         public Guid Id { get; set; }
-        public DateTime Day { get; set; }
-        public DateTime Time { get; set; }
+        public string Day { get; set; }
+        public string Time { get; set; }
         public string Subject { get; set; } = String.Empty;
 
         // Relationship Property related with clasroom model 1:M

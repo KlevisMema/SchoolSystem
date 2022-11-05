@@ -1,108 +1,123 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.DTO.ViewModels.TimeTable;
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// TimeTable API Controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class TimeTablesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> _timeTableService;
+        private readonly IValidator<CreateUpdateTimeTableViewModel> _modelValidator;
+        private readonly StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> _statusCodeResponse;
 
-        public TimeTablesController(ApplicationDbContext context)
+        /// <summary>
+        /// Inject services
+        /// </summary>
+        /// <param name="timeTableService">Time table service</param>
+        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="statusCodeResponse">Status code response service</param>
+        public TimeTablesController(
+            ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> timeTableService,
+            IValidator<CreateUpdateTimeTableViewModel> modelValidator,
+            StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> statusCodeResponse)
         {
-            _context = context;
+            _timeTableService = timeTableService;
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
         }
 
-        // GET: api/TimeTables
+        /// <summary>
+        /// Get all time tables
+        /// </summary>
+        /// <returns>A list of time tables </returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TimeTable>>> GetTimeTables()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<TimeTableViewModel>>> GetTimeTables()
         {
-            return await _context.TimeTables.ToListAsync();
+            var timeTables = await _timeTableService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(timeTables);
         }
 
-        // GET: api/TimeTables/5
+        /// <summary>
+        /// Get a time table by id
+        /// </summary>
+        /// <param name="id">Id of the time table</param>
+        /// <returns>A time table info</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<TimeTable>> GetTimeTable(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<TimeTableViewModel>> GetTimeTable(Guid id)
         {
-            var timeTable = await _context.TimeTables.FindAsync(id);
-
-            if (timeTable == null)
-            {
-                return NotFound();
-            }
-
-            return timeTable;
+            var timeTable = await _timeTableService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(timeTable);
         }
 
-        // PUT: api/TimeTables/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Updates a time table
+        /// </summary>
+        /// <param name="id">Id of the time table</param>
+        /// <param name="timeTable">Object from client</param>
+        /// <returns>The updated time table</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTimeTable(Guid id, TimeTable timeTable)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> PutTimeTable([FromRoute] Guid id, [FromForm] CreateUpdateTimeTableViewModel timeTable)
         {
-            if (id != timeTable.Id)
-            {
-                return BadRequest();
-            }
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            _context.Entry(timeTable).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TimeTableExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedTimeTable = await _timeTableService.PutRecord(id, timeTable);
+            return _statusCodeResponse.ControllerResponse(updatedTimeTable);
         }
 
-        // POST: api/TimeTables
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Creates a time table 
+        /// </summary>
+        /// <param name="timeTable">Object from client</param>
+        /// <returns>A message telling if the time table was created or not</returns>
         [HttpPost]
-        public async Task<ActionResult<TimeTable>> PostTimeTable(TimeTable timeTable)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<TimeTableViewModel>> PostTimeTable([FromForm] CreateUpdateTimeTableViewModel timeTable)
         {
-            _context.TimeTables.Add(timeTable);
-            await _context.SaveChangesAsync();
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            return CreatedAtAction("GetTimeTable", new { id = timeTable.Id }, timeTable);
+            var createTimeTable = await _timeTableService.PostRecord(timeTable);
+            return _statusCodeResponse.ControllerResponse(createTimeTable);
         }
 
-        // DELETE: api/TimeTables/5
+        /// <summary>
+        /// Deletes a time table by id
+        /// </summary>
+        /// <param name="id">Id of the time table</param>
+        /// <returns>A message telling if the time table was deleted or not</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteTimeTable(Guid id)
         {
-            var timeTable = await _context.TimeTables.FindAsync(id);
-            if (timeTable == null)
-            {
-                return NotFound();
-            }
-
-            _context.TimeTables.Remove(timeTable);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TimeTableExists(Guid id)
-        {
-            return _context.TimeTables.Any(e => e.Id == id);
+            var deleteTimeTable = await _timeTableService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteTimeTable);
         }
     }
 }

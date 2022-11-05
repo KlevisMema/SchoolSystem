@@ -9,19 +9,24 @@ using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.FluentValidation.Attendance;
+using SchoolSystem.DTO.FluentValidation.Clasroom;
 using SchoolSystem.DTO.FluentValidation.Exam;
 using SchoolSystem.DTO.FluentValidation.Result;
 using SchoolSystem.DTO.FluentValidation.Student;
+using SchoolSystem.DTO.FluentValidation.StudentClasroom;
 using SchoolSystem.DTO.FluentValidation.Subject;
 using SchoolSystem.DTO.FluentValidation.Teacher;
+using SchoolSystem.DTO.FluentValidation.TimeTable;
 using SchoolSystem.DTO.Mappings;
 using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Result;
 using SchoolSystem.DTO.ViewModels.Student;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.DTO.ViewModels.Subject;
 using SchoolSystem.DTO.ViewModels.Teacher;
+using SchoolSystem.DTO.ViewModels.TimeTable;
 using System.Reflection;
 
 namespace SchoolSystem.API.ProgramExtension
@@ -37,7 +42,11 @@ namespace SchoolSystem.API.ProgramExtension
         /// <param name="services"></param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        public static IServiceCollection InjectServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection InjectServices
+        (
+            this IServiceCollection services, 
+            IConfiguration configuration
+        )
         {
             // Swagger configuration
             services.AddSwaggerGen(optios =>
@@ -59,12 +68,15 @@ namespace SchoolSystem.API.ProgramExtension
 
             // AutoMapper service registration
             services.AddAutoMapper(typeof(MappingsExam));
+            services.AddAutoMapper(typeof(MappingsResult));
             services.AddAutoMapper(typeof(MappingsTeacher));
             services.AddAutoMapper(typeof(MappingsStudent));
             services.AddAutoMapper(typeof(MappingsSubject));
-            services.AddAutoMapper(typeof(MappingsResult));
+            services.AddAutoMapper(typeof(MappingsClasroom));
+            services.AddAutoMapper(typeof(MappingsTimeTable));
             services.AddAutoMapper(typeof(MappingsAttendance));
             services.AddAutoMapper(typeof(MappingsStudentClasroom));
+            
 
 
             // Database registration
@@ -75,11 +87,15 @@ namespace SchoolSystem.API.ProgramExtension
 
             services.AddTransient<I_Valid_Id<Teacher>, TeacherService>();
             services.AddTransient<I_Valid_Id<Student>, StudentService>();
+            services.AddTransient<I_Valid_Id<TimeTable>, TimeTableService>();
+
             services.AddTransient<ICrudService<ExamViewModel, CreateUpdateExamViewModel>, ExamService>();
             services.AddTransient<ICrudService<ResultViewModel, CreateUpdateResultViewModel>, ResultService>();
-            services.AddTransient<ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>,TeacherService>();
+            services.AddTransient<ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>, TeacherService>();
             services.AddTransient<ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel>, SubjectService>();
             services.AddTransient<ICrudService<StudentViewModel, CreateUpdateStudentViewModel>, StudentService>();
+            services.AddTransient<ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>, ClasroomService>();
+            services.AddTransient<ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel>, TimeTableService>();
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
             services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
 
@@ -88,12 +104,15 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient(typeof(StatusCodeResponse<,>));
 
             // FluentValidation services registration
-            services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateTeacherViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateUpdateTeacherViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentViewModel>, CreateUpdateStudentViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateSubjectViewModel>, CreateUpdateSubjectViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateResultViewModel>, CreateUpdateResultViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateTimeTableViewModel>, CreateUpdateTimeTableViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateClasroomViewModel>, CreateUpdateClasroomViewModelValidation>();
 
             return services;
         }
