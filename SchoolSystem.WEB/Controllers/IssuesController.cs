@@ -1,100 +1,142 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
 using SchoolSystem.DAL.Models;
+using Microsoft.AspNetCore.Mvc;
+using FluentValidation.Results;
+using SchoolSystem.DTO.ViewModels.Issue;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.DTO.ViewModels.Attendance;
 
 namespace SchoolSystem.API.Controllers
 {
-    [Route("api/[controller]")]
+    /// <summary>
+    /// Issue API Controller
+    /// </summary>
     [ApiController]
+    [Route("api/[controller]")]
     public class IssuesController : ControllerBase
     {
+        private readonly IValidator<CreateUpdateIssueViewModel> _modelValidator;
+        private readonly ICrudService<IssueViewModel, CreateUpdateIssueViewModel> _issueService;
+        private readonly StatusCodeResponse<IssueViewModel, List<IssueViewModel>> _statusCodeResponse;
 
-        public IssuesController()
+        /// <summary>
+        /// Inject services
+        /// </summary>
+        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="issueService">Issue service </param>
+        /// <param name="statusCodeResponse">Status code response service</param>
+        public IssuesController
+        (
+            IValidator<CreateUpdateIssueViewModel> modelValidator,
+            ICrudService<IssueViewModel, CreateUpdateIssueViewModel> issueService,
+            StatusCodeResponse<IssueViewModel, List<IssueViewModel>> statusCodeResponse
+        )
         {
+            _issueService = issueService;
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
         }
 
-        //// GET: api/Issues
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Issue>>> GetIssues()
-        //{
-        //    return await _context.Issues.ToListAsync();
-        //}
+        /// <summary>
+        /// Get all issues
+        /// </summary>
+        /// <returns>A list of issues</returns>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<List<Issue>>> GetIssues
+        (
+        )
+        {
+            var issues = await _issueService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(issues);
+        }
 
-        //// GET: api/Issues/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Issue>> GetIssue(Guid id)
-        //{
-        //    var issue = await _context.Issues.FindAsync(id);
+        /// <summary>
+        /// Get a single issue by id
+        /// </summary>
+        /// <param name="id">Id of the issue</param>
+        /// <returns>The issue</returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<Issue>> GetIssue
+        (
+            [FromRoute] Guid id
+        )
+        {
+            var issue = await _issueService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(issue);
+        }
 
-        //    if (issue == null)
-        //    {
-        //        return NotFound();
-        //    }
+        /// <summary>
+        /// Update an issue
+        /// </summary>
+        /// <param name="id">Id of the issue</param>
+        /// <param name="issue">Issue cliennt object  </param>
+        /// <returns>The updated issue</returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> PutIssue
+        (
+            [FromRoute] Guid id,
+            [FromForm] CreateUpdateIssueViewModel issue
+        )
+        {
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(issue);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-        //    return issue;
-        //}
+            var updatedIssue = await _issueService.PutRecord(id, issue);
+            return _statusCodeResponse.ControllerResponse(updatedIssue);
+        }
 
-        //// PUT: api/Issues/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutIssue(Guid id, Issue issue)
-        //{
-        //    if (id != issue.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+        /// <summary>
+        /// Create a new issue
+        /// </summary>
+        /// <param name="issue">Issue object from client</param>
+        /// <returns>A message telling if the issue was created or not</returns>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<Issue>> PostIssue
+        (
+            [FromForm] CreateUpdateIssueViewModel issue
+        )
+        {
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(issue);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-        //    _context.Entry(issue).State = EntityState.Modified;
+            var createIssue = await _issueService.PostRecord(issue);
+            return _statusCodeResponse.ControllerResponse(createIssue);
+        }
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!IssueExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        //// POST: api/Issues
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Issue>> PostIssue(Issue issue)
-        //{
-        //    _context.Issues.Add(issue);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetIssue", new { id = issue.Id }, issue);
-        //}
-
-        //// DELETE: api/Issues/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteIssue(Guid id)
-        //{
-        //    var issue = await _context.Issues.FindAsync(id);
-        //    if (issue == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Issues.Remove(issue);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool IssueExists(Guid id)
-        //{
-        //    return _context.Issues.Any(e => e.Id == id);
-        //}
+        /// <summary>
+        /// Delete an issue
+        /// </summary>
+        /// <param name="id">Id of the issue</param>
+        /// <returns>A message telling if the issue was deleted or not</returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> DeleteIssue
+        (
+            [FromRoute] Guid id
+        )
+        {
+            var deleteIssue = await _issueService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteIssue);
+        }
     }
 }

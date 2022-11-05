@@ -6,6 +6,7 @@ using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DTO.Mappings;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.DTO.ViewModels.Exam;
+using SchoolSystem.DTO.ViewModels.Issue;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryService;
 using SchoolSystem.BLL.ServiceInterfaces;
@@ -17,16 +18,19 @@ using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.DTO.ViewModels.TimeTable;
 using SchoolSystem.DTO.FluentValidation.Exam;
 using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.DTO.FluentValidation.Issue;
 using SchoolSystem.DTO.FluentValidation.Result;
 using SchoolSystem.DTO.FluentValidation.Student;
 using SchoolSystem.DTO.FluentValidation.Subject;
 using SchoolSystem.DTO.FluentValidation.Teacher;
+using SchoolSystem.DTO.ViewModels.StudentIssues;
 using SchoolSystem.DTO.FluentValidation.Clasroom;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.DTO.FluentValidation.TimeTable;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DTO.FluentValidation.Attendance;
 using SchoolSystem.BLL.RepositoryService.CrudService;
+using SchoolSystem.DTO.FluentValidation.StudentIssue;
 using SchoolSystem.DTO.FluentValidation.StudentClasroom;
 
 namespace SchoolSystem.API.ProgramExtension
@@ -44,7 +48,7 @@ namespace SchoolSystem.API.ProgramExtension
         /// </returns>
         public static IServiceCollection InjectServices
         (
-            this IServiceCollection services, 
+            this IServiceCollection services,
             IConfiguration configuration
         )
         {
@@ -68,6 +72,7 @@ namespace SchoolSystem.API.ProgramExtension
 
             // AutoMapper service registration
             services.AddAutoMapper(typeof(MappingsExam));
+            services.AddAutoMapper(typeof(MappingsIssue));
             services.AddAutoMapper(typeof(MappingsResult));
             services.AddAutoMapper(typeof(MappingsTeacher));
             services.AddAutoMapper(typeof(MappingsStudent));
@@ -75,6 +80,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddAutoMapper(typeof(MappingsClasroom));
             services.AddAutoMapper(typeof(MappingsTimeTable));
             services.AddAutoMapper(typeof(MappingsAttendance));
+            services.AddAutoMapper(typeof(MappingsStudentIssue));
             services.AddAutoMapper(typeof(MappingsStudentClasroom));
 
             // Database registration
@@ -91,6 +97,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<I_Valid_Id<TimeTable>, TimeTableService>();
 
             services.AddTransient<ICrudService<ExamViewModel, CreateUpdateExamViewModel>, ExamService>();
+            services.AddTransient<ICrudService<IssueViewModel, CreateUpdateIssueViewModel>, IssueService>();
             services.AddTransient<ICrudService<ResultViewModel, CreateUpdateResultViewModel>, ResultService>();
             services.AddTransient<ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>, TeacherService>();
             services.AddTransient<ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel>, SubjectService>();
@@ -99,6 +106,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel>, TimeTableService>();
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
             services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
+            services.AddTransient<ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel>, StudentIssueService>();
 
             // Generic serivces registration
             services.AddTransient(typeof(CRUD<,,>));
@@ -106,6 +114,7 @@ namespace SchoolSystem.API.ProgramExtension
 
             // FluentValidation services registration
             services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateIssueViewModel>, CreateUpdateIssueViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateResultViewModel>, CreateUpdateResultViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateUpdateTeacherViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentViewModel>, CreateUpdateStudentViewModelValidation>();
@@ -114,6 +123,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddScoped<IValidator<CreateUpdateTimeTableViewModel>, CreateUpdateTimeTableViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateStudentIssueViewModel>, CreateUpdateStudentIssueViewModelValidation>();
 
             return services;
         }

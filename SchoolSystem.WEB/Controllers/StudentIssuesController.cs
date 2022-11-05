@@ -1,117 +1,160 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.DTO.ViewModels.StudentIssues;
+using SchoolSystem.DTO.ViewModels.StudentClasroom;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+
 
 namespace SchoolSystem.API.Controllers
 {
+    /// <summary>
+    /// Student Issues API Controller
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class StudentIssuesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public StudentIssuesController(ApplicationDbContext context)
+        private readonly IValidator<CreateUpdateStudentIssueViewModel> _modelValidator;
+        private readonly StatusCodeResponse<StudentIssueViewModel, List<StudentIssueViewModel>> _statusCodeResponse;
+        private readonly ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel> _studentIssueService;
+        private async Task<CustomMesageResponse> ValidateId(Guid studentId, Guid issueId)
         {
-            _context = context;
+            //var teacher = await _Teacher_Valid_Id.Bool(teacherId);
+            //var student = await _Student_Valid_Id.Bool(studentId);
+
+            //if (!teacher)
+            //    return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
+            //if (!student)
+            //    return CustomMesageResponse.NotFound(student, "Invalid student id");
+
+            return CustomMesageResponse.Succsess();
         }
 
-        // GET: api/StudentIssues
+        /// <summary>
+        /// Inject services
+        /// </summary>
+        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="statusCodeResponse">Status code response service</param>
+        /// <param name="studentIssueService">Student issue service</param>
+        public StudentIssuesController
+        (
+            IValidator<CreateUpdateStudentIssueViewModel> modelValidator,
+            StatusCodeResponse<StudentIssueViewModel, List<StudentIssueViewModel>> statusCodeResponse,
+            ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel> studentIssueService
+        )
+        {
+            _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
+            _studentIssueService = studentIssueService;
+        }
+
+        /// <summary>
+        /// Get all student student issues
+        /// </summary>
+        /// <returns>A list of student issues</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StudentIssue>>> GetStudentIssues()
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        public async Task<ActionResult<List<StudentIssueViewModel>>> GetStudentIssues
+        (
+        )
         {
-            return await _context.StudentIssues.ToListAsync();
+            var studentIssues = await _studentIssueService.GetRecords();
+            return _statusCodeResponse.ControllerResponse(studentIssues);
         }
 
-        // GET: api/StudentIssues/5
+        /// <summary>
+        /// Get single student issues
+        /// </summary>
+        /// <param name="id">Id of the student</param>
+        /// <returns>A student issue</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<StudentIssue>> GetStudentIssue(Guid id)
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        public async Task<ActionResult<StudentIssueViewModel>> GetStudentIssue
+        (
+            [FromRoute] Guid id
+        )
         {
-            var studentIssue = await _context.StudentIssues.FindAsync(id);
-
-            if (studentIssue == null)
-            {
-                return NotFound();
-            }
-
-            return studentIssue;
+            var studentIssue = await _studentIssueService.GetRecord(id);
+            return _statusCodeResponse.ControllerResponse(studentIssue);
         }
 
-        // PUT: api/StudentIssues/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a student issue
+        /// </summary>
+        /// <param name="studentIssue">Data from client</param>
+        /// <returns>The updated record</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudentIssue(Guid id, StudentIssue studentIssue)
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        public async Task<IActionResult> PutStudentIssue
+        (
+            [FromForm] CreateUpdateStudentIssueViewModel studentIssue
+        )
         {
-            if (id != studentIssue.StudentId)
-            {
-                return BadRequest();
-            }
+            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            _context.Entry(studentIssue).State = EntityState.Modified;
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(studentIssue);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentIssueExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updateStudentIssue = await _studentIssueService.PutRecord(studentIssue.StudentId, studentIssue);
+            return _statusCodeResponse.ControllerResponse(updateStudentIssue);
         }
 
-        // POST: api/StudentIssues
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a student issue
+        /// </summary>
+        /// <param name="studentIssue">Data from client</param>
+        /// <returns>A message telling if the record was created or not</returns>
         [HttpPost]
-        public async Task<ActionResult<StudentIssue>> PostStudentIssue(StudentIssue studentIssue)
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        public async Task<ActionResult<StudentIssueViewModel>> PostStudentIssue
+        (
+            [FromForm] CreateUpdateStudentIssueViewModel studentIssue
+        )
         {
-            _context.StudentIssues.Add(studentIssue);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (StudentIssueExists(studentIssue.StudentId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
-            return CreatedAtAction("GetStudentIssue", new { id = studentIssue.StudentId }, studentIssue);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(studentIssue);
+            if (!validationResult.IsValid)
+                return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+
+            var createStudentIssue = await _studentIssueService.PostRecord(studentIssue);
+            return _statusCodeResponse.ControllerResponse(createStudentIssue);
         }
 
-        // DELETE: api/StudentIssues/5
+        /// <summary>
+        /// Deletes a student issue
+        /// </summary>
+        /// <param name="id">Id of the student</param>
+        /// <returns>A message telling if the record was deleted succsessfully</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudentIssue(Guid id)
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
+        public async Task<IActionResult> DeleteStudentIssue
+        (
+            [FromRoute] Guid id
+        )
         {
-            var studentIssue = await _context.StudentIssues.FindAsync(id);
-            if (studentIssue == null)
-            {
-                return NotFound();
-            }
-
-            _context.StudentIssues.Remove(studentIssue);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentIssueExists(Guid id)
-        {
-            return _context.StudentIssues.Any(e => e.StudentId == id);
+            var deleteStudentIssue = await _studentIssueService.DeleteRecord(id);
+            return _statusCodeResponse.ControllerResponse(deleteStudentIssue);
         }
     }
 }

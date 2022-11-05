@@ -16,7 +16,6 @@ namespace SchoolSystem.BLL.RepositoryService
         )
         {
             _CRUD = CRUD;
-            _context = context;
         }
 
         /// <summary>
