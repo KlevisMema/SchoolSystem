@@ -9,7 +9,6 @@ namespace SchoolSystem.DAL.BaseModel
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
-
         public string FullName { get; set; }  
 
         [DataType(DataType.EmailAddress)]

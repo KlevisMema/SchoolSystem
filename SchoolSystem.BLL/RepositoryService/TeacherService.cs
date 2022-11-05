@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SchoolSystem.BLL.RepositoryService.CrudService;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+﻿using SchoolSystem.DAL.Models;
+using SchoolSystem.DAL.DataBase;
+using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Teacher;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {

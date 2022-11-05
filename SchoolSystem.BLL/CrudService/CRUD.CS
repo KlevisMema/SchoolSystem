@@ -1,29 +1,37 @@
 ﻿using AutoMapper;
+using SchoolSystem.DAL.DataBase;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
-using SchoolSystem.DAL.DataBase;
 
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
-    public class CRUD<ReturnType,
-                      ModelType,
-                      PostUpdateModelType>
-
-                      where ReturnType : class
-                      where ModelType : class
-                      where PostUpdateModelType : class
+    public class CRUD
+    <
+        ReturnType,
+        ModelType,
+        PostUpdateModelType
+    >
+        where ModelType           : class
+        where ReturnType          : class
+        where PostUpdateModelType : class
     {
-        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _context;
 
-        public CRUD(ApplicationDbContext context, IMapper mapper)
+        public CRUD
+        (
+            ApplicationDbContext context, 
+            IMapper mapper
+        )
         {
-            _context = context;
             _mapper = mapper;
+            _context = context;
         }
 
         // Get all records from an entity in database.
-        public async Task<Response<List<ReturnType>>> GetAll()
+        public async Task<Response<List<ReturnType>>> GetAll
+        (
+        )
         {
             try
             {
@@ -40,7 +48,11 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Get a specific record from an entity in database.
-        public async Task<Response<ReturnType>> GetSpecificRecord(Guid id, string customMessage)
+        public async Task<Response<ReturnType>> GetSpecificRecord
+        (
+            Guid id, 
+            string customMessage
+        )
         {
             try
             {
@@ -63,7 +75,11 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Create a record of an entity
-        public async Task<Response<ReturnType>> PostRecord(PostUpdateModelType record, string customMessage)
+        public async Task<Response<ReturnType>> PostRecord
+        (
+            PostUpdateModelType record, 
+            string customMessage
+        )
         {
             try
             {
@@ -84,7 +100,12 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Upadate a record of an Entity 
-        public async Task<Response<ReturnType>> PutRecord(Guid id, PostUpdateModelType recordFromClient, string customMessage)
+        public async Task<Response<ReturnType>> PutRecord
+        (
+            Guid id, 
+            PostUpdateModelType recordFromClient, 
+            string customMessage
+        )
         {
             try
             {
@@ -109,7 +130,11 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         }
 
         // Delete a record of an Entity 
-        public async Task<Response<ReturnType>> DeleteRecord(Guid id, string customMessage)
+        public async Task<Response<ReturnType>> DeleteRecord
+        (
+            Guid id, 
+            string customMessage
+        )
         {
             try
             {

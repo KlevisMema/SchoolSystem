@@ -1,21 +1,19 @@
-﻿using SchoolSystem.BLL.RepositoryService.CrudService;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+﻿using SchoolSystem.DAL.Models;
 using SchoolSystem.BLL.ResponseService;
-using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Subject;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
     public class SubjectService : ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel>
     {
-
         private readonly CRUD<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> _CRUD;
-        private readonly ApplicationDbContext _context;
 
-        public SubjectService(
-            CRUD<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> CRUD, ApplicationDbContext context)
+        public SubjectService
+        (
+            CRUD<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> CRUD
+        )
         {
             _CRUD = CRUD;
             _context = context;
@@ -25,7 +23,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Get all subjects from database
         /// </summary>
         /// <returns> A list of all subjects</returns>
-        public async Task<Response<List<SubjectViewModel>>> GetRecords()
+        public async Task<Response<List<SubjectViewModel>>> GetRecords
+        (
+        )
         {
             var getAllSubjects = await _CRUD.GetAll();
             return getAllSubjects;
@@ -36,7 +36,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id"> Id of a subject</param>
         /// <returns> The object of a specific subject</returns>
-        public async Task<Response<SubjectViewModel>> GetRecord(Guid id)
+        public async Task<Response<SubjectViewModel>> GetRecord
+        (
+            Guid id
+        )
         {
             var getSubject = await _CRUD.GetSpecificRecord(id, "Subject");
             return getSubject;
@@ -48,7 +51,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a subject</param>
         /// <param name="viewModel">Object that holds the new values of subject </param>
         /// <returns>The updated subject</returns>
-        public async Task<Response<SubjectViewModel>> PutRecord(Guid id, CreateUpdateSubjectViewModel viewModel)
+        public async Task<Response<SubjectViewModel>> PutRecord
+        (
+            Guid id,
+            CreateUpdateSubjectViewModel viewModel
+        )
         {
             var updateSubject = await _CRUD.PutRecord(id, viewModel, "Subject");
             return updateSubject;
@@ -59,9 +66,12 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="viewModel">subject object </param>
         /// <returns>The created subject</returns>
-        public async Task<Response<SubjectViewModel>> PostRecord(CreateUpdateSubjectViewModel viewModel)
+        public async Task<Response<SubjectViewModel>> PostRecord
+        (
+            CreateUpdateSubjectViewModel viewModel
+        )
         {
-            var postSubject  = await _CRUD.PostRecord(viewModel, "Subject");
+            var postSubject = await _CRUD.PostRecord(viewModel, "Subject");
             return postSubject;
         }
 
@@ -70,7 +80,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id">Id of the subject</param>
         /// <returns>A message telling if the subject was deleted or not</returns>
-        public async Task<Response<SubjectViewModel>> DeleteRecord(Guid id)
+        public async Task<Response<SubjectViewModel>> DeleteRecord
+        (
+            Guid id
+        )
         {
             var deleteSubject = await _CRUD.DeleteRecord(id, "Subject");
             return deleteSubject;

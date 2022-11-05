@@ -10,12 +10,12 @@ namespace SchoolSystem.API.Controllers
     /// <summary>
     /// TimeTable API Controller
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class TimeTablesController : ControllerBase
     {
-        private readonly ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> _timeTableService;
         private readonly IValidator<CreateUpdateTimeTableViewModel> _modelValidator;
+        private readonly ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> _timeTableService;
         private readonly StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> _statusCodeResponse;
 
         /// <summary>
@@ -24,13 +24,15 @@ namespace SchoolSystem.API.Controllers
         /// <param name="timeTableService">Time table service</param>
         /// <param name="modelValidator">Model validator service</param>
         /// <param name="statusCodeResponse">Status code response service</param>
-        public TimeTablesController(
-            ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> timeTableService,
+        public TimeTablesController
+        (
             IValidator<CreateUpdateTimeTableViewModel> modelValidator,
-            StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> statusCodeResponse)
+            ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> timeTableService,
+            StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> statusCodeResponse
+        )
         {
-            _timeTableService = timeTableService;
             _modelValidator = modelValidator;
+            _timeTableService = timeTableService;
             _statusCodeResponse = statusCodeResponse;
         }
 
@@ -39,10 +41,12 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <returns>A list of time tables </returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<List<TimeTableViewModel>>> GetTimeTables()
+        public async Task<ActionResult<List<TimeTableViewModel>>> GetTimeTables
+        (
+        )
         {
             var timeTables = await _timeTableService.GetRecords();
             return _statusCodeResponse.ControllerResponse(timeTables);
@@ -54,11 +58,14 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the time table</param>
         /// <returns>A time table info</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TimeTableViewModel>> GetTimeTable(Guid id)
+        public async Task<ActionResult<TimeTableViewModel>> GetTimeTable
+        (
+            [FromRoute] Guid id
+        )
         {
             var timeTable = await _timeTableService.GetRecord(id);
             return _statusCodeResponse.ControllerResponse(timeTable);
@@ -71,11 +78,15 @@ namespace SchoolSystem.API.Controllers
         /// <param name="timeTable">Object from client</param>
         /// <returns>The updated time table</returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> PutTimeTable([FromRoute] Guid id, [FromForm] CreateUpdateTimeTableViewModel timeTable)
+        public async Task<IActionResult> PutTimeTable
+        (
+            [FromRoute] Guid id,
+            [FromForm] CreateUpdateTimeTableViewModel timeTable
+        )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
             if (!validationResult.IsValid)
@@ -91,10 +102,13 @@ namespace SchoolSystem.API.Controllers
         /// <param name="timeTable">Object from client</param>
         /// <returns>A message telling if the time table was created or not</returns>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TimeTableViewModel>> PostTimeTable([FromForm] CreateUpdateTimeTableViewModel timeTable)
+        public async Task<ActionResult<TimeTableViewModel>> PostTimeTable
+        (
+            [FromForm] CreateUpdateTimeTableViewModel timeTable
+        )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
             if (!validationResult.IsValid)
@@ -110,11 +124,14 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the time table</param>
         /// <returns>A message telling if the time table was deleted or not</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> DeleteTimeTable(Guid id)
+        public async Task<IActionResult> DeleteTimeTable
+        (
+            [FromForm] Guid id
+        )
         {
             var deleteTimeTable = await _timeTableService.DeleteRecord(id);
             return _statusCodeResponse.ControllerResponse(deleteTimeTable);

@@ -1,19 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SchoolSystem.BLL.RepositoryService.CrudService;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+﻿using SchoolSystem.DAL.Models;
+using SchoolSystem.DAL.DataBase;
+using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.TimeTable;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
     public class TimeTableService : ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel>,
                                     I_Valid_Id<TimeTable>
     {
-        private readonly CRUD<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> _CRUD;
         private readonly ApplicationDbContext _context;
+        private readonly CRUD<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> _CRUD;
 
         public TimeTableService
         (

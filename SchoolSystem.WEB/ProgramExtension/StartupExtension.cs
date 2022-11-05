@@ -1,47 +1,47 @@
 ﻿using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using SchoolSystem.DAL.Models;
 using Microsoft.OpenApi.Models;
+using SchoolSystem.DAL.DataBase;
+using SchoolSystem.DTO.Mappings;
+using Microsoft.EntityFrameworkCore;
+using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.RepositoryService;
-using SchoolSystem.BLL.RepositoryService.CrudService;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DAL.DataBase;
-using SchoolSystem.DAL.Models;
-using SchoolSystem.DTO.FluentValidation.Attendance;
-using SchoolSystem.DTO.FluentValidation.Clasroom;
-using SchoolSystem.DTO.FluentValidation.Exam;
-using SchoolSystem.DTO.FluentValidation.Result;
-using SchoolSystem.DTO.FluentValidation.Student;
-using SchoolSystem.DTO.FluentValidation.StudentClasroom;
-using SchoolSystem.DTO.FluentValidation.Subject;
-using SchoolSystem.DTO.FluentValidation.Teacher;
-using SchoolSystem.DTO.FluentValidation.TimeTable;
-using SchoolSystem.DTO.Mappings;
-using SchoolSystem.DTO.ViewModels.Attendance;
-using SchoolSystem.DTO.ViewModels.Clasroom;
-using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Result;
 using SchoolSystem.DTO.ViewModels.Student;
-using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.DTO.ViewModels.Subject;
 using SchoolSystem.DTO.ViewModels.Teacher;
+using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.DTO.ViewModels.TimeTable;
-using System.Reflection;
+using SchoolSystem.DTO.FluentValidation.Exam;
+using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.DTO.FluentValidation.Result;
+using SchoolSystem.DTO.FluentValidation.Student;
+using SchoolSystem.DTO.FluentValidation.Subject;
+using SchoolSystem.DTO.FluentValidation.Teacher;
+using SchoolSystem.DTO.FluentValidation.Clasroom;
+using SchoolSystem.DTO.ViewModels.StudentClasroom;
+using SchoolSystem.DTO.FluentValidation.TimeTable;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.DTO.FluentValidation.Attendance;
+using SchoolSystem.BLL.RepositoryService.CrudService;
+using SchoolSystem.DTO.FluentValidation.StudentClasroom;
 
 namespace SchoolSystem.API.ProgramExtension
 {
     /// <summary>
-    /// Startup class to register/configure other services
+    ///     Startup class to register/configure other services
     /// </summary>
     public static class StartupExtension
     {
         /// <summary>
-        /// Extension method of ServiceCollection 
+        ///     Extension method of ServiceCollection 
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///     All connfigured services 
+        /// </returns>
         public static IServiceCollection InjectServices
         (
             this IServiceCollection services, 
@@ -76,11 +76,12 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddAutoMapper(typeof(MappingsTimeTable));
             services.AddAutoMapper(typeof(MappingsAttendance));
             services.AddAutoMapper(typeof(MappingsStudentClasroom));
-            
-
 
             // Database registration
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>
+            (
+                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+            );
 
             // Services registration
             services.AddTransient<IExists, ResultService>();
@@ -104,15 +105,15 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient(typeof(StatusCodeResponse<,>));
 
             // FluentValidation services registration
+            services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateResultViewModel>, CreateUpdateResultViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateTeacherViewModel>, CreateUpdateTeacherViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentViewModel>, CreateUpdateStudentViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateSubjectViewModel>, CreateUpdateSubjectViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateResultViewModel>, CreateUpdateResultViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateTimeTableViewModel>, CreateUpdateTimeTableViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateClasroomViewModel>, CreateUpdateClasroomViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateTimeTableViewModel>, CreateUpdateTimeTableViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
 
             return services;
         }

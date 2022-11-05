@@ -2,21 +2,20 @@
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Teacher;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
     /// Teachers API Controller
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class TeachersController : ControllerBase
     {
-        private readonly ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
         private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
+        private readonly ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
         private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
 
         /// <summary>
@@ -26,15 +25,16 @@ namespace SchoolSystem.API.Controllers
         /// <param name="statusCodeResponse"></param>
         /// <param name="teacherService"></param>
         /// <param name="modelValidator"></param>
-        public TeachersController(
-            ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService,
-            StatusCodeResponse<TeacherViewModel,
-            List<TeacherViewModel>> statusCodeResponse,
-            IValidator<CreateUpdateTeacherViewModel> modelValidator)
+        public TeachersController
+        (
+            IValidator<CreateUpdateTeacherViewModel> modelValidator,
+            StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> statusCodeResponse,
+            ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService
+        )
         {
             _teacherService = teacherService;
-            _statusCodeResponse = statusCodeResponse;
             _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
         }
 
         /// <summary>
@@ -42,10 +42,12 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <returns> All Teachers </returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers()
+        public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers
+        (
+        )
         {
             var teachers = await _teacherService.GetRecords();
             return _statusCodeResponse.ControllerResponse(teachers);
@@ -57,14 +59,17 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the teacher </param>
         /// <returns> The teacher info </returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TeacherViewModel>> GetTeacher(Guid id)
+        public async Task<ActionResult<TeacherViewModel>> GetTeacher
+        (
+            [FromRoute] Guid id
+        )
         {
             var teacher = await _teacherService.GetRecord(id);
-            return _statusCodeResponse.ControllerResponse(teacher); 
+            return _statusCodeResponse.ControllerResponse(teacher);
         }
 
         /// <summary>
@@ -74,11 +79,15 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacher"> Teacher object</param>
         /// <returns>The updtated techer </returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TeacherViewModel>> PutTeacher([FromRoute] Guid id, [FromForm] CreateUpdateTeacherViewModel teacher)
+        public async Task<ActionResult<TeacherViewModel>> PutTeacher
+        (
+            [FromRoute] Guid id,
+            [FromForm] CreateUpdateTeacherViewModel teacher
+        )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
             if (!validationResult.IsValid)
@@ -94,10 +103,13 @@ namespace SchoolSystem.API.Controllers
         /// <param name="teacher"> Teacher object </param>
         /// <returns> The created techer </returns>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TeacherViewModel>> PostTeacher([FromForm] CreateUpdateTeacherViewModel teacher)
+        public async Task<ActionResult<TeacherViewModel>> PostTeacher
+        (
+            [FromForm] CreateUpdateTeacherViewModel teacher
+        )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
             if (!validationResult.IsValid)
@@ -113,11 +125,14 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the teacher </param>
         /// <returns>A message if it deleted or not </returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TeacherViewModel>> DeleteTeacher(Guid id)
+        public async Task<ActionResult<TeacherViewModel>> DeleteTeacher
+        (
+            [FromRoute] Guid id
+        )
         {
             var deleteTeacher = await _teacherService.DeleteRecord(id);
             return _statusCodeResponse.ControllerResponse(deleteTeacher);

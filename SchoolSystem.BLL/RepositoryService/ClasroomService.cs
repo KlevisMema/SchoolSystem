@@ -1,8 +1,8 @@
-﻿using SchoolSystem.BLL.RepositoryService.CrudService;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+﻿using SchoolSystem.DAL.Models;
 using SchoolSystem.BLL.ResponseService;
-using SchoolSystem.DAL.Models;
 using SchoolSystem.DTO.ViewModels.Clasroom;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
@@ -10,7 +10,10 @@ namespace SchoolSystem.BLL.RepositoryService
     {
         private readonly CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> _CRUD;
 
-        public ClasroomService(CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD)
+        public ClasroomService
+        (
+            CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD
+        )
         {
             _CRUD = CRUD;
         }
@@ -19,7 +22,9 @@ namespace SchoolSystem.BLL.RepositoryService
         /// Get all clasrooms from time tables
         /// </summary>
         /// <returns> a list of all time clasrooms</returns>
-        public async Task<Response<List<ClasroomViewModel>>> GetRecords()
+        public async Task<Response<List<ClasroomViewModel>>> GetRecords
+        (
+        )
         {
             var getAllClasrooms = await _CRUD.GetAll();
             return getAllClasrooms;
@@ -30,7 +35,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id"> Id of a clasroom</param>
         /// <returns> The object of a specific clasroom</returns>
-        public async Task<Response<ClasroomViewModel>> GetRecord(Guid id)
+        public async Task<Response<ClasroomViewModel>> GetRecord
+        (
+            Guid id
+        )
         {
             var getClasroom = await _CRUD.GetSpecificRecord(id, "Clasroom");
             return getClasroom;
@@ -42,7 +50,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="id">Id of a clasroom </param>
         /// <param name="viewModel">Object that holds the new values of clasroom </param>
         /// <returns>The updated clasroom</returns>
-        public async Task<Response<ClasroomViewModel>> PutRecord(Guid id, CreateUpdateClasroomViewModel viewModel)
+        public async Task<Response<ClasroomViewModel>> PutRecord
+        (
+            Guid id, 
+            CreateUpdateClasroomViewModel viewModel
+        )
         {
             var updatetClasroom = await _CRUD.PutRecord(id, viewModel, "Clasroom");
             return updatetClasroom;
@@ -53,7 +65,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="viewModel">clasroom object </param>
         /// <returns>The created clasroom</returns>
-        public async Task<Response<ClasroomViewModel>> PostRecord(CreateUpdateClasroomViewModel viewModel)
+        public async Task<Response<ClasroomViewModel>> PostRecord
+        (
+            CreateUpdateClasroomViewModel viewModel
+        )
         {
             var postClasroom = await _CRUD.PostRecord(viewModel, "Clasroom");
             return postClasroom;
@@ -64,7 +79,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="id">Id of the clasroom</param>
         /// <returns>A message telling if the clasroom was deleted or not</returns>
-        public async Task<Response<ClasroomViewModel>> DeleteRecord(Guid id)
+        public async Task<Response<ClasroomViewModel>> DeleteRecord
+        (
+            Guid id
+        )
         {
             var deleteClasroom = await _CRUD.DeleteRecord(id, "Clasroom");
             return deleteClasroom;

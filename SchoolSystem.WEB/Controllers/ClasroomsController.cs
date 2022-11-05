@@ -1,28 +1,27 @@
 ﻿using FluentValidation;
+using SchoolSystem.DAL.Models;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DAL.Models;
-using SchoolSystem.DTO.ViewModels.Attendance;
 using SchoolSystem.DTO.ViewModels.Clasroom;
+using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
     /// Clasroom API Controller
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ClasroomsController : ControllerBase
     {
-        private readonly ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel> _clasroomService;
-        private readonly IValidator<CreateUpdateClasroomViewModel> _modelValidator;
-        private readonly StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> _statusCodeResponse;
         private readonly I_Valid_Id<Teacher> _Teacher_Valid_Id;
         private readonly I_Valid_Id<TimeTable> _TimeTable_Valid_Id;
-
+        private readonly IValidator<CreateUpdateClasroomViewModel> _modelValidator;
+        private readonly ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel> _clasroomService;
+        private readonly StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> _statusCodeResponse;
         private async Task<CustomMesageResponse> ValidateId
         (
             Guid teacherId, 
@@ -50,17 +49,17 @@ namespace SchoolSystem.API.Controllers
         /// <param name="timeTable_Valid_Id">Time Table valid id service</param>
         public ClasroomsController
         (
-            ICrudService<ClasroomViewModel,
-            CreateUpdateClasroomViewModel> clasroomService, IValidator<CreateUpdateClasroomViewModel> modelValidator,
-            StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> statusCodeResponse,
             I_Valid_Id<Teacher> teacher_Valid_Id,
-            I_Valid_Id<TimeTable> timeTable_Valid_Id
+            I_Valid_Id<TimeTable> timeTable_Valid_Id,
+            IValidator<CreateUpdateClasroomViewModel> modelValidator,
+            ICrudService<ClasroomViewModel,CreateUpdateClasroomViewModel> clasroomService,
+            StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> statusCodeResponse
         )
         {
-            _clasroomService = clasroomService;
             _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
+            _clasroomService = clasroomService;
             _Teacher_Valid_Id = teacher_Valid_Id;
+            _statusCodeResponse = statusCodeResponse;
             _TimeTable_Valid_Id = timeTable_Valid_Id;
         }
 
@@ -69,8 +68,8 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <returns>A list of clasrooms</returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<ClasroomViewModel>>> GetClasrooms
         (
@@ -86,9 +85,9 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the clasroom</param>
         /// <returns>The clasroom with that specific id</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ClasroomViewModel>> GetClasroom
         (
@@ -106,9 +105,9 @@ namespace SchoolSystem.API.Controllers
         /// <param name="clasroom">Client data object</param>
         /// <returns>The updated clasroom</returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> PutClasroom
         (
@@ -134,8 +133,8 @@ namespace SchoolSystem.API.Controllers
         /// <param name="clasroom">Clasroom client object</param>
         /// <returns>A message telling if the clasroom  was created or not</returns>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ClasroomViewModel>> PostClasroom
         (
@@ -160,9 +159,9 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id">Id of the clasroom</param>
         /// <returns>A message telling if the clasroom was deleted or not</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteClasroom
         (
