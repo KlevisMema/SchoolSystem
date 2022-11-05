@@ -43,7 +43,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <summary>
         /// Updates a attendance  
         /// </summary>
-        /// <param name="id">Id of a eattendancexam</param>
+        /// <param name="id">Id of a attendance</param>
         /// <param name="viewModel">Object that holds the new values of attendance </param>
         /// <returns>The updated attendance</returns>
         public async Task<Response<AttendanceViewModel>> PutRecord(Guid id, CreateUpdateAttendanceViewModel viewModel)

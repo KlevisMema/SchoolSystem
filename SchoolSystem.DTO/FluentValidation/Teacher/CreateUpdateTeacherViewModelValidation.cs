@@ -3,9 +3,9 @@ using SchoolSystem.DTO.ViewModels.Teacher;
 
 namespace SchoolSystem.DTO.FluentValidation.Teacher
 {
-    public class CreateTeacherViewModelValidation : AbstractValidator<CreateUpdateTeacherViewModel>
+    public class CreateUpdateTeacherViewModelValidation : AbstractValidator<CreateUpdateTeacherViewModel>
     {
-        public CreateTeacherViewModelValidation()
+        public CreateUpdateTeacherViewModelValidation()
         {
             RuleFor(x => x.Email).NotNull().EmailAddress();
             RuleFor(x=>x.Adress).NotNull().Length(4,10);

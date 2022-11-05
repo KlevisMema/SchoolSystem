@@ -42,12 +42,14 @@ namespace SchoolSystem.API.Controllers
         /// <param name="modelValidator">Model validation service</param>
         /// <param name="Teacher_Valid_Id"></param>
         /// <param name="student_Valid_Id"></param>
-        public AttendancesController(
+        public AttendancesController
+        (
             ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel> attendanceService,
             StatusCodeResponse<AttendanceViewModel, List<AttendanceViewModel>> statusCodeResponse,
             IValidator<CreateUpdateAttendanceViewModel> modelValidator,
             I_Valid_Id<Teacher> Teacher_Valid_Id,
-            I_Valid_Id<Student> student_Valid_Id)
+            I_Valid_Id<Student> student_Valid_Id
+        )
         {
             _attendanceService = attendanceService;
             _statusCodeResponse = statusCodeResponse;
@@ -115,13 +117,13 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="attendance">attendance object from client</param>
         /// <remarks> 
-        ///  Role contains Teacher with value of 1 and Student with value 2,
         ///  Status contains Present with value of 1 and Missing with value of 2
         /// </remarks>
         /// <returns>A message id attendance was created or not</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<AttendanceViewModel>> PostAttendance([FromForm] CreateUpdateAttendanceViewModel attendance)
         {
