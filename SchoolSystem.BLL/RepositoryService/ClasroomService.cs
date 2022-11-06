@@ -1,21 +1,27 @@
 ﻿using SchoolSystem.DAL.Models;
+using SchoolSystem.DAL.DataBase;
+using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class ClasroomService : ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>
+    public class ClasroomService : ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>, I_Valid_Id<Clasroom>
     {
+        private readonly ApplicationDbContext  _context;
         private readonly CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> _CRUD;
 
         public ClasroomService
         (
+            ApplicationDbContext context,
             CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD
         )
         {
             _CRUD = CRUD;
+            _context = context;
         }
 
         /// <summary>
@@ -86,6 +92,25 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             var deleteClasroom = await _CRUD.DeleteRecord(id, "Clasroom");
             return deleteClasroom;
+        }
+
+        /// <summary>
+        ///     Returns true or false if the clasroom exists or not
+        /// </summary>
+        /// <param name="id">Id of the clasroom</param>
+        public async Task<bool> Bool
+        (
+            Guid id
+        )
+        {
+            try
+            {
+                return await _context.Clasrooms.AnyAsync(x=>x.Id.Equals(id));
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
