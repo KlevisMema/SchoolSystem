@@ -3,6 +3,7 @@ using SchoolSystem.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
 using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 
@@ -15,18 +16,20 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class StudentClasroomsController : ControllerBase
     {
+        private readonly I_Valid_Id<Student> i_Valid_Student_Id;
+        private readonly I_Valid_Id<Clasroom> i_Valid_Clasroom_Id;
         private readonly IValidator<CreateUpdateStudentClasroomViewModel> _modelValidator;
         private readonly StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> _statusCodeResponse;
         private readonly ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> _studentClasroomService;
-        private async Task<CustomMesageResponse> ValidateId(Guid teacherId, Guid studentId)
+        private async Task<CustomMesageResponse> ValidateId(Guid clasroomid, Guid studentId)
         {
-            //var teacher = await _Teacher_Valid_Id.Bool(teacherId);
-            //var student = await _Student_Valid_Id.Bool(studentId);
+            var clasroom = await i_Valid_Clasroom_Id.Bool(clasroomid);
+            var student = await i_Valid_Student_Id.Bool(studentId);
 
-            //if (!teacher)
-            //    return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
-            //if (!student)
-            //    return CustomMesageResponse.NotFound(student, "Invalid student id");
+            if (!clasroom)
+                return CustomMesageResponse.NotFound(clasroom, "Invalid clasroom id");
+            if (!student)
+                return CustomMesageResponse.NotFound(student, "Invalid student id");
 
             return CustomMesageResponse.Succsess();
         }
@@ -34,13 +37,15 @@ namespace SchoolSystem.API.Controllers
         /// <summary>
         /// Inject services
         /// </summary>
-        /// <param name="studentClasroomService"></param>
-        /// <param name="modelValidator"></param>
-        /// <param name="statusCodeResponse"></param>
-        /// <param name="teacher_Valid_Id"></param>
-        /// <param name="student_Valid_Id"></param>
+        /// <param name="studentClasroomService">Student Clasroom servivce</param>
+        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="statusCodeResponse">Status code response service</param>
+        /// <param name="i_Valid_Clasroom_Id">Clasroom valid id service</param>
+        /// <param name="i_Valid_Student_Id">Student valid id service</param>
         public StudentClasroomsController
         (
+            I_Valid_Id<Student> i_Valid_Student_Id,
+            I_Valid_Id<Clasroom> i_Valid_Clasroom_Id,
             IValidator<CreateUpdateStudentClasroomViewModel> modelValidator,
             StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> statusCodeResponse,
             ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> studentClasroomService
@@ -48,6 +53,8 @@ namespace SchoolSystem.API.Controllers
         {
             _modelValidator = modelValidator;
             _statusCodeResponse = statusCodeResponse;
+            this.i_Valid_Student_Id = i_Valid_Student_Id;
+            this.i_Valid_Clasroom_Id = i_Valid_Clasroom_Id;
             _studentClasroomService = studentClasroomService;
         }
 
@@ -79,7 +86,7 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<StudentClasroom>> GetStudentClasroom
         (
-            [FromForm] Guid id
+            [FromRoute] Guid id
         )
         {
             var studentClasroom = await _studentClasroomService.GetRecord(id);

@@ -94,6 +94,7 @@ namespace SchoolSystem.API.ProgramExtension
 
             services.AddTransient<I_Valid_Id<Teacher>, TeacherService>();
             services.AddTransient<I_Valid_Id<Student>, StudentService>();
+            services.AddTransient<I_Valid_Id<Clasroom>, ClasroomService>();
             services.AddTransient<I_Valid_Id<TimeTable>, TimeTableService>();
 
             services.AddTransient<ICrudService<ExamViewModel, CreateUpdateExamViewModel>, ExamService>();
@@ -105,8 +106,8 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>, ClasroomService>();
             services.AddTransient<ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel>, TimeTableService>();
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
-            services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
             services.AddTransient<ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel>, StudentIssueService>();
+            services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
 
             // Generic serivces registration
             services.AddTransient(typeof(CRUD<,,>));
@@ -122,8 +123,8 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddScoped<IValidator<CreateUpdateClasroomViewModel>, CreateUpdateClasroomViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateTimeTableViewModel>, CreateUpdateTimeTableViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
-            services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentIssueViewModel>, CreateUpdateStudentIssueViewModelValidation>();
+            services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
 
             return services;
         }
