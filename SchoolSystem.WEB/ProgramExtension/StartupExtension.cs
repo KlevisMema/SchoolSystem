@@ -4,6 +4,7 @@ using SchoolSystem.DAL.Models;
 using Microsoft.OpenApi.Models;
 using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DTO.Mappings;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Issue;
@@ -32,6 +33,7 @@ using SchoolSystem.DTO.FluentValidation.Attendance;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.DTO.FluentValidation.StudentIssue;
 using SchoolSystem.DTO.FluentValidation.StudentClasroom;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace SchoolSystem.API.ProgramExtension
 {
@@ -52,6 +54,26 @@ namespace SchoolSystem.API.ProgramExtension
             IConfiguration configuration
         )
         {
+            // Database registration
+            services.AddDbContext<ApplicationDbContext>
+            (
+                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+            );
+
+            // Identity
+            services.AddAuthentication();
+
+            services.AddIdentity<User, IdentityRole>
+            (
+                u =>
+                {
+                    u.User.RequireUniqueEmail = true;
+                    u.Password.RequiredLength = 6;
+                }
+            )
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
             // Swagger configuration
             services.AddSwaggerGen(optios =>
             {
@@ -77,20 +99,17 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddAutoMapper(typeof(MappingsTeacher));
             services.AddAutoMapper(typeof(MappingsStudent));
             services.AddAutoMapper(typeof(MappingsSubject));
+            services.AddAutoMapper(typeof(MappingsAccount));
             services.AddAutoMapper(typeof(MappingsClasroom));
             services.AddAutoMapper(typeof(MappingsTimeTable));
             services.AddAutoMapper(typeof(MappingsAttendance));
             services.AddAutoMapper(typeof(MappingsStudentIssue));
             services.AddAutoMapper(typeof(MappingsStudentClasroom));
-
-            // Database registration
-            services.AddDbContext<ApplicationDbContext>
-            (
-                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-            );
-
+            
             // Services registration
             services.AddTransient<IExists, ResultService>();
+
+            services.AddTransient<IAccountService, AccountService>();
 
             services.AddTransient<I_Valid_Id<Teacher>, TeacherService>();
             services.AddTransient<I_Valid_Id<Student>, StudentService>();
@@ -108,7 +127,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
             services.AddTransient<ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel>, StudentIssueService>();
             services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
-
+           
             // Generic serivces registration
             services.AddTransient(typeof(CRUD<,,>));
             services.AddTransient(typeof(StatusCodeResponse<,>));

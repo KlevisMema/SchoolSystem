@@ -11,17 +11,14 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class StudentService : ICrudService<StudentViewModel, CreateUpdateStudentViewModel>, I_Valid_Id<Student>
     {
-        private readonly ApplicationDbContext _context;
         private readonly CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
 
         public StudentService
         (
-            CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD,
-            ApplicationDbContext context
+            CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD
         )
         {
             _CRUD = CRUD;
-            _context = context;
         }
 
         /// <summary>
@@ -103,7 +100,9 @@ namespace SchoolSystem.BLL.RepositoryService
             Guid id
         )
         {
-            return await _context.Students.AnyAsync(x => x.Id.Equals(id));
+            var getAllStudents = await _CRUD.GetAll();
+            var result = getAllStudents.Value;
+            return result.Any(x => x.Id.Equals(id));
         }
     }
 }
