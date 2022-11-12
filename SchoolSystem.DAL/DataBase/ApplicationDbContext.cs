@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SchoolSystem.DAL.Configuration.Entities;
 using SchoolSystem.DAL.Models;
 
 namespace SchoolSystem.DAL.DataBase
@@ -23,6 +24,9 @@ namespace SchoolSystem.DAL.DataBase
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Seedig roles onmodel creating
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             /// Relationship between models configuration
             ///
