@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SchoolSystem.DAL.Configuration.Seeding
+namespace SchoolSystem.DAL.DataBase.Configuration.Seeding
 {
     public class DatabaseSeeding
     {

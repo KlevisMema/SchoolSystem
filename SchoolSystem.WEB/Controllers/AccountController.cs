@@ -13,8 +13,8 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
+        private readonly IOAuthService _oAuthService;
         private readonly IAccountService _accountService;
-        private readonly StatusCodeResponse<LoginViewModel, List<LoginViewModel>> _logInStatusCodeResponse;
         private readonly StatusCodeResponse<RegisterViewModel, List<RegisterViewModel>> _registerStatusCodeResponse;
 
         /// <summary>
@@ -22,17 +22,17 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="accountService">Account service</param>
         /// <param name="registerStatusCodeResponse">Register StatusCode response</param>
-        /// <param name="logInStatusCodeResponse">Login StatusCode response</param>
+        /// <param name="oAuthService"></param>
         public AccountController
         (
+            IOAuthService oAuthService,
             IAccountService accountService,
-            StatusCodeResponse<LoginViewModel, List<LoginViewModel>> logInStatusCodeResponse,
             StatusCodeResponse<RegisterViewModel, List<RegisterViewModel>> registerStatusCodeResponse
         )
         {
             _accountService = accountService;
-            _logInStatusCodeResponse = logInStatusCodeResponse;
             _registerStatusCodeResponse = registerStatusCodeResponse;
+            _oAuthService = oAuthService;
         }
 
         /// <summary>
@@ -76,7 +76,10 @@ namespace SchoolSystem.API.Controllers
 
             var loginResult = await _accountService.Login(logIn);
 
-            return _logInStatusCodeResponse.ControllerResponse(loginResult);
+            if (loginResult.Success)
+                return Ok(await _oAuthService.CreateToken(logIn));
+
+            return BadRequest(loginResult.Message);
         }
     }
 }

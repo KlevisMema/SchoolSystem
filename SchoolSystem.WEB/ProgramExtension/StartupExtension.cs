@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text;
+using FluentValidation;
 using System.Reflection;
 using SchoolSystem.DAL.Models;
 using Microsoft.OpenApi.Models;
@@ -6,6 +7,7 @@ using SchoolSystem.DAL.DataBase;
 using SchoolSystem.DTO.Mappings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Issue;
 using SchoolSystem.API.ControllerRespose;
@@ -30,10 +32,11 @@ using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.DTO.FluentValidation.TimeTable;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DTO.FluentValidation.Attendance;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.DTO.FluentValidation.StudentIssue;
 using SchoolSystem.DTO.FluentValidation.StudentClasroom;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using SchoolSystem.BLL.AuthTokenService;
 
 namespace SchoolSystem.API.ProgramExtension
 {
@@ -60,7 +63,7 @@ namespace SchoolSystem.API.ProgramExtension
                 options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // Identity
+            // Identity configuration
             services.AddAuthentication();
 
             services.AddIdentity<User, IdentityRole>
@@ -74,10 +77,60 @@ namespace SchoolSystem.API.ProgramExtension
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // Swagger configuration
-            services.AddSwaggerGen(optios =>
+            // Jwt cofiguration
+            var jwtSetting = configuration.GetSection("Jwt");
+
+            services.AddAuthentication(oauth =>
             {
-                optios.SwaggerDoc("v1", new OpenApiInfo
+                oauth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                oauth.DefaultChallengeScheme= JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(oauth =>
+            {
+                oauth.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSetting.GetSection("Issuer").Value,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.GetSection("Key").Value)),
+                    ValidateAudience = false
+                };
+            });
+
+            // Swagger configuration
+            services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"Enter 'Bearer' [Space] and then your token in the input field below. 
+                                    Example : 'Bearer 1234dsfhj'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "Jwt"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "0auth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                    }
+                });
+
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "School System API",
@@ -87,9 +140,11 @@ namespace SchoolSystem.API.ProgramExtension
                         Url = new Uri("https://www.linkedin.com/in/klevis-m-ab1b3b140/")
                     }
                 });
+
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                optios.IncludeXmlComments(xmlPath);
+
+                options.IncludeXmlComments(xmlPath);
             });
 
             // AutoMapper service registration
@@ -108,6 +163,8 @@ namespace SchoolSystem.API.ProgramExtension
             
             // Services registration
             services.AddTransient<IExists, ResultService>();
+
+            services.AddTransient<IOAuthService, OAuthService>();
 
             services.AddTransient<IAccountService, AccountService>();
 

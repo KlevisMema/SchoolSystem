@@ -1,5 +1,5 @@
 using SchoolSystem.API.ProgramExtension;
-using SchoolSystem.DAL.Configuration.Seeding;
+using SchoolSystem.DAL.DataBase.Configuration.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

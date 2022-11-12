@@ -6,6 +6,7 @@ using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Attendance;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SchoolSystem.API.Controllers
 {
@@ -66,7 +67,9 @@ namespace SchoolSystem.API.Controllers
         /// Get all attendances
         /// </summary>
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<AttendanceViewModel>>> GetAttendances

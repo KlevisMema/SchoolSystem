@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using SchoolSystem.DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using SchoolSystem.DAL.Configuration.Entities;
-using SchoolSystem.DAL.Models;
+using SchoolSystem.DAL.DataBase.Configuration.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 
 namespace SchoolSystem.DAL.DataBase
 {
