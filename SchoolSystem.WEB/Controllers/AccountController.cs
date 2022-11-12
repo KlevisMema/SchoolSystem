@@ -49,7 +49,7 @@ namespace SchoolSystem.API.Controllers
             [FromForm] RegisterViewModel register
         )
         {
-            if(!ModelState.IsValid) 
+            if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await _accountService.Register(register);
