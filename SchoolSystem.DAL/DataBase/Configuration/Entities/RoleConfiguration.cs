@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace SchoolSystem.DAL.Configuration.Entities
+namespace SchoolSystem.DAL.DataBase.Configuration.Entities
 {
     public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
     {
@@ -12,15 +12,15 @@ namespace SchoolSystem.DAL.Configuration.Entities
             (
                 new IdentityRole
                 {
-                    Name= "Teacher",
-                    NormalizedName= "TEACHER",
+                    Name = "Teacher",
+                    NormalizedName = "TEACHER",
                 },
                 new IdentityRole
                 {
                     Name = "Student",
                     NormalizedName = "Student",
                 }
-            ) ;
+            );
         }
     }
 }

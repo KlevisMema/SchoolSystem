@@ -65,6 +65,5 @@ namespace SchoolSystem.BLL.RepositoryService
                 return Response<LoginViewModel>.ErrorMsg("Iternal server error, please try again later!");
             }
         }
-
     }
 }

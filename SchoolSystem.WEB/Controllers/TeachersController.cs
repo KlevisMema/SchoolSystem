@@ -21,7 +21,6 @@ namespace SchoolSystem.API.Controllers
         /// <summary>
         /// Inject teacher service 
         /// </summary>
-        /// <param name=""></param>
         /// <param name="statusCodeResponse"></param>
         /// <param name="teacherService"></param>
         /// <param name="modelValidator"></param>
