@@ -1,5 +1,4 @@
-﻿using SchoolSystem.DAL.DataBase;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SchoolSystem.DAL.DataBase.Configuration.Seeding
