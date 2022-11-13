@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Account;
@@ -13,8 +13,8 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IOAuthService _oAuthService;
         private readonly IAccountService _accountService;
+        private readonly StatusCodeResponse<LoginViewModel, List<LoginViewModel>> _loginStatusCodeResponse;
         private readonly StatusCodeResponse<RegisterViewModel, List<RegisterViewModel>> _registerStatusCodeResponse;
 
         /// <summary>
@@ -22,17 +22,17 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="accountService">Account service</param>
         /// <param name="registerStatusCodeResponse">Register StatusCode response</param>
-        /// <param name="oAuthService"></param>
+        /// <param name="loginStatusCodeResponse">Login StatusCode response</param>
         public AccountController
         (
-            IOAuthService oAuthService,
             IAccountService accountService,
+            StatusCodeResponse<LoginViewModel, List<LoginViewModel>> loginStatusCodeResponse,
             StatusCodeResponse<RegisterViewModel, List<RegisterViewModel>> registerStatusCodeResponse
         )
         {
             _accountService = accountService;
+            _loginStatusCodeResponse = loginStatusCodeResponse;
             _registerStatusCodeResponse = registerStatusCodeResponse;
-            _oAuthService = oAuthService;
         }
 
         /// <summary>
@@ -52,9 +52,9 @@ namespace SchoolSystem.API.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _accountService.Register(register);
+            var registerResult = await _accountService.Register(register);
 
-            return _registerStatusCodeResponse.ControllerResponse(result);
+            return _registerStatusCodeResponse.ControllerResponse(registerResult);
         }
 
         /// <summary>
@@ -65,6 +65,7 @@ namespace SchoolSystem.API.Controllers
         [HttpPost("Login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> LogIn
         (
@@ -76,10 +77,7 @@ namespace SchoolSystem.API.Controllers
 
             var loginResult = await _accountService.Login(logIn);
 
-            if (loginResult.Success)
-                return Ok(await _oAuthService.CreateToken(logIn));
-
-            return BadRequest(loginResult.Message);
+            return _loginStatusCodeResponse.ControllerResponse(loginResult);
         }
     }
 }

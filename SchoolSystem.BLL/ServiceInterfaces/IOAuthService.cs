@@ -4,6 +4,6 @@ namespace SchoolSystem.BLL.ServiceInterfaces
 {
     public interface IOAuthService
     {
-        Task<string> CreateToken(LoginViewModel logIn);
+        string CreateToken(UserViewModel user);
     }
 }
