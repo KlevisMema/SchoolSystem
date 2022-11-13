@@ -8,8 +8,10 @@ namespace SchoolSystem.DTO.Mappings
     {
         public MappingsAccount()
         {
+
             CreateMap<RegisterViewModel, User>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
+            CreateMap<LoginViewModel, User>();
         }
     }
 }

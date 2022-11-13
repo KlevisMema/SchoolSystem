@@ -1,10 +1,8 @@
 ﻿using System.Text;
 using System.Security.Claims;
-using SchoolSystem.DAL.Models;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Extensions.Configuration;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Account;
 
@@ -12,74 +10,74 @@ namespace SchoolSystem.BLL.AuthTokenService
 {
     public class OAuthService : IOAuthService
     {
-        private User _user;
-        private readonly IConfiguration configuration;
-        private readonly UserManager<User> userManager;
+        private readonly IOptions<JwtConfig> _jwtOptions;
 
         public OAuthService
         (
-            IConfiguration configuration,
-            UserManager<User> userManager
+            IOptions<JwtConfig> jwtOptions
         )
         {
-            this.userManager = userManager;
-            this.configuration = configuration;
+            _jwtOptions = jwtOptions;
         }
 
-        public async Task<string> CreateToken(LoginViewModel logIn)
+        /// <summary>
+        /// Serialize a token in a string fromat (Jwt format)
+        /// </summary>
+        /// <param name="logIn">Login object to be used for user validation</param>
+        /// <returns>Token</returns>
+        public string CreateToken(UserViewModel user)
         {
-            await ValidateUser(logIn);
             var singinCredentials = GetSinginCredentials();
-            var claims = await GetClaims();
+            var claims = GetClaims(user);
             var token = GenerateToken(singinCredentials, claims);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private async Task<bool> ValidateUser(LoginViewModel login)
-        {
-            _user = await userManager.FindByEmailAsync(login.Email);
-            return _user != null && await userManager.CheckPasswordAsync(_user, login.Password);
-        }
-
+        /// <summary>
+        /// Get jwt config key and hash it 
+        /// </summary>
+        /// <returns>SigningCredentials hashed key</returns>
         private SigningCredentials GetSinginCredentials()
         {
-            var jwtSetting = configuration.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.GetSection("Key").Value));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Value.Key));
 
             return new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         }
 
-        private async Task<List<Claim>> GetClaims()
+        /// <summary>
+        /// Creates a list of claims
+        /// </summary>
+        /// <returns>List of claims</returns>
+        private List<Claim> GetClaims(UserViewModel user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, _user.UserName),
-                new Claim(JwtRegisteredClaimNames.NameId, _user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, _user.Email),
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(JwtRegisteredClaimNames.NameId, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iss, configuration["Jwt:Issuer"])
+                new Claim(JwtRegisteredClaimNames.Iss, _jwtOptions.Value.Issuer)
             };
 
-            var roles = await userManager.GetRolesAsync(_user);
-
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            claims.AddRange(user.Roles.Select(role=> new Claim(ClaimTypes.Role, role)));
 
             return claims;
         }
 
+        /// <summary>
+        /// Create a token with hashed credentials and a list of claims
+        /// </summary>
+        /// <param name="singinCredentials">Hashed credentials</param>
+        /// <param name="claims">List of claims</param>
+        /// <returns>JwtSecurityToken</returns>
         private JwtSecurityToken GenerateToken(SigningCredentials singinCredentials, List<Claim> claims)
         {
-            var jwtSetting = configuration.GetSection("Jwt");
-
             var token = new JwtSecurityToken
             (
-                issuer: jwtSetting.GetSection("Issuer").Value,
+                issuer: _jwtOptions.Value.Issuer,
                 claims: claims,
-                expires: DateTime.Now.AddHours(Convert.ToDouble(jwtSetting.GetSection("LifeTime").Value)),
+                expires: DateTime.Now.AddHours(Convert.ToDouble(_jwtOptions.Value.LifeTime)),
                 signingCredentials: singinCredentials
             );
 

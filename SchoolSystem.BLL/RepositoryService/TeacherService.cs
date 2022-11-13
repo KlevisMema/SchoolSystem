@@ -1,6 +1,5 @@
 ﻿using SchoolSystem.DAL.Models;
-using SchoolSystem.DAL.DataBase;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Teacher;
@@ -11,17 +10,17 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class TeacherService : ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>, I_Valid_Id<Teacher>
     {
+        private readonly ILogger<TeacherService> _logger;
         private readonly CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
-        private readonly ApplicationDbContext _context;
 
         public TeacherService
         (
-            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD,
-            ApplicationDbContext context
+            ILogger<TeacherService> logger,
+            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD
         )
         {
             _CRUD = CRUD;
-            _context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -106,10 +105,22 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             try
             {
-                return await _context.Teachers.AnyAsync(x => x.Id.Equals(id));
+                var getAllTeachers = await _CRUD.GetAll();
+                var result = getAllTeachers.Value;
+                return result.Any(x => x.Id.Equals(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError
+                (
+                    ex,
+                    $" Something went wrong \n" +
+                    $"Error, something went wrong !! => \n " +
+                    $" Method : {ex.TargetSite} \n" +
+                    $" Source : {ex.Source} \n" +
+                    $"InnerEx : {ex.InnerException} \n"
+                );
+
                 return false;
             }
         }

@@ -1,6 +1,5 @@
 ﻿using SchoolSystem.DAL.Models;
-using SchoolSystem.DAL.DataBase;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Clasroom;
@@ -11,17 +10,17 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class ClasroomService : ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>, I_Valid_Id<Clasroom>
     {
-        private readonly ApplicationDbContext  _context;
+        private readonly ILogger<ClasroomService> _logger;
         private readonly CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> _CRUD;
 
         public ClasroomService
         (
-            ApplicationDbContext context,
+            ILogger<ClasroomService> logger,
             CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD
         )
         {
             _CRUD = CRUD;
-            _context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The updated clasroom</returns>
         public async Task<Response<ClasroomViewModel>> PutRecord
         (
-            Guid id, 
+            Guid id,
             CreateUpdateClasroomViewModel viewModel
         )
         {
@@ -105,10 +104,22 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             try
             {
-                return await _context.Clasrooms.AnyAsync(x=>x.Id.Equals(id));
+                var clasroomServices = await _CRUD.GetAll();
+                var result = clasroomServices.Value;
+                return result.Any(x => x.Id.Equals(id));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError
+                (
+                    ex,
+                    $" Something went wrong \n" +
+                    $"Error, something went wrong !! => \n " +
+                    $" Method : {ex.TargetSite} \n" +
+                    $" Source : {ex.Source} \n" +
+                    $"InnerEx : {ex.InnerException} \n"
+                );
+
                 return false;
             }
         }

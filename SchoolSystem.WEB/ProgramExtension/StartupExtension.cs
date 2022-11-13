@@ -78,6 +78,8 @@ namespace SchoolSystem.API.ProgramExtension
             .AddDefaultTokenProviders();
 
             // Jwt cofiguration
+            services.Configure<JwtConfig>(configuration.GetSection("Jwt"));
+
             var jwtSetting = configuration.GetSection("Jwt");
 
             services.AddAuthentication(oauth =>

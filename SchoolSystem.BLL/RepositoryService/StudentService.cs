@@ -1,6 +1,5 @@
 ﻿using SchoolSystem.DAL.Models;
-using SchoolSystem.DAL.DataBase;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Student;
@@ -11,14 +10,17 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class StudentService : ICrudService<StudentViewModel, CreateUpdateStudentViewModel>, I_Valid_Id<Student>
     {
+        private readonly ILogger<StudentService> _logger;
         private readonly CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
 
         public StudentService
         (
+            ILogger<StudentService> logger,
             CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD
         )
         {
             _CRUD = CRUD;
+            _logger = logger;
         }
 
         /// <summary>
@@ -100,9 +102,26 @@ namespace SchoolSystem.BLL.RepositoryService
             Guid id
         )
         {
-            var getAllStudents = await _CRUD.GetAll();
-            var result = getAllStudents.Value;
-            return result.Any(x => x.Id.Equals(id));
+            try
+            {
+                var getAllStudents = await _CRUD.GetAll();
+                var result = getAllStudents.Value;
+                return result.Any(x => x.Id.Equals(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError
+                (
+                    ex,
+                    $" Something went wrong \n" +
+                    $"Error, something went wrong !! => \n " +
+                    $" Method : {ex.TargetSite} \n" +
+                    $" Source : {ex.Source} \n" +
+                    $"InnerEx : {ex.InnerException} \n"
+                );
+
+                return false;
+            }
         }
     }
 }
