@@ -7,7 +7,7 @@ namespace SchoolSystem.API.ControllerRespose
     /// <summary>
     /// Generic method 
     /// </summary>
-    public class StatusCodeResponse<T, ListT> : ControllerBase 
+    public class StatusCodeResponse<T, ListT> : ControllerBase
     where T : class
     where ListT : List<T>
     {
@@ -25,8 +25,8 @@ namespace SchoolSystem.API.ControllerRespose
             };
         }
 
-       /// <param name="obj">List of object that will come from a controller</param>
-       /// <returns>The appropriate status code</returns>
+        /// <param name="obj">List of object that will come from a controller</param>
+        /// <returns>The appropriate status code</returns>
         public ObjectResult ControllerResponse(Response<ListT> obj)
         {
             return obj.StatusCode switch

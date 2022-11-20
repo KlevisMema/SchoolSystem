@@ -53,9 +53,10 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<Result>>> GetResults
         (
+            CancellationToken cancellationToken
         )
         {
-            var results = await _resultService.GetRecords();
+            var results = await _resultService.GetRecords(cancellationToken);
             return _statusCodeResponse.ControllerResponse(results);
         }
 
@@ -71,10 +72,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ResultViewModel>> GetResult
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var result = await _resultService.GetRecord(id);
+            var result = await _resultService.GetRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(result);
         }
 
@@ -92,7 +94,8 @@ namespace SchoolSystem.API.Controllers
         public async Task<ActionResult<ResultViewModel>> PutResult
         (
             [FromRoute] Guid id,
-            [FromForm] CreateUpdateResultViewModel result
+            [FromForm] CreateUpdateResultViewModel result,
+            CancellationToken cancellationToken
         )
         {
             var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
@@ -104,7 +107,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedResult = await _resultService.PutRecord(id, result);
+            var updatedResult = await _resultService.PutRecord(id, result, cancellationToken);
             return _statusCodeResponse.ControllerResponse(updatedResult);
         }
 
@@ -120,7 +123,8 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ResultViewModel>> PostResult
         (
-            [FromForm] CreateUpdateResultViewModel result
+            [FromForm] CreateUpdateResultViewModel result,
+            CancellationToken cancellationToken
         )
         {
             var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
@@ -132,7 +136,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createResult = await _resultService.PostRecord(result);
+            var createResult = await _resultService.PostRecord(result, cancellationToken);
             return _statusCodeResponse.ControllerResponse(createResult);
         }
 
@@ -148,10 +152,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ResultViewModel>> DeleteResult
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteResult = await _resultService.DeleteRecord(id);
+            var deleteResult = await _resultService.DeleteRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(deleteResult);
         }
     }

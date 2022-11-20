@@ -10,10 +10,10 @@ namespace SchoolSystem.BLL.RepositoryServiceInterfaces
     where TReturnType : class
     where TInputType : class
     {
-        Task<Response<List<TReturnType>>> GetRecords();
-        Task<Response<TReturnType>> GetRecord(Guid id);
-        Task<Response<TReturnType>> DeleteRecord(Guid id);
-        Task<Response<TReturnType>> PostRecord(TInputType viewModel);
-        Task<Response<TReturnType>> PutRecord(Guid id, TInputType viewModel);
+        Task<Response<List<TReturnType>>> GetRecords(CancellationToken cancellationToken);
+        Task<Response<TReturnType>> GetRecord(Guid id, CancellationToken cancellationToken);
+        Task<Response<TReturnType>> DeleteRecord(Guid id, CancellationToken cancellationToken);
+        Task<Response<TReturnType>> PostRecord(TInputType viewModel, CancellationToken cancellationToken);
+        Task<Response<TReturnType>> PutRecord(Guid id, TInputType viewModel, CancellationToken cancellationToken);
     }
 }

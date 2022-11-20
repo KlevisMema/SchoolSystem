@@ -1,9 +1,14 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.DTO.ViewModels.Student;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Student.Commands;
+
+#endregion
 
 namespace SchoolSystem.WEB.Controllers
 {
@@ -14,49 +19,61 @@ namespace SchoolSystem.WEB.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateStudentViewModel> _modelValidator;
-        private readonly ICrudService<StudentViewModel, CreateUpdateStudentViewModel> _studentService;
-        private readonly StatusCodeResponse<StudentViewModel, List<StudentViewModel>> _statusCodeResponse;
+
+        #region Inject all services in ctor
 
         /// <summary>
         /// Inject Student Services 
         /// </summary>
-        /// <param name="studentService"></param>
-        /// <param name="statusCodeResponse"></param>
         /// <param name="modelValidator"></param>
+        /// <param name="mediator"></param>
+
         public StudentsController
         (
-            IValidator<CreateUpdateStudentViewModel> modelValidator,
-            ICrudService<StudentViewModel, CreateUpdateStudentViewModel> studentService,
-            StatusCodeResponse<StudentViewModel, List<StudentViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateStudentViewModel> modelValidator
         )
         {
-            _studentService = studentService;
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
         }
+        #endregion
+
+        #region Get all students endpoint
 
         /// <summary>
-        /// Get all students
+        ///     Get all students
         /// </summary>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> All Students </returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<StudentViewModel>>> GetStudents
         (
+            CancellationToken cancellationToken
         )
         {
-            var students = await _studentService.GetRecords();
-            return _statusCodeResponse.ControllerResponse(students);
+            var getAllQuery = new GetAllStudentsQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get a student by id endpoint
+
         /// <summary>
-        /// Get a specific student by id 
+        ///     Get a specific student by id 
         /// </summary>
         /// <param name="id"> Id of the student </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> The student by that id </returns>
+
         [HttpGet("GetSpecificStudent")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -64,41 +81,60 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<StudentViewModel>>> GetSpecificStudent
         (
-            [FromRoute] Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var student = await _studentService.GetRecord(id);
-            return _statusCodeResponse.ControllerResponse(student);
+            var getByIdQuery = new GetStudentByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Create a student endpoint
+
         /// <summary>
-        /// Create student
+        ///     Create student
         /// </summary>
         /// <param name="newStudent"> Student object cotainig {FullName,Email,Password,Phone,Sex,Adress} </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> The created student </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<StudentViewModel>> CreateStudent
         (
-            [FromForm] CreateUpdateStudentViewModel newStudent
+            [FromForm] CreateUpdateStudentViewModel newStudent,
+            CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(newStudent);
+            #region Validate /CreateUpdateStudentViewModel/ object values
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(newStudent, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+            #endregion
 
-            var createStudent = await _studentService.PostRecord(newStudent);
-            return _statusCodeResponse.ControllerResponse(createStudent);
+            #region Create Student
+            var createCommad = new CreateStudentCommad(newStudent);
+            var result = await _mediator.Send(createCommad, cancellationToken);
+            return result;
+            #endregion
         }
+        #endregion
+
+        #region Update a student endpoint
 
         /// <summary>
-        /// Update a student 
+        ///     Update a student 
         /// </summary>
-        /// <param name="id">Id of the teacher</param>
-        /// <param name="student"> student object</param>
-        /// <returns>The updtated student </returns>
+        /// <param name="id"> Id of the teacher </param>
+        /// <param name="student"> Student object </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updtated student </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -107,22 +143,34 @@ namespace SchoolSystem.WEB.Controllers
         public async Task<ActionResult<StudentViewModel>> PutStudent
         (
             [FromRoute] Guid id,
-            [FromForm] CreateUpdateStudentViewModel student
+            [FromForm] CreateUpdateStudentViewModel student,
+            CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(student);
+            #region Validate /CreateUpdateStudentViewModel/ object values
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(student, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+            #endregion
 
-            var updatedStudent = await _studentService.PutRecord(id, student);
-            return _statusCodeResponse.ControllerResponse(updatedStudent);
+            #region Update Student
+            var updateCommad = new UpdateStudentCommand(id, student);
+            var result = await _mediator.Send(updateCommad, cancellationToken);
+            return result;
+            #endregion
         }
 
+        #endregion
+
+        #region Delete student endpoint
+
         /// <summary>
-        /// Delete a student
+        ///     Delete a student
         /// </summary>
-        /// <param name="id">Id of the student </param>
-        /// <returns>A message if it deleted or not </returns>
+        /// <param name="id"> Id of the student </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message if it deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -130,11 +178,15 @@ namespace SchoolSystem.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<StudentViewModel>> DeleteStudent
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteStudent = await _studentService.DeleteRecord(id);
-            return _statusCodeResponse.ControllerResponse(deleteStudent);
+            var deleteCommad = new DeleteStudentCommand(id);
+            var result = await _mediator.Send(deleteCommad, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

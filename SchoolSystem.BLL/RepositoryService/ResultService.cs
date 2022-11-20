@@ -30,9 +30,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> A list of all results</returns>
         public async Task<Response<List<ResultViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllResults = await _CRUD.GetAll();
+            var getAllResults = await _CRUD.GetAll(cancellationToken);
             return getAllResults;
         }
 
@@ -43,10 +44,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific result</returns>
         public async Task<Response<ResultViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getResult = await _CRUD.GetSpecificRecord(id, "Result");
+            var getResult = await _CRUD.GetSpecificRecord(id, "Result", cancellationToken);
             return getResult;
         }
 
@@ -59,10 +61,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<ResultViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateResultViewModel viewModel
+            CreateUpdateResultViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateResult = await _CRUD.PutRecord(id, viewModel, "Result");
+            var updateResult = await _CRUD.PutRecord(id, viewModel, "Result", cancellationToken);
             return updateResult;
         }
 
@@ -73,10 +76,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The created result </returns>
         public async Task<Response<ResultViewModel>> PostRecord
         (
-            CreateUpdateResultViewModel viewModel
+            CreateUpdateResultViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postResult = await _CRUD.PostRecord(viewModel, "Result");
+            var postResult = await _CRUD.PostRecord(viewModel, "Result", cancellationToken);
             return postResult;
         }
 
@@ -87,10 +91,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> A message telling if the result was deleted or not </returns>
         public async Task<Response<ResultViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteResult = await _CRUD.DeleteRecord(id, "Result");
+            var deleteResult = await _CRUD.DeleteRecord(id, "Result", cancellationToken);
             return deleteResult;
         }
 

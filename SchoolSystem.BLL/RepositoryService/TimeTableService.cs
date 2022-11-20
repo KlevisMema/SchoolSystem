@@ -31,9 +31,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all time tables</returns>
         public async Task<Response<List<TimeTableViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllTimeTables = await _CRUD.GetAll();
+            var getAllTimeTables = await _CRUD.GetAll(cancellationToken);
             return getAllTimeTables;
         }
 
@@ -44,10 +45,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific time table</returns>
         public async Task<Response<TimeTableViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getTimeTable = await _CRUD.GetSpecificRecord(id, "Time Table");
+            var getTimeTable = await _CRUD.GetSpecificRecord(id, "Time Table", cancellationToken);
             return getTimeTable;
         }
 
@@ -60,10 +62,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<TimeTableViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateTimeTableViewModel viewModel
+            CreateUpdateTimeTableViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updatetTmeTable = await _CRUD.PutRecord(id, viewModel, "Time Table");
+            var updatetTmeTable = await _CRUD.PutRecord(id, viewModel, "Time Table", cancellationToken);
             return updatetTmeTable;
         }
 
@@ -74,10 +77,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created time table</returns>
         public async Task<Response<TimeTableViewModel>> PostRecord
         (
-            CreateUpdateTimeTableViewModel viewModel
+            CreateUpdateTimeTableViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postTimeTable = await _CRUD.PostRecord(viewModel, "Time Table");
+            var postTimeTable = await _CRUD.PostRecord(viewModel, "Time Table", cancellationToken);
             return postTimeTable;
         }
 
@@ -88,10 +92,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the time table was deleted or not</returns>
         public async Task<Response<TimeTableViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteTimeTable = await _CRUD.DeleteRecord(id, "Time Table");
+            var deleteTimeTable = await _CRUD.DeleteRecord(id, "Time Table", cancellationToken);
             return deleteTimeTable;
         }
 
@@ -102,12 +107,13 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>True or false</returns>
         public async Task<bool> Bool
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                var getTimeTables = await _CRUD.GetAll();
+                var getTimeTables = await _CRUD.GetAll(cancellationToken);
                 var result = getTimeTables.Value;
                 return result.Any(x => x.Id.Equals(id));
             }

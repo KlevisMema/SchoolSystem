@@ -2,6 +2,6 @@
 {
     public interface I_Valid_Id<T>
     {
-       Task<bool> Bool(Guid id);
+       Task<bool> Bool(Guid id, CancellationToken cancellationToken);
     }
 }

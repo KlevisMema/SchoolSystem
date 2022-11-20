@@ -46,9 +46,10 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<ExamViewModel>>> GetExams
         (
+            CancellationToken cancellationToken
         )
         {
-            var exams = await _examService.GetRecords();
+            var exams = await _examService.GetRecords(cancellationToken);
             return _statusCodeResponse.ControllerResponse(exams);
         }
 
@@ -64,10 +65,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<ExamViewModel>> GetExam
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var exam = await _examService.GetRecord(id);
+            var exam = await _examService.GetRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(exam);
         }
 
@@ -85,14 +87,15 @@ namespace SchoolSystem.API.Controllers
         public async Task<IActionResult> PutExam
         (
             [FromRoute] Guid id,
-            [FromForm] CreateUpdateExamViewModel exam
+            [FromForm] CreateUpdateExamViewModel exam,
+            CancellationToken cancellationToken
         )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedExam = await _examService.PutRecord(id, exam);
+            var updatedExam = await _examService.PutRecord(id, exam, cancellationToken);
             return _statusCodeResponse.ControllerResponse(updatedExam);
         }
 
@@ -107,14 +110,15 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<Exam>> PostExam
         (
-            [FromForm] CreateUpdateExamViewModel exam
+            [FromForm] CreateUpdateExamViewModel exam,
+            CancellationToken cancellationToken
         )
         {
             ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudent = await _examService.PostRecord(exam);
+            var createStudent = await _examService.PostRecord(exam, cancellationToken);
             return _statusCodeResponse.ControllerResponse(createStudent);
         }
 
@@ -130,10 +134,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteExam
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteExam = await _examService.DeleteRecord(id);
+            var deleteExam = await _examService.DeleteRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(deleteExam);
         }
     }

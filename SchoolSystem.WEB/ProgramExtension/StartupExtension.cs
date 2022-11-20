@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#region Usings
+using MediatR;
+using System.Text;
 using FluentValidation;
 using System.Reflection;
 using SchoolSystem.DAL.Models;
@@ -37,6 +39,7 @@ using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.DTO.FluentValidation.StudentIssue;
 using SchoolSystem.DTO.FluentValidation.StudentClasroom;
 using SchoolSystem.BLL.AuthTokenService;
+#endregion
 
 namespace SchoolSystem.API.ProgramExtension
 {
@@ -57,13 +60,14 @@ namespace SchoolSystem.API.ProgramExtension
             IConfiguration configuration
         )
         {
-            // Database registration
+            #region Database registration
             services.AddDbContext<ApplicationDbContext>
             (
                 options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
             );
+            #endregion
 
-            // Identity configuration
+            #region Identity configuration
             services.AddAuthentication();
 
             services.AddIdentity<User, IdentityRole>
@@ -76,8 +80,9 @@ namespace SchoolSystem.API.ProgramExtension
             )
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+            #endregion
 
-            // Jwt cofiguration
+            #region Jwt cofiguration
             services.Configure<JwtConfig>(configuration.GetSection("Jwt"));
 
             var jwtSetting = configuration.GetSection("Jwt");
@@ -85,7 +90,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddAuthentication(oauth =>
             {
                 oauth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                oauth.DefaultChallengeScheme= JwtBearerDefaults.AuthenticationScheme;
+                oauth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(oauth =>
             {
@@ -99,23 +104,24 @@ namespace SchoolSystem.API.ProgramExtension
                     ValidateAudience = false
                 };
             });
+            #endregion
 
-            // Swagger configuration
+            #region Swagger configuration
             services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = @"Enter 'Bearer' [Space] and then your token in the input field below. 
+                Description = @"Enter 'Bearer' [Space] and then your token in the input field below. 
                                     Example : 'Bearer 1234dsfhj'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "Jwt"
-                });
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "Jwt"
+            });
 
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
                     {
                         new OpenApiSecurityScheme
                         {
@@ -130,26 +136,27 @@ namespace SchoolSystem.API.ProgramExtension
                         },
                         new List<string>()
                     }
-                });
-
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "School System API",
-                    License = new OpenApiLicense
-                    {
-                        Name = "Web Api created by Klevis Mema",
-                        Url = new Uri("https://www.linkedin.com/in/klevis-m-ab1b3b140/")
-                    }
-                });
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-                options.IncludeXmlComments(xmlPath);
             });
 
-            // AutoMapper service registration
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "School System API",
+                License = new OpenApiLicense
+                {
+                    Name = "Web Api created by Klevis Mema",
+                    Url = new Uri("https://www.linkedin.com/in/klevis-m-ab1b3b140/")
+                }
+            });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+            options.IncludeXmlComments(xmlPath);
+        });
+            #endregion
+
+            #region AutoMapper service registration
             services.AddAutoMapper(typeof(MappingsExam));
             services.AddAutoMapper(typeof(MappingsIssue));
             services.AddAutoMapper(typeof(MappingsResult));
@@ -162,8 +169,9 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddAutoMapper(typeof(MappingsAttendance));
             services.AddAutoMapper(typeof(MappingsStudentIssue));
             services.AddAutoMapper(typeof(MappingsStudentClasroom));
-            
-            // Services registration
+            #endregion
+
+            #region Services registration
             services.AddTransient<IExists, ResultService>();
 
             services.AddTransient<IOAuthService, OAuthService>();
@@ -186,12 +194,15 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
             services.AddTransient<ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel>, StudentIssueService>();
             services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
-           
-            // Generic serivces registration
-            services.AddTransient(typeof(CRUD<,,>));
-            services.AddTransient(typeof(StatusCodeResponse<,>));
+            #endregion
 
-            // FluentValidation services registration
+            #region Generic serivces registration
+            services.AddTransient(typeof(CRUD<,,>));
+            services.AddTransient(typeof(IControllerStatusCodeResponse<,>), typeof(SchoolSystem.BLL.ResponseService.ControllerStatusCodeResponse<,>));
+            services.AddTransient(typeof(StatusCodeResponse<,>));
+            #endregion
+
+            #region FluentValidation services registration
             services.AddScoped<IValidator<CreateUpdateExamViewModel>, CreateUpdateExamViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateIssueViewModel>, CreateUpdateIssueViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateResultViewModel>, CreateUpdateResultViewModelValidation>();
@@ -203,6 +214,11 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddScoped<IValidator<CreateUpdateAttendanceViewModel>, CreateUpdateAttendanceViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentIssueViewModel>, CreateUpdateStudentIssueViewModelValidation>();
             services.AddScoped<IValidator<CreateUpdateStudentClasroomViewModel>, CreateUpdateStudentClasroomViewModelValidation>();
+            #endregion
+
+            #region Mediatr
+            services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(ICrudService<,>).Assembly);
+            #endregion
 
             return services;
         }

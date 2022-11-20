@@ -6,7 +6,7 @@ using SchoolSystem.BLL.RepositoryService.CrudService;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class ExamService : ICrudService<ExamViewModel,CreateUpdateExamViewModel>
+    public class ExamService : ICrudService<ExamViewModel, CreateUpdateExamViewModel>
     {
         private readonly CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
 
@@ -24,9 +24,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all exams</returns>
         public async Task<Response<List<ExamViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllExams = await _CRUD.GetAll();
+            var getAllExams = await _CRUD.GetAll(cancellationToken);
             return getAllExams;
         }
 
@@ -37,10 +38,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific exam</returns>
         public async Task<Response<ExamViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getExam = await _CRUD.GetSpecificRecord(id, "Exam");
+            var getExam = await _CRUD.GetSpecificRecord(id, "Exam", cancellationToken);
             return getExam;
         }
 
@@ -52,11 +54,12 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The updated exam</returns>
         public async Task<Response<ExamViewModel>> PutRecord
         (
-            Guid id, 
-            CreateUpdateExamViewModel viewModel
+            Guid id,
+            CreateUpdateExamViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateExam = await _CRUD.PutRecord(id, viewModel, "Exam");
+            var updateExam = await _CRUD.PutRecord(id, viewModel, "Exam", cancellationToken);
             return updateExam;
         }
 
@@ -67,10 +70,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created exam</returns>
         public async Task<Response<ExamViewModel>> PostRecord
         (
-            CreateUpdateExamViewModel viewModel
+            CreateUpdateExamViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postExam = await _CRUD.PostRecord(viewModel, "Exam");
+            var postExam = await _CRUD.PostRecord(viewModel, "Exam", cancellationToken);
             return postExam;
         }
 
@@ -81,10 +85,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the exam was deleted or not</returns>
         public async Task<Response<ExamViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteExam = await _CRUD.DeleteRecord(id, "Exam");
+            var deleteExam = await _CRUD.DeleteRecord(id, "Exam", cancellationToken);
             return deleteExam;
         }
     }

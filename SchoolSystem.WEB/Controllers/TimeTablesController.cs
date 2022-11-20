@@ -46,9 +46,10 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<TimeTableViewModel>>> GetTimeTables
         (
+            CancellationToken cancellationToken
         )
         {
-            var timeTables = await _timeTableService.GetRecords();
+            var timeTables = await _timeTableService.GetRecords(cancellationToken);
             return _statusCodeResponse.ControllerResponse(timeTables);
         }
 
@@ -64,10 +65,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TimeTableViewModel>> GetTimeTable
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var timeTable = await _timeTableService.GetRecord(id);
+            var timeTable = await _timeTableService.GetRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(timeTable);
         }
 
@@ -85,14 +87,15 @@ namespace SchoolSystem.API.Controllers
         public async Task<IActionResult> PutTimeTable
         (
             [FromRoute] Guid id,
-            [FromForm] CreateUpdateTimeTableViewModel timeTable
+            [FromForm] CreateUpdateTimeTableViewModel timeTable,
+            CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedTimeTable = await _timeTableService.PutRecord(id, timeTable);
+            var updatedTimeTable = await _timeTableService.PutRecord(id, timeTable, cancellationToken);
             return _statusCodeResponse.ControllerResponse(updatedTimeTable);
         }
 
@@ -107,14 +110,15 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TimeTableViewModel>> PostTimeTable
         (
-            [FromForm] CreateUpdateTimeTableViewModel timeTable
+            [FromForm] CreateUpdateTimeTableViewModel timeTable,
+            CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(timeTable, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createTimeTable = await _timeTableService.PostRecord(timeTable);
+            var createTimeTable = await _timeTableService.PostRecord(timeTable, cancellationToken);
             return _statusCodeResponse.ControllerResponse(createTimeTable);
         }
 
@@ -130,10 +134,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteTimeTable
         (
-            [FromForm] Guid id
+            [FromForm] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteTimeTable = await _timeTableService.DeleteRecord(id);
+            var deleteTimeTable = await _timeTableService.DeleteRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(deleteTimeTable);
         }
     }
