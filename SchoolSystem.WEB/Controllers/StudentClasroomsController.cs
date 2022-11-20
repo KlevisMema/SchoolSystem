@@ -21,10 +21,10 @@ namespace SchoolSystem.API.Controllers
         private readonly IValidator<CreateUpdateStudentClasroomViewModel> _modelValidator;
         private readonly StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> _statusCodeResponse;
         private readonly ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> _studentClasroomService;
-        private async Task<CustomMesageResponse> ValidateId(Guid clasroomid, Guid studentId)
+        private async Task<CustomMesageResponse> ValidateId(Guid clasroomid, Guid studentId, CancellationToken cancellationToken)
         {
-            var clasroom = await i_Valid_Clasroom_Id.Bool(clasroomid);
-            var student = await i_Valid_Student_Id.Bool(studentId);
+            var clasroom = await i_Valid_Clasroom_Id.Bool(clasroomid, cancellationToken);
+            var student = await i_Valid_Student_Id.Bool(studentId, cancellationToken);
 
             if (!clasroom)
                 return CustomMesageResponse.NotFound(clasroom, "Invalid clasroom id");
@@ -68,9 +68,10 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<StudentClasroom>>> GetStudentClasrooms
         (
+            CancellationToken cancellationToken
         )
         {
-            var studentClasrooms = await _studentClasroomService.GetRecords();
+            var studentClasrooms = await _studentClasroomService.GetRecords(cancellationToken);
             return _statusCodeResponse.ControllerResponse(studentClasrooms);
         }
 
@@ -86,10 +87,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<StudentClasroom>> GetStudentClasroom
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var studentClasroom = await _studentClasroomService.GetRecord(id);
+            var studentClasroom = await _studentClasroomService.GetRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(studentClasroom);
         }
 
@@ -105,10 +107,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<IActionResult> PutStudentClasroom
         (
-            [FromForm] CreateUpdateStudentClasroomViewModel studentClasroom
+            [FromForm] CreateUpdateStudentClasroomViewModel studentClasroom,
+            CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId);
+            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId, cancellationToken);
             if (!Ids.Exists)
                 return NotFound(Ids.CustomMessage);
 
@@ -116,7 +119,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedAttendance = await _studentClasroomService.PutRecord(studentClasroom.StudentId, studentClasroom);
+            var updatedAttendance = await _studentClasroomService.PutRecord(studentClasroom.StudentId, studentClasroom, cancellationToken);
             return _statusCodeResponse.ControllerResponse(updatedAttendance);
         }
 
@@ -131,10 +134,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<StudentClasroom>> PostStudentClasroom
         (
-            [FromForm] CreateUpdateStudentClasroomViewModel studentClasroom
+            [FromForm] CreateUpdateStudentClasroomViewModel studentClasroom,
+            CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId);
+            var Ids = await ValidateId(studentClasroom.ClasroomId, studentClasroom.StudentId, cancellationToken);
             if (!Ids.Exists)
                 return NotFound(Ids.CustomMessage);
 
@@ -142,7 +146,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudentClasroom = await _studentClasroomService.PostRecord(studentClasroom);
+            var createStudentClasroom = await _studentClasroomService.PostRecord(studentClasroom, cancellationToken);
             return _statusCodeResponse.ControllerResponse(createStudentClasroom);
         }
 
@@ -158,10 +162,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<IActionResult> DeleteStudentClasroom
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteStudentClasroom = await _studentClasroomService.DeleteRecord(id);
+            var deleteStudentClasroom = await _studentClasroomService.DeleteRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(deleteStudentClasroom);
         }
     }

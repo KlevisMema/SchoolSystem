@@ -1,12 +1,17 @@
-﻿using FluentValidation;
-using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.ServiceInterfaces;
-using SchoolSystem.DTO.ViewModels.Attendance;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
+using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Attendance.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Attendance.Commands;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
@@ -17,55 +22,60 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class AttendancesController : ControllerBase
     {
-        private readonly I_Valid_Id<Teacher> _Teacher_Valid_Id;
-        private readonly I_Valid_Id<Student> _Student_Valid_Id;
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateAttendanceViewModel> _modelValidator;
-        private readonly StatusCodeResponse<AttendanceViewModel, List<AttendanceViewModel>> _statusCodeResponse;
-        private readonly ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel> _attendanceService;
-        private async Task<CustomMesageResponse> ValidateId
+
+        #region Validate ids
+
+        private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
-            Guid teacherId, 
-            Guid studentId
+            Guid teacherId,
+            Guid studentId,
+            CancellationToken cancellationToken
         )
         {
-            var teacher = await _Teacher_Valid_Id.Bool(teacherId);
-            var student = await _Student_Valid_Id.Bool(studentId);
+            var doesTeacherExists = new DoesTeacherExistsQuery(teacherId);
+            var resultTeacher = await _mediator.Send(doesTeacherExists, cancellationToken);
 
-            if (!teacher)
-                return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
-            if (!student)
-                return CustomMesageResponse.NotFound(student, "Invalid student id");
+            var doesStudentExists = new DoesStudentExistsQuery(studentId);
+            var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
 
-            return CustomMesageResponse.Succsess();
+            if (!resultTeacher.Exists)
+                return resultTeacher;
+            if (!resultStudent.Exists)
+                return resultStudent;
+
+            return SchoolSystem.BLL.ResponseService.CustomMesageResponse.Succsess();
         }
+
+        #endregion
+
+        #region Inject services to Attendance ctor
 
         /// <summary>
-        /// Inject services 
+        ///     Inject services 
         /// </summary>
-        /// <param name="attendanceService">Exam service</param>
-        /// <param name="statusCodeResponse">status code response service</param>
-        /// <param name="modelValidator">Model validation service</param>
-        /// <param name="Teacher_Valid_Id"></param>
-        /// <param name="student_Valid_Id"></param>
+        /// <param name="modelValidator"> Model validation service </param>
+        /// <param name="mediator"> Mediator Service </param>
+
         public AttendancesController
         (
-            I_Valid_Id<Teacher> Teacher_Valid_Id,
-            I_Valid_Id<Student> student_Valid_Id,
-            IValidator<CreateUpdateAttendanceViewModel> modelValidator,
-            ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel> attendanceService,
-            StatusCodeResponse<AttendanceViewModel, List<AttendanceViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateAttendanceViewModel> modelValidator
         )
         {
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _Teacher_Valid_Id = Teacher_Valid_Id;
-            _Student_Valid_Id = student_Valid_Id;
-            _attendanceService = attendanceService;
-            _statusCodeResponse = statusCodeResponse;
         }
+
+        #endregion
+
+        #region Get all attendances endpoint
 
         /// <summary>
         /// Get all attendances
         /// </summary>
+
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -74,17 +84,25 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<AttendanceViewModel>>> GetAttendances
         (
+            CancellationToken cancellationToken
         )
         {
-            var attendances = await _attendanceService.GetRecords();
-            return _statusCodeResponse.ControllerResponse(attendances);
+            var getAllQuery = new GetAllAttendancesQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get attendance by id endpoint
+
         /// <summary>
-        /// Get an attendance
+        ///     Get an attendance
         /// </summary>
-        /// <param name="id">Id of the attendance</param>
-        /// <returns>Details of that attendance</returns>
+        /// <param name="id"> Id of the attendance </param>
+        /// <param name="cancellationToken"> Cancellationn Token </param>
+        /// <returns> Details of that attendance </returns>
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -92,19 +110,27 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<AttendanceViewModel>> GetAttendance
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var attendance = await _attendanceService.GetRecord(id);
-            return _statusCodeResponse.ControllerResponse(attendance);
+            var getByIdQuery = new GetAttedanceByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Put attendance endpoint
+
         /// <summary>
-        /// Update an attendance
+        ///     Update an attendance
         /// </summary>
-        /// <param name="id">Id of the  attendance</param>
-        /// <param name="attendance">attendance object from client</param>
-        /// <returns>The updated attendance </returns>
+        /// <param name="id"> Id of the attendance </param>
+        /// <param name="attendance"> attendance object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated attendance </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -112,30 +138,44 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> PutAttendance
         (
-            [FromRoute] Guid id, 
-            [FromForm] CreateUpdateAttendanceViewModel attendance
+            [FromRoute] Guid id,
+            [FromForm] CreateUpdateAttendanceViewModel attendance,
+            CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId);
-            if (!Ids.Exists)
-                return NotFound(Ids.CustomMessage);
-
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance);
+            #region Validation
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+            #endregion
 
-            var updatedAttendance = await _attendanceService.PutRecord(id, attendance);
-            return _statusCodeResponse.ControllerResponse(updatedAttendance);
+            #region Check if teacherid and studentId exists in db
+            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId, cancellationToken);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
+            #endregion
+
+            #region Update the record
+            var updateCommand = new UpdateAttendanceCommand(id, attendance);
+            var result = await _mediator.Send(updateCommand, cancellationToken);
+            return result;
+            #endregion
         }
 
+        #endregion
+
+        #region Post attendance endpoint
+
         /// <summary>
-        /// Creates an attendance 
+        ///     Creates an attendance 
         /// </summary>
-        /// <param name="attendance">attendance object from client</param>
+        /// <param name="attendance"> Attendance object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <remarks> 
-        ///  Status contains Present with value of 1 and Missing with value of 2
+        ///     Status contains Present with value of 1 and Missing with value of 2
         /// </remarks>
-        /// <returns>A message id attendance was created or not</returns>
+        /// <returns> A message id attendance was created or not </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -143,38 +183,56 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<AttendanceViewModel>> PostAttendance
         (
-            [FromForm] CreateUpdateAttendanceViewModel attendance
+            [FromForm] CreateUpdateAttendanceViewModel attendance,
+            CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId);
-            if (!Ids.Exists)
-                return NotFound(Ids.CustomMessage);
-
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance);
+            #region Validate data in //CreateUpdateAttendanceViewModel// object
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(attendance, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+            #endregion
 
-            var createAttendance = await _attendanceService.PostRecord(attendance);
-            return _statusCodeResponse.ControllerResponse(createAttendance);
+            #region Check if teacherid and studentId exists in db
+            var Ids = await ValidateId(attendance.TeacherId, attendance.StudentId, cancellationToken);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
+            #endregion
+
+            #region Create the record
+            var createCommand = new CreateAttendanceCommand(attendance);
+            var result = await _mediator.Send(createCommand, cancellationToken);
+            return result;
+            #endregion
         }
 
+        #endregion
+
+        #region Delete attendance endpoint
+
         /// <summary>
-        /// Deletes an attendance
+        ///     Deletes an attendance
         /// </summary>
-        /// <param name="id">Id of the attendance</param>
-        /// <returns>A message if the attendance was deleted or not</returns>
+        /// <param name="id"> Id of the attendance </param>
+        /// <param name="cancellationToken"> Cancellation Token</param>
+        /// <returns> A message if the attendance was deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteAttendance
-        (   
-            [FromRoute] Guid id
+        (
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteAttendance = await _attendanceService.DeleteRecord(id);
-            return _statusCodeResponse.ControllerResponse(deleteAttendance);
+            var deleteCommand = new DeleteAttendanceCommand(id);
+            var result = await _mediator.Send(deleteCommand, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

@@ -29,9 +29,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all teachers</returns>
         public async Task<Response<List<TeacherViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllTeachers = await _CRUD.GetAll();
+            var getAllTeachers = await _CRUD.GetAll(cancellationToken);
             return getAllTeachers;
         }
 
@@ -42,10 +43,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific teacher</returns>
         public async Task<Response<TeacherViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getTeacher = await _CRUD.GetSpecificRecord(id, "Teacher");
+            var getTeacher = await _CRUD.GetSpecificRecord(id, "Teacher", cancellationToken);
             return getTeacher;
         }
 
@@ -56,10 +58,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created teacher</returns>
         public async Task<Response<TeacherViewModel>> PostRecord
         (
-            CreateUpdateTeacherViewModel viewModel
+            CreateUpdateTeacherViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postTeacher = await _CRUD.PostRecord(viewModel, "Teacher");
+            var postTeacher = await _CRUD.PostRecord(viewModel, "Teacher", cancellationToken);
             return postTeacher;
         }
 
@@ -72,10 +75,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<TeacherViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateTeacherViewModel viewModel
+            CreateUpdateTeacherViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateTeacher = await _CRUD.PutRecord(id, viewModel, "Teacher");
+            var updateTeacher = await _CRUD.PutRecord(id, viewModel, "Teacher", cancellationToken);
             return updateTeacher;
         }
 
@@ -86,10 +90,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the teacher was deleted or not</returns>
         public async Task<Response<TeacherViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteTeacher = await _CRUD.DeleteRecord(id, "Teacher");
+            var deleteTeacher = await _CRUD.DeleteRecord(id, "Teacher", cancellationToken);
             return deleteTeacher;
         }
 
@@ -100,12 +105,13 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>True or false</returns>
         public async Task<bool> Bool
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                var getAllTeachers = await _CRUD.GetAll();
+                var getAllTeachers = await _CRUD.GetAll(cancellationToken);
                 var result = getAllTeachers.Value;
                 return result.Any(x => x.Id.Equals(id));
             }

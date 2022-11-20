@@ -24,9 +24,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all attendances</returns>
         public async Task<Response<List<AttendanceViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllAttendances = await _CRUD.GetAll();
+            var getAllAttendances = await _CRUD.GetAll(cancellationToken);
             return getAllAttendances;
         }
 
@@ -37,10 +38,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific attendance</returns>
         public async Task<Response<AttendanceViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getAttendance = await _CRUD.GetSpecificRecord(id, "Attendance");
+            var getAttendance = await _CRUD.GetSpecificRecord(id, "Attendance", cancellationToken);
             return getAttendance;
         }
 
@@ -53,10 +55,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<AttendanceViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateAttendanceViewModel viewModel
+            CreateUpdateAttendanceViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateAttendance = await _CRUD.PutRecord(id, viewModel, "Attendance");
+            var updateAttendance = await _CRUD.PutRecord(id, viewModel, "Attendance", cancellationToken);
             return updateAttendance;
         }
 
@@ -67,10 +70,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created attendance</returns>
         public async Task<Response<AttendanceViewModel>> PostRecord
         (
-            CreateUpdateAttendanceViewModel viewModel
+            CreateUpdateAttendanceViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postAttendance = await _CRUD.PostRecord(viewModel, "Attendance");
+            var postAttendance = await _CRUD.PostRecord(viewModel, "Attendance", cancellationToken);
             return postAttendance;
         }
 
@@ -81,10 +85,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the attendance was deleted or not</returns>
         public async Task<Response<AttendanceViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteAttendance = await _CRUD.DeleteRecord(id, "Attendance");
+            var deleteAttendance = await _CRUD.DeleteRecord(id, "Attendance", cancellationToken);
             return deleteAttendance;
         }
     }

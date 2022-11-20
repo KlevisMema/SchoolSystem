@@ -1,9 +1,14 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.DTO.ViewModels.Teacher;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Teacher.Commads;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
@@ -15,48 +20,59 @@ namespace SchoolSystem.API.Controllers
     public class TeachersController : ControllerBase
     {
         private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
-        private readonly ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> _teacherService;
-        private readonly StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> _statusCodeResponse;
+        private readonly IMediator _mediator;
 
+        #region Services injection into ctor
         /// <summary>
-        /// Inject teacher service 
+        ///     Inject teacher service 
         /// </summary>
-        /// <param name="statusCodeResponse"></param>
-        /// <param name="teacherService"></param>
+        /// <param name="mediator"></param>
         /// <param name="modelValidator"></param>
+
         public TeachersController
         (
-            IValidator<CreateUpdateTeacherViewModel> modelValidator,
-            StatusCodeResponse<TeacherViewModel, List<TeacherViewModel>> statusCodeResponse,
-            ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel> teacherService
+            IMediator mediator,
+            IValidator<CreateUpdateTeacherViewModel> modelValidator
         )
         {
-            _teacherService = teacherService;
             _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
+            _mediator = mediator;
         }
 
+        #endregion
+
+        #region Get all teacher endpoint
+
         /// <summary>
-        /// Get all Teachers
+        ///     Get all Teachers
         /// </summary>
+        /// <param name="cancellationToken"> Cancellation Token</param>
         /// <returns> All Teachers </returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<List<TeacherViewModel>>> GetTeachers
         (
+            CancellationToken cancellationToken
         )
         {
-            var teachers = await _teacherService.GetRecords();
-            return _statusCodeResponse.ControllerResponse(teachers);
+            var getAllQuery = new GetAllTeachersQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
+        #endregion
+
+        #region Get a techer by id endpoint
 
         /// <summary>
-        /// Get a specific teacher
+        ///     Get a specific teacher
         /// </summary>
-        /// <param name="id">Id of the teacher </param>
+        /// <param name="id"> Id of the teacher </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> The teacher info </returns>
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -64,19 +80,27 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> GetTeacher
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var teacher = await _teacherService.GetRecord(id);
-            return _statusCodeResponse.ControllerResponse(teacher);
+            var getByIdQuery = new GetTeacherByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Update a teacher endpoint
+
         /// <summary>
-        /// Update a teacher 
+        ///     Update a teacher 
         /// </summary>
-        /// <param name="id">Id of the teacher</param>
+        /// <param name="id"> Id of the teacher</param>
         /// <param name="teacher"> Teacher object</param>
-        /// <returns>The updtated techer </returns>
+        /// <param name="cancellationToken"> Cancellation Token</param>
+        /// <returns> The updtated techer </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -85,44 +109,64 @@ namespace SchoolSystem.API.Controllers
         public async Task<ActionResult<TeacherViewModel>> PutTeacher
         (
             [FromRoute] Guid id,
-            [FromForm] CreateUpdateTeacherViewModel teacher
+            [FromForm] CreateUpdateTeacherViewModel teacher,
+            CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedTeacher = await _teacherService.PutRecord(id, teacher);
-            return _statusCodeResponse.ControllerResponse(updatedTeacher);
+            var updateQuery = new UpdateTeacherCommand(id, teacher);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Create teacher endpoint
+
         /// <summary>
-        /// Create a teacher 
+        ///     Create a teacher 
         /// </summary>
         /// <param name="teacher"> Teacher object </param>
+        /// <param name="cancellationToken"> Cancellation Token</param>
         /// <returns> The created techer </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherViewModel))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> PostTeacher
         (
-            [FromForm] CreateUpdateTeacherViewModel teacher
+            [FromForm] CreateUpdateTeacherViewModel teacher,
+            CancellationToken cancellationToken
         )
         {
+            #region Validate /CreateUpdateTeacherViewModel/ object values
             ValidationResult validationResult = await _modelValidator.ValidateAsync(teacher);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
+            #endregion
 
-            var createTeacher = await _teacherService.PostRecord(teacher);
-            return _statusCodeResponse.ControllerResponse(createTeacher);
+            #region Crate Teacher Command
+            var createQuery = new CreateTeacherCommand(teacher);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
+            #endregion
         }
+
+        #endregion
+
+        #region Delete a teacher by id endpoint
 
         /// <summary>
         /// Delete a teacher
         /// </summary>
         /// <param name="id">Id of the teacher </param>
+        /// <param name="cancellationToken"> Cancellation Token</param>
         /// <returns>A message if it deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -130,11 +174,15 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TeacherViewModel>> DeleteTeacher
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteTeacher = await _teacherService.DeleteRecord(id);
-            return _statusCodeResponse.ControllerResponse(deleteTeacher);
+            var deleteQuery = new DeleteTeacherCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

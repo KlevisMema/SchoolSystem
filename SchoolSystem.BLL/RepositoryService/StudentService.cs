@@ -29,9 +29,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all student</returns>
         public async Task<Response<List<StudentViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllStudents = await _CRUD.GetAll();
+            var getAllStudents = await _CRUD.GetAll(cancellationToken);
             return getAllStudents;
         }
 
@@ -42,10 +43,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific student</returns>
         public async Task<Response<StudentViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getStudent = await _CRUD.GetSpecificRecord(id, "Student");
+            var getStudent = await _CRUD.GetSpecificRecord(id, "Student", cancellationToken);
             return getStudent;
         }
 
@@ -56,10 +58,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created student</returns>
         public async Task<Response<StudentViewModel>> PostRecord
         (
-            CreateUpdateStudentViewModel viewModel
+            CreateUpdateStudentViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postStudent = await _CRUD.PostRecord(viewModel, "Student");
+            var postStudent = await _CRUD.PostRecord(viewModel, "Student", cancellationToken);
             return postStudent;
         }
 
@@ -72,10 +75,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<StudentViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateStudentViewModel viewModel
+            CreateUpdateStudentViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateStudent = await _CRUD.PutRecord(id, viewModel, "Student");
+            var updateStudent = await _CRUD.PutRecord(id, viewModel, "Student", cancellationToken);
             return updateStudent;
         }
 
@@ -86,10 +90,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the student was deleted or not</returns>
         public async Task<Response<StudentViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteStudent = await _CRUD.DeleteRecord(id, "Student");
+            var deleteStudent = await _CRUD.DeleteRecord(id, "Student", cancellationToken);
             return deleteStudent;
         }
 
@@ -99,12 +104,13 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>True of false</returns>
         public async Task<bool> Bool
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                var getAllStudents = await _CRUD.GetAll();
+                var getAllStudents = await _CRUD.GetAll(cancellationToken);
                 var result = getAllStudents.Value;
                 return result.Any(x => x.Id.Equals(id));
             }

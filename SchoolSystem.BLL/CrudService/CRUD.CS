@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using SchoolSystem.DAL.DataBase;
+using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
-using Microsoft.Extensions.Logging;
+
 
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
@@ -38,11 +39,12 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <returns>A list of records</returns>
         public async Task<Response<List<ReturnType>>> GetAll
         (
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                List<ModelType> recordsFromDb = await _context.Set<ModelType>().ToListAsync();
+                List<ModelType> recordsFromDb = await _context.Set<ModelType>().ToListAsync(cancellationToken);
 
                 List<ReturnType> trasfromObjectToReturnType = _mapper.Map<List<ReturnType>>(recordsFromDb);
 
@@ -71,12 +73,13 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         public async Task<Response<ReturnType>> GetSpecificRecord
         (
             Guid id,
-            string customMessage
+            string customMessage,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                ModelType recordFromDb = await _context.Set<ModelType>().FindAsync(id);
+                ModelType recordFromDb = await _context.Set<ModelType>().FindAsync(id, cancellationToken);
 
                 ArgumentNullException.ThrowIfNull(recordFromDb);
 
@@ -113,7 +116,8 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         public async Task<Response<ReturnType>> PostRecord
         (
             PostUpdateModelType record,
-            string customMessage
+            string customMessage,
+            CancellationToken cancellationToken
         )
         {
             try
@@ -124,7 +128,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
 
                 Console.WriteLine(transformObjectToModelType);
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return Response<ReturnType>.SuccessMessage($"{customMessage} created succsessuflly");
             }
@@ -153,20 +157,21 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         (
             Guid id,
             PostUpdateModelType recordFromClient,
-            string customMessage
+            string customMessage,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                ModelType _recordFromDb = await _context.Set<ModelType>().FindAsync(id);
+                ModelType _recordFromDb = await _context.Set<ModelType>().FindAsync(id, cancellationToken);
 
                 ArgumentNullException.ThrowIfNull(_recordFromDb);
 
                 _context.Entry(_recordFromDb).CurrentValues.SetValues(recordFromClient);
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
 
-                return await GetSpecificRecord(id, string.Empty);
+                return await GetSpecificRecord(id, string.Empty, cancellationToken);
             }
             catch (ArgumentNullException ex)
             {
@@ -197,26 +202,27 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         public async Task<Response<ReturnType>> DeleteRecord
         (
             Guid id,
-            string customMessage
+            string customMessage,
+            CancellationToken cancellationToken
         )
         {
             try
             {
-                ModelType record = await _context.Set<ModelType>().FindAsync(id);
+                ModelType record = await _context.Set<ModelType>().FindAsync(id, cancellationToken);
 
                 ArgumentNullException.ThrowIfNull(record);
 
                 _context.Set<ModelType>().Remove(record);
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return Response<ReturnType>.SuccessMessage($"{customMessage} deleted successfully...");
             }
-            catch (ArgumentNullException ex) 
-            { 
+            catch (ArgumentNullException ex)
+            {
                 _logger.LogError(ex, $"Argument null exeption {typeof(ModelType)} || {ex.ParamName}");
-                
-                return Response<ReturnType>.NotFound($"{customMessage} doesn't exists!"); 
+
+                return Response<ReturnType>.NotFound($"{customMessage} doesn't exists!");
             }
             catch (Exception ex)
             {

@@ -60,9 +60,10 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<List<StudentIssueViewModel>>> GetStudentIssues
         (
+            CancellationToken cancellationToken
         )
         {
-            var studentIssues = await _studentIssueService.GetRecords();
+            var studentIssues = await _studentIssueService.GetRecords(cancellationToken);
             return _statusCodeResponse.ControllerResponse(studentIssues);
         }
 
@@ -78,10 +79,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<StudentIssueViewModel>> GetStudentIssue
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var studentIssue = await _studentIssueService.GetRecord(id);
+            var studentIssue = await _studentIssueService.GetRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(studentIssue);
         }
 
@@ -97,7 +99,8 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<IActionResult> PutStudentIssue
         (
-            [FromForm] CreateUpdateStudentIssueViewModel studentIssue
+            [FromForm] CreateUpdateStudentIssueViewModel studentIssue,
+            CancellationToken cancellationToken
         )
         {
             var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
@@ -108,7 +111,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updateStudentIssue = await _studentIssueService.PutRecord(studentIssue.StudentId, studentIssue);
+            var updateStudentIssue = await _studentIssueService.PutRecord(studentIssue.StudentId, studentIssue, cancellationToken);
             return _statusCodeResponse.ControllerResponse(updateStudentIssue);
         }
 
@@ -123,7 +126,8 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<StudentIssueViewModel>> PostStudentIssue
         (
-            [FromForm] CreateUpdateStudentIssueViewModel studentIssue
+            [FromForm] CreateUpdateStudentIssueViewModel studentIssue,
+            CancellationToken cancellationToken
         )
         {
             var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
@@ -134,7 +138,7 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudentIssue = await _studentIssueService.PostRecord(studentIssue);
+            var createStudentIssue = await _studentIssueService.PostRecord(studentIssue, cancellationToken);
             return _statusCodeResponse.ControllerResponse(createStudentIssue);
         }
 
@@ -150,10 +154,11 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<IActionResult> DeleteStudentIssue
         (
-            [FromRoute] Guid id
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteStudentIssue = await _studentIssueService.DeleteRecord(id);
+            var deleteStudentIssue = await _studentIssueService.DeleteRecord(id, cancellationToken);
             return _statusCodeResponse.ControllerResponse(deleteStudentIssue);
         }
     }

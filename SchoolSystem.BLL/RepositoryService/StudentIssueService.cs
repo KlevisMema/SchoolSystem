@@ -24,9 +24,10 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> a list of all time clasrooms</returns>
         public async Task<Response<List<StudentIssueViewModel>>> GetRecords
         (
+            CancellationToken cancellationToken
         )
         {
-            var getAllStudentIssues = await _CRUD.GetAll();
+            var getAllStudentIssues = await _CRUD.GetAll(cancellationToken);
             return getAllStudentIssues;
         }
 
@@ -37,10 +38,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns> The object of a specific clasroom</returns>
         public async Task<Response<StudentIssueViewModel>> GetRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var getStudentIssues = await _CRUD.GetSpecificRecord(id, "Student issue");
+            var getStudentIssues = await _CRUD.GetSpecificRecord(id, "Student issue", cancellationToken);
             return getStudentIssues;
         }
 
@@ -53,10 +55,11 @@ namespace SchoolSystem.BLL.RepositoryService
         public async Task<Response<StudentIssueViewModel>> PutRecord
         (
             Guid id,
-            CreateUpdateStudentIssueViewModel viewModel
+            CreateUpdateStudentIssueViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var updateStudentIssue = await _CRUD.PutRecord(id, viewModel, "Student issue");
+            var updateStudentIssue = await _CRUD.PutRecord(id, viewModel, "Student issue", cancellationToken);
             return updateStudentIssue;
         }
 
@@ -67,10 +70,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>The created student issue</returns>
         public async Task<Response<StudentIssueViewModel>> PostRecord
         (
-            CreateUpdateStudentIssueViewModel viewModel
+            CreateUpdateStudentIssueViewModel viewModel,
+            CancellationToken cancellationToken
         )
         {
-            var postStudentIssue = await _CRUD.PostRecord(viewModel, "Student issue");
+            var postStudentIssue = await _CRUD.PostRecord(viewModel, "Student issue", cancellationToken);
             return postStudentIssue;
         }
 
@@ -81,10 +85,11 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <returns>A message telling if the student issue was deleted or not</returns>
         public async Task<Response<StudentIssueViewModel>> DeleteRecord
         (
-            Guid id
+            Guid id,
+            CancellationToken cancellationToken
         )
         {
-            var deleteStudentIssue = await _CRUD.DeleteRecord(id, "Student issue");
+            var deleteStudentIssue = await _CRUD.DeleteRecord(id, "Student issue", cancellationToken);
             return deleteStudentIssue;
         }
     }
