@@ -1,73 +1,83 @@
-﻿using FluentValidation;
-using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.DTO.ViewModels.Attendance;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Clasroom.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Clasroom.Commands;
+using SchoolSystem.BLL.MediatrService.Actions.TimeTable.Queries;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Clasroom API Controller
+    ///     Clasroom API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ClasroomsController : ControllerBase
     {
-        private readonly I_Valid_Id<Teacher> _Teacher_Valid_Id;
-        private readonly I_Valid_Id<TimeTable> _TimeTable_Valid_Id;
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateClasroomViewModel> _modelValidator;
-        private readonly ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel> _clasroomService;
-        private readonly StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> _statusCodeResponse;
-        private async Task<CustomMesageResponse> ValidateId
+
+        #region Validate ids
+
+        private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
             Guid teacherId,
             Guid timetableId,
             CancellationToken cancellationToken
         )
         {
-            var teacher = await _Teacher_Valid_Id.Bool(teacherId, cancellationToken);
-            var timetable = await _TimeTable_Valid_Id.Bool(timetableId, cancellationToken);
+            var doesTeacherExists = new DoesTeacherExistsQuery(teacherId);
+            var resultTeacher = await _mediator.Send(doesTeacherExists, cancellationToken);
 
-            if (!teacher)
-                return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
-            if (!timetable)
-                return CustomMesageResponse.NotFound(timetable, "Invalid timetable id");
+            var doesTimeTableExists = new DoestTimeTableExistsQuery(timetableId);
+            var resultTimeTable = await _mediator.Send(doesTimeTableExists, cancellationToken);
 
-            return CustomMesageResponse.Succsess();
+            if (!resultTeacher.Exists)
+                return resultTeacher;
+            if (!resultTimeTable.Exists)
+                return resultTimeTable;
+
+            return SchoolSystem.BLL.ResponseService.CustomMesageResponse.Succsess();
         }
+
+        #endregion
+
+        #region Inject services to Clasrooms ctor
 
         /// <summary>
         /// Inject Services
         /// </summary>
-        /// <param name="clasroomService">Clasroom service</param>
+        /// <param name="mediator"> Mediator  service</param>
         /// <param name="modelValidator">Model validator service</param>
-        /// <param name="statusCodeResponse">Status code response</param>
-        /// <param name="teacher_Valid_Id">Teacher valid id service</param>
-        /// <param name="timeTable_Valid_Id">Time Table valid id service</param>
+
         public ClasroomsController
         (
-            I_Valid_Id<Teacher> teacher_Valid_Id,
-            I_Valid_Id<TimeTable> timeTable_Valid_Id,
-            IValidator<CreateUpdateClasroomViewModel> modelValidator,
-            ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel> clasroomService,
-            StatusCodeResponse<ClasroomViewModel, List<ClasroomViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateClasroomViewModel> modelValidator
         )
         {
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _clasroomService = clasroomService;
-            _Teacher_Valid_Id = teacher_Valid_Id;
-            _statusCodeResponse = statusCodeResponse;
-            _TimeTable_Valid_Id = timeTable_Valid_Id;
         }
 
+        #endregion
+
+        #region Get all Clasrooms endpoint
+
         /// <summary>
-        /// Get all clasrooms
+        ///     Get all clasrooms
         /// </summary>
-        /// <returns>A list of clasrooms</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A list of clasrooms </returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
@@ -77,15 +87,22 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var clasrooms = await _clasroomService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(clasrooms);
+            var getAllQuery = new GetAllClasroomsQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get clasroom by id endpoint
+
         /// <summary>
-        /// Get one clasroom by id
+        ///     Get one clasroom by id
         /// </summary>
         /// <param name="id">Id of the clasroom</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>The clasroom with that specific id</returns>
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -97,16 +114,23 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var clasroom = await _clasroomService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(clasroom);
+            var getByIdQuery = new GetClasroomsByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Put clasroom endpoint
+
         /// <summary>
-        /// Update a clasroom
+        ///     Update a clasroom
         /// </summary>
-        /// <param name="id">Id of the clasroom</param>
-        /// <param name="clasroom">Client data object</param>
-        /// <returns>The updated clasroom</returns>
+        /// <param name="id"> Id of the clasroom </param>
+        /// <param name="clasroom"> Client data object </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated clasroom </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -123,19 +147,26 @@ namespace SchoolSystem.API.Controllers
             if (!Ids.Exists)
                 return NotFound(Ids.CustomMessage);
 
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(clasroom);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(clasroom, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedClasroom = await _clasroomService.PutRecord(id, clasroom, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedClasroom);
+            var updateQuery = new UpdateClasroomCommand(id, clasroom);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Post clasroom endpoint
+
         /// <summary>
-        /// Create  a new clasroom
+        ///     Create  a new clasroom
         /// </summary>
-        /// <param name="clasroom">Clasroom client object</param>
-        /// <returns>A message telling if the clasroom  was created or not</returns>
+        /// <param name="clasroom"> Clasroom client object </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the clasroom was created or not </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClasroomViewModel))]
@@ -154,15 +185,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createClasroom = await _clasroomService.PostRecord(clasroom, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createClasroom);
+            var createQuery = new CreateClasroomCommand(clasroom);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Delete clasroom endpoint
+
         /// <summary>
-        /// Delete a clasroom by id
+        ///     Delete a clasroom by id
         /// </summary>
-        /// <param name="id">Id of the clasroom</param>
-        /// <returns>A message telling if the clasroom was deleted or not</returns>
+        /// <param name="id"> Id of the clasroom </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the clasroom was deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -174,8 +212,11 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var deleteClasroom = await _clasroomService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteClasroom);
+            var deleteQuery = new DeleteClasroomCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

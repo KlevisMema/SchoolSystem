@@ -1,45 +1,55 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.TimeTable;
+using SchoolSystem.BLL.MediatrService.Actions.TimeTable.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.TimeTable.Commands;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// TimeTable API Controller
+    ///     TimeTable API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TimeTablesController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateTimeTableViewModel> _modelValidator;
-        private readonly ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> _timeTableService;
-        private readonly StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> _statusCodeResponse;
 
+        #region Inject services in the TimeTable Ctor
+        
         /// <summary>
-        /// Inject services
+        ///     Inject services
         /// </summary>
-        /// <param name="timeTableService">Time table service</param>
+        /// <param name="mediator"> Mediator service</param>
         /// <param name="modelValidator">Model validator service</param>
-        /// <param name="statusCodeResponse">Status code response service</param>
+
         public TimeTablesController
         (
-            IValidator<CreateUpdateTimeTableViewModel> modelValidator,
-            ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> timeTableService,
-            StatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateTimeTableViewModel> modelValidator
         )
         {
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _timeTableService = timeTableService;
-            _statusCodeResponse = statusCodeResponse;
         }
 
+        #endregion
+
+        #region Get all time tables endpoint
+
         /// <summary>
-        /// Get all time tables
+        ///     Get all time tables
         /// </summary>
-        /// <returns>A list of time tables </returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A list of time tables </returns>
+        
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
@@ -49,15 +59,22 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var timeTables = await _timeTableService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(timeTables);
+            var getAllQuery = new GetAllTimeTablesQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get a time table by id endpoint
+
         /// <summary>
-        /// Get a time table by id
+        ///     Get a time table by id
         /// </summary>
-        /// <param name="id">Id of the time table</param>
-        /// <returns>A time table info</returns>
+        /// <param name="id"> Id of the time table </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A time table info </returns>
+        
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -69,16 +86,23 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var timeTable = await _timeTableService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(timeTable);
+            var getByIdQuery = new GetTimeTableByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Update a time table endpoint
+
         /// <summary>
-        /// Updates a time table
+        ///     Updates a time table
         /// </summary>
-        /// <param name="id">Id of the time table</param>
-        /// <param name="timeTable">Object from client</param>
-        /// <returns>The updated time table</returns>
+        /// <param name="id"> Id of the time table </param>
+        /// <param name="timeTable"> Object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated time table </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -95,15 +119,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedTimeTable = await _timeTableService.PutRecord(id, timeTable, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedTimeTable);
+            var updateQuery = new UpdateTimeTableCommand(id, timeTable);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Create a time table endpoint
+
         /// <summary>
-        /// Creates a time table 
+        ///     Creates a time table 
         /// </summary>
-        /// <param name="timeTable">Object from client</param>
-        /// <returns>A message telling if the time table was created or not</returns>
+        /// <param name="timeTable"> Object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the time table was created or not </returns>
+        
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
@@ -118,15 +149,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createTimeTable = await _timeTableService.PostRecord(timeTable, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createTimeTable);
+            var createQuery = new CreateTimeTableCommand(timeTable);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Delete a time table by id endpoint
+
         /// <summary>
-        /// Deletes a time table by id
+        ///     Deletes a time table by id
         /// </summary>
-        /// <param name="id">Id of the time table</param>
-        /// <returns>A message telling if the time table was deleted or not</returns>
+        /// <param name="id"> Id of the time table </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the time table was deleted or not </returns>
+        
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -134,12 +172,15 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> DeleteTimeTable
         (
-            [FromForm] Guid id,
+            [FromRoute] Guid id,
             CancellationToken cancellationToken
         )
         {
-            var deleteTimeTable = await _timeTableService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteTimeTable);
+            var deleteQuery = new DeleteTimeTableCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }
