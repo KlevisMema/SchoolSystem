@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using SchoolSystem.BLL.MediatrService.Actions.Attendance.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Clasroom.Queries;
 
 namespace SchoolSystem.BLL.MediatrService.Handlers.Clasroom.QueriesHandler
