@@ -1,21 +1,26 @@
 ﻿using SchoolSystem.DAL.Models;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.Exam;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
+using Microsoft.Extensions.Logging;
 
 namespace SchoolSystem.BLL.RepositoryService
 {
-    public class ExamService : ICrudService<ExamViewModel, CreateUpdateExamViewModel>
+    public class ExamService : ICrudService<ExamViewModel, CreateUpdateExamViewModel>, I_Valid_Id<Exam>
     {
+        private readonly ILogger<ExamService> _logger;
         private readonly CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
 
         public ExamService
         (
-            CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD
+            CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD,
+            ILogger<ExamService> logger
         )
         {
             _CRUD = CRUD;
+            _logger = logger;
         }
 
         /// <summary>
@@ -91,6 +96,39 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             var deleteExam = await _CRUD.DeleteRecord(id, "Exam", cancellationToken);
             return deleteExam;
+        }
+
+        /// <summary>
+        ///     Returns True or false if the exam exists in database
+        /// </summary>
+        /// <param name="id"> Id of the exam </param>
+        /// <returns> True or false </returns>
+        public async Task<bool> Bool
+        (
+            Guid id, 
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                var getAllExams = await _CRUD.GetAll(cancellationToken);
+                var result = getAllExams.Value;
+                return result.Any(x => x.Id.Equals(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError
+                (
+                    ex,
+                    $" Something went wrong \n" +
+                    $"Error, something went wrong !! => \n " +
+                    $" Method : {ex.TargetSite} \n" +
+                    $" Source : {ex.Source} \n" +
+                    $"InnerEx : {ex.InnerException} \n"
+                );
+
+                return false;
+            }
         }
     }
 }

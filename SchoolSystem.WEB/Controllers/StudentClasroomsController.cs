@@ -6,6 +6,9 @@ using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using MediatR;
+using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Commands;
 
 namespace SchoolSystem.API.Controllers
 {
@@ -16,6 +19,7 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class StudentClasroomsController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly I_Valid_Id<Student> i_Valid_Student_Id;
         private readonly I_Valid_Id<Clasroom> i_Valid_Clasroom_Id;
         private readonly IValidator<CreateUpdateStudentClasroomViewModel> _modelValidator;
@@ -48,7 +52,8 @@ namespace SchoolSystem.API.Controllers
             I_Valid_Id<Clasroom> i_Valid_Clasroom_Id,
             IValidator<CreateUpdateStudentClasroomViewModel> modelValidator,
             StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> statusCodeResponse,
-            ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> studentClasroomService
+            ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> studentClasroomService,
+            IMediator mediator
         )
         {
             _modelValidator = modelValidator;
@@ -56,6 +61,7 @@ namespace SchoolSystem.API.Controllers
             this.i_Valid_Student_Id = i_Valid_Student_Id;
             this.i_Valid_Clasroom_Id = i_Valid_Clasroom_Id;
             _studentClasroomService = studentClasroomService;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -71,8 +77,9 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var studentClasrooms = await _studentClasroomService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(studentClasrooms);
+            var getAllQuery = new GetAllStudentClasroomsQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
         /// <summary>
@@ -91,8 +98,9 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var studentClasroom = await _studentClasroomService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(studentClasroom);
+            var getByIdQuery = new GetStudentClasroomByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
         /// <summary>
@@ -119,8 +127,9 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedAttendance = await _studentClasroomService.PutRecord(studentClasroom.StudentId, studentClasroom, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedAttendance);
+            var updateQuery = new UpdateStudentClasroomCommand(studentClasroom.StudentId, studentClasroom);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
         /// <summary>
@@ -146,8 +155,9 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudentClasroom = await _studentClasroomService.PostRecord(studentClasroom, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createStudentClasroom);
+            var createQuery = new CreateStudentClasroomCommand(studentClasroom);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
         }
 
         /// <summary>
@@ -166,8 +176,9 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var deleteStudentClasroom = await _studentClasroomService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteStudentClasroom);
+            var deleteQuery = new DeleteStudentClasroomCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
     }
 }
