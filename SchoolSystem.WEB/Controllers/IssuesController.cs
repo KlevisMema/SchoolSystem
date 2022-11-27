@@ -1,47 +1,57 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using SchoolSystem.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
 using SchoolSystem.DTO.ViewModels.Issue;
-using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Attendance;
+using SchoolSystem.BLL.MediatrService.Actions.Issues.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Issues.Commands;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Issue API Controller
+    ///     Issue API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class IssuesController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateIssueViewModel> _modelValidator;
-        private readonly ICrudService<IssueViewModel, CreateUpdateIssueViewModel> _issueService;
-        private readonly StatusCodeResponse<IssueViewModel, List<IssueViewModel>> _statusCodeResponse;
+
+        #region Inject services in the ctor 
 
         /// <summary>
         /// Inject services
         /// </summary>
         /// <param name="modelValidator">Model validator service</param>
-        /// <param name="issueService">Issue service </param>
-        /// <param name="statusCodeResponse">Status code response service</param>
+        /// <param name="mediator"> Mediator service </param>
+
         public IssuesController
         (
-            IValidator<CreateUpdateIssueViewModel> modelValidator,
-            ICrudService<IssueViewModel, CreateUpdateIssueViewModel> issueService,
-            StatusCodeResponse<IssueViewModel, List<IssueViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateIssueViewModel> modelValidator
         )
         {
-            _issueService = issueService;
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
         }
 
+        #endregion
+
+        #region Get all issues 
+
         /// <summary>
-        /// Get all issues
+        ///     Get all issues
         /// </summary>
-        /// <returns>A list of issues</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A list of issues </returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
@@ -51,15 +61,22 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var issues = await _issueService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(issues);
+            var getAllQuery = new GetAllIssuesQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get issue by id endpoint
+
         /// <summary>
-        /// Get a single issue by id
+        ///     Get a single issue by id
         /// </summary>
         /// <param name="id">Id of the issue</param>
-        /// <returns>The issue</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The issue </returns>
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -71,16 +88,23 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var issue = await _issueService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(issue);
+            var getByIdQuery = new GetIssueByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Update issue endpoint
+
         /// <summary>
-        /// Update an issue
+        ///     Update an issue
         /// </summary>
         /// <param name="id">Id of the issue</param>
         /// <param name="issue">Issue cliennt object  </param>
-        /// <returns>The updated issue</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated issue </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -97,15 +121,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedIssue = await _issueService.PutRecord(id, issue, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedIssue);
+            var updateQuery = new UpdateIssueCommand(id, issue);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Create issues endpoint
+
         /// <summary>
-        /// Create a new issue
+        ///     Create a new issue
         /// </summary>
         /// <param name="issue">Issue object from client</param>
-        /// <returns>A message telling if the issue was created or not</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the issue was created or not </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceViewModel))]
@@ -120,15 +151,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createIssue = await _issueService.PostRecord(issue, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createIssue);
+            var createQuery = new CreateIssueCommand(issue);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Delete an issue endpoint
+
         /// <summary>
-        /// Delete an issue
+        ///     Delete an issue
         /// </summary>
         /// <param name="id">Id of the issue</param>
-        /// <returns>A message telling if the issue was deleted or not</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the issue was deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -140,8 +178,11 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var deleteIssue = await _issueService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteIssue);
+            var deleteQuery = new DeleteIssueCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

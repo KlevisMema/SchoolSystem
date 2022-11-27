@@ -178,6 +178,7 @@ namespace SchoolSystem.API.ProgramExtension
 
             services.AddTransient<IAccountService, AccountService>();
 
+            services.AddTransient<I_Valid_Id<Exam>, ExamService>();
             services.AddTransient<I_Valid_Id<Teacher>, TeacherService>();
             services.AddTransient<I_Valid_Id<Student>, StudentService>();
             services.AddTransient<I_Valid_Id<Clasroom>, ClasroomService>();

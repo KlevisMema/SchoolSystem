@@ -1,45 +1,54 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using SchoolSystem.DAL.Models;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.DTO.ViewModels.Exam;
-using SchoolSystem.API.ControllerRespose;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.MediatrService.Actions.Exam.Querys;
+using SchoolSystem.BLL.MediatrService.Actions.Exam.Commands;
+
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Exam API Controller
+    ///     Exam API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ExamsController : ControllerBase
     {
+        private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateExamViewModel> _modelValidator;
-        private readonly ICrudService<ExamViewModel, CreateUpdateExamViewModel> _examService;
-        private readonly StatusCodeResponse<ExamViewModel, List<ExamViewModel>> _statusCodeResponse;
 
+        #region Inject services in the ctor
         /// <summary>
-        /// Inject services 
+        ///     Inject services 
         /// </summary>
-        /// <param name="examService">Exam service</param>
-        /// <param name="statusCodeResponse">status code response service</param>
+        /// <param name="mediator"> Mediator service</param>
         /// <param name="modelValidator">Model validation service</param>
+
         public ExamsController
         (
-            IValidator<CreateUpdateExamViewModel> modelValidator,
-            ICrudService<ExamViewModel, CreateUpdateExamViewModel> examService,
-            StatusCodeResponse<ExamViewModel, List<ExamViewModel>> statusCodeResponse
+            IMediator mediator,
+            IValidator<CreateUpdateExamViewModel> modelValidator
         )
         {
-            _examService = examService;
+            _mediator = mediator;
             _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
         }
 
+        #endregion
+
+        #region Get all exams endpoint
+
         /// <summary>
-        /// Get all Exams
+        ///     Get all Exams
         /// </summary>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -49,15 +58,22 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var exams = await _examService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(exams);
+            var getAllQuery = new GetAllExamsQuery();
+            var result = await _mediator.Send(getAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get exam by id endpoint
+
         /// <summary>
-        /// Get an exam
+        ///     Get an exam
         /// </summary>
-        /// <param name="id">Id of the exam</param>
-        /// <returns>Details of that exam</returns>
+        /// <param name="id"> Id of the exam </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> Details of that exam </returns>
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
@@ -69,16 +85,23 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var exam = await _examService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(exam);
+            var getByIdQuery = new GetExamByIdQuery(id);
+            var result = await _mediator.Send(getByIdQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Update exam endpoint
+
         /// <summary>
-        /// Update an exam
+        ///     Update an exam
         /// </summary>
-        /// <param name="id">Id of the  exam</param>
-        /// <param name="exam">Exam object from client</param>
-        /// <returns>The updated exam </returns>
+        /// <param name="id"> Id of the  exam </param>
+        /// <param name="exam"> Exam object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated exam </returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
@@ -91,19 +114,26 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updatedExam = await _examService.PutRecord(id, exam, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedExam);
+            var updateQuery = new UpdateExamCommand(id, exam);
+            var result = await _mediator.Send(updateQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Create exam endpoint
+
         /// <summary>
-        /// Creates an exam 
+        ///     Creates an exam 
         /// </summary>
-        /// <param name="exam">Exam object from client</param>
-        /// <returns>A message id exam was created or not</returns>
+        /// <param name="exam"> Exam object from client </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message id exam was created or not </returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -114,19 +144,26 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam);
+            ValidationResult validationResult = await _modelValidator.ValidateAsync(exam, cancellationToken);
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudent = await _examService.PostRecord(exam, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createStudent);
+            var createQuery = new CreateExamCommand(exam);
+            var result = await _mediator.Send(createQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Delete exam endpoint
+
         /// <summary>
-        /// Deletes an exam
+        ///     Deletes an exam
         /// </summary>
-        /// <param name="id">Id of the exam</param>
-        /// <returns>A message if the exam was deleted or not</returns>
+        /// <param name="id"> Id of the exam </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message if the exam was deleted or not </returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamViewModel))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -138,8 +175,11 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var deleteExam = await _examService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteExam);
+            var deleteQuery = new DeleteExamCommand(id);
+            var result = await _mediator.Send(deleteQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
     }
 }

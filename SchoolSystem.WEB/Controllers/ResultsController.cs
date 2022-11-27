@@ -8,6 +8,10 @@ using SchoolSystem.DTO.ViewModels.Result;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Commands;
+using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Exam.Queries;
+using SchoolSystem.DAL.Models;
 
 #endregion
 
@@ -21,9 +25,38 @@ namespace SchoolSystem.API.Controllers
     public class ResultsController : ControllerBase
     {
         private readonly IMediator _mediator;
-
-        private readonly IExists _exists;
         private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
+
+        #region Validate ids
+
+        private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
+        (
+            Guid ExamId,
+            Guid StudentId,
+            Guid SubjectId,
+            CancellationToken cancellationToken
+        )
+        {
+            var doesExamExists = new DoesExamExistsQuery(ExamId);
+            var resultExam = await _mediator.Send(doesExamExists, cancellationToken);
+
+            var doesStudentExists = new DoesStudentExistsQuery(StudentId);
+            var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
+
+            var doesSubjectExists = new DoesStudentExistsQuery(SubjectId);
+            var resultSubject = await _mediator.Send(doesSubjectExists, cancellationToken);
+
+            if (!resultExam.Exists)
+                return resultExam;
+            if (!resultStudent.Exists)
+                return resultStudent;
+            if (!resultSubject.Exists)
+                return resultSubject;
+
+            return SchoolSystem.BLL.ResponseService.CustomMesageResponse.Succsess();
+        }
+
+        #endregion
 
         #region Inject services in the ctor 
 
@@ -32,16 +65,13 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="mediator"> Mediator service </param>
         /// <param name="modelValidator"> Validator service </param>
-        /// <param name="exists">Exists service</param>
 
         public ResultsController
         (
-            IExists exists,
-            IValidator<CreateUpdateResultViewModel> modelValidator,
-            IMediator mediator
+            IMediator mediator,
+            IValidator<CreateUpdateResultViewModel> modelValidator
         )
         {
-            _exists = exists;
             _mediator = mediator;
             _modelValidator = modelValidator;
         }
@@ -120,10 +150,9 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
-
-            if (!checkIds)
-                return NotFound("Invalid ids!!");
+            var Ids = await ValidateId(result.ExamId, result.StudentId, result.SubjectId, cancellationToken);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
             ValidationResult validationResult = await _modelValidator.ValidateAsync(result);
             if (!validationResult.IsValid)
@@ -156,10 +185,9 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var checkIds = await _exists.DoesExists(result.ExamId, result.StudentId, result.SubjectId);
-
-            if (!checkIds)
-                return NotFound("Invalid ids!!");
+            var Ids = await ValidateId(result.ExamId, result.StudentId, result.SubjectId, cancellationToken);
+            if (!Ids.Exists)
+                return NotFound(Ids.CustomMessage);
 
             ValidationResult validationResult = await _modelValidator.ValidateAsync(result);
             if (!validationResult.IsValid)
