@@ -5,20 +5,17 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.DTO.ViewModels.Result;
-using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Commands;
 using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
-using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Exam.Queries;
-using SchoolSystem.DAL.Models;
 
 #endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Results API Controller
+    ///     Results API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -40,16 +37,18 @@ namespace SchoolSystem.API.Controllers
             var doesExamExists = new DoesExamExistsQuery(ExamId);
             var resultExam = await _mediator.Send(doesExamExists, cancellationToken);
 
+            if (!resultExam.Exists)
+                return resultExam;
+
             var doesStudentExists = new DoesStudentExistsQuery(StudentId);
             var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
+
+            if (!resultStudent.Exists)
+                return resultStudent;
 
             var doesSubjectExists = new DoesStudentExistsQuery(SubjectId);
             var resultSubject = await _mediator.Send(doesSubjectExists, cancellationToken);
 
-            if (!resultExam.Exists)
-                return resultExam;
-            if (!resultStudent.Exists)
-                return resultStudent;
             if (!resultSubject.Exists)
                 return resultSubject;
 
@@ -103,6 +102,7 @@ namespace SchoolSystem.API.Controllers
         #endregion
 
         #region Get result by id endpoint
+
         /// <summary>
         ///     Get a specific result
         /// </summary>

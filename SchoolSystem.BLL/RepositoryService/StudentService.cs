@@ -1,4 +1,6 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
 using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
@@ -6,27 +8,51 @@ using SchoolSystem.DTO.ViewModels.Student;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Student service that implements ICrudService interface, I_Valid_Id interface, and has all the buisness logic related to attendance 
+    /// </summary>
     public class StudentService : ICrudService<StudentViewModel, CreateUpdateStudentViewModel>, I_Valid_Id<Student>
     {
-        private readonly ILogger<StudentService> _logger;
-        private readonly CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
+        #region Services 
 
+        /// <summary>
+        ///     A readonly field for logger      
+        /// </summary>
+        private readonly ILogger<StudentService> _logger;
+        /// <summary>
+        ///     A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<StudentViewModel, Student, CreateUpdateStudentViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor 
+        /// </summary>
+        /// <param name="logger"> Logger service </param>
+        /// <param name="CRUD"> CRUD Service </param>
         public StudentService
         (
             ILogger<StudentService> logger,
-            CRUD<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD
+            DatabaseActionsService<StudentViewModel, Student, CreateUpdateStudentViewModel> CRUD
         )
         {
             _CRUD = CRUD;
             _logger = logger;
         }
 
+        #endregion
+
+        #region Get all students from student table 
+
         /// <summary>
-        /// Get all student from database
+        ///     Get all student from database
         /// </summary>
-        /// <returns> a list of all student</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of all student</returns>
+
         public async Task<Response<List<StudentViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -36,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllStudents;
         }
 
+        #endregion
+
+        #region Get a student by id from student table
+
         /// <summary>
-        /// Get a single student
+        ///     Get a single student
         /// </summary>
-        /// <param name="id"> Id of a student</param>
-        /// <returns> The object of a specific student</returns>
+        /// <param name="id"> Id of a student </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The object of a specific student </returns>
+
         public async Task<Response<StudentViewModel>> GetRecord
         (
             Guid id,
@@ -51,11 +83,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getStudent;
         }
 
+        #endregion
+
+        #region Create a new student in student table
+
         /// <summary>
-        /// Creates a new student 
+        ///     Creates a new student 
         /// </summary>
-        /// <param name="viewModel">Teacher object </param>
-        /// <returns>The created student</returns>
+        /// <param name="viewModel"> Teacher object </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The created student </returns>
+
         public async Task<Response<StudentViewModel>> PostRecord
         (
             CreateUpdateStudentViewModel viewModel,
@@ -66,12 +104,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return postStudent;
         }
 
+        #endregion
+
+        #region Update a existing student in student table 
+
         /// <summary>
-        /// Updates a student  
+        ///     Updates a student  
         /// </summary>
-        /// <param name="id">Id of a student</param>
-        /// <param name="viewModel">Object that holds the new values of student </param>
-        /// <returns>The updated student</returns>
+        /// <param name="id"> Id of a student </param>
+        /// <param name="viewModel"> Object that holds the new values of student </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated student </returns>
+
         public async Task<Response<StudentViewModel>> PutRecord
         (
             Guid id,
@@ -83,11 +127,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return updateStudent;
         }
 
+        #endregion
+
+        #region Delete a existing student by id from student table 
+
         /// <summary>
-        /// Deletes a student 
+        ///     Deletes a student 
         /// </summary>
-        /// <param name="id">Id of the student</param>
-        /// <returns>A message telling if the student was deleted or not</returns>
+        /// <param name="id"> Id of the student </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A message telling if the student was deleted or not </returns>
+
         public async Task<Response<StudentViewModel>> DeleteRecord
         (
             Guid id,
@@ -98,10 +148,16 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteStudent;
         }
 
+        #endregion
+
+        #region Check if the student exist in student table 
+
         /// <summary>
-        /// Chkecks if the record exists i database or not
+        ///     Chkecks if the record exists in database 
         /// </summary>
-        /// <returns>True of false</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> True of false </returns>
+
         public async Task<bool> Bool
         (
             Guid id,
@@ -129,5 +185,8 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
+
     }
 }

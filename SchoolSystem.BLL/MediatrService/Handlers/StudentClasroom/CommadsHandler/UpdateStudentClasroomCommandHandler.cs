@@ -28,8 +28,8 @@ namespace SchoolSystem.BLL.MediatrService.Handlers.StudentClasroom.CommadsHandle
             CancellationToken cancellationToken
         )
         {
-            var updatedAttendance = await _studentClasroomService.PutRecord(request.Id, request._updateStudentClasroom, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updatedAttendance);
+            var updatedStudentClasroom = await _studentClasroomService.PutRecord(request.Id, request._updateStudentClasroom, cancellationToken);
+            return _statusCodeResponse.ControllerResponse(updatedStudentClasroom);
         }
     }
 }

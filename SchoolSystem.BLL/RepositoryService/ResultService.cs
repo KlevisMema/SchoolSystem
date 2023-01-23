@@ -1,4 +1,6 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
 using SchoolSystem.DAL.DataBase;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
@@ -7,27 +9,50 @@ using SchoolSystem.DTO.ViewModels.Result;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Result service that implements ICrud interface, IExists interface and, has all buisness logic related to result
+    /// </summary>
     public class ResultService : ICrudService<ResultViewModel, CreateUpdateResultViewModel>, IExists
     {
-        private readonly ApplicationDbContext _context;
-        private readonly CRUD<ResultViewModel, Result, CreateUpdateResultViewModel> _CRUD;
+        #region Services 
 
+        /// <summary>
+        ///    A readonly field for database context
+        /// </summary>
+        private readonly ApplicationDbContext _context;
+        /// <summary>
+        ///    A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<ResultViewModel, Result, CreateUpdateResultViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor
+        /// </summary>
+        /// <param name="CRUD"> CRUD Services </param>
+        /// <param name="context"> Database context services </param>
         public ResultService
         (
-             CRUD<ResultViewModel, Result, CreateUpdateResultViewModel> CRUD,
+             DatabaseActionsService<ResultViewModel, Result, CreateUpdateResultViewModel> CRUD,
              ApplicationDbContext context
         )
         {
             _CRUD = CRUD;
             _context = context;
         }
+        #endregion
+
+        #region Get all result form result table
 
         /// <summary>
-        /// Get all result from database
+        ///     Get all result from database
         /// </summary>
-        /// <returns> A list of all results</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of all results </returns>
+        
         public async Task<Response<List<ResultViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -37,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllResults;
         }
 
+        #endregion
+
+        #region Get a single result by id from result table
+
         /// <summary>
-        /// Get a single result
+        ///     Get a single result
         /// </summary>
-        /// <param name="id"> Id of a result</param>
-        /// <returns> The object of a specific result</returns>
+        /// <param name="id"> Id of a result </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The object of a specific result </returns>
+         
         public async Task<Response<ResultViewModel>> GetRecord
         (
             Guid id,
@@ -52,12 +83,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return getResult;
         }
 
+        #endregion
+
+        #region Update a existing result in result table
+
         /// <summary>
-        /// Updates a result  
+        ///     Updates a result  
         /// </summary>
-        /// <param name="id">Id of a result</param>
-        /// <param name="viewModel">Object that holds the new values of result </param>
-        /// <returns>The updated result</returns>
+        /// <param name="id"> Id of a result </param>
+        /// <param name="viewModel"> Object that holds the new values of result </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated result </returns>
+         
         public async Task<Response<ResultViewModel>> PutRecord
         (
             Guid id,
@@ -69,11 +106,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return updateResult;
         }
 
+        #endregion
+
+        #region Create a new result in result table 
+
         /// <summary>
-        /// Creates a new result 
+        ///     Creates a new result 
         /// </summary>
         /// <param name="viewModel">  Result object </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> The created result </returns>
+         
         public async Task<Response<ResultViewModel>> PostRecord
         (
             CreateUpdateResultViewModel viewModel,
@@ -84,11 +127,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return postResult;
         }
 
+        #endregion
+
+        #region Deletes a result by id from result table
+
         /// <summary>
-        /// Deletes a result 
+        ///     Deletes a result 
         /// </summary>
         /// <param name="id"> Id of the result </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A message telling if the result was deleted or not </returns>
+         
         public async Task<Response<ResultViewModel>> DeleteRecord
         (
             Guid id,
@@ -99,8 +148,12 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteResult;
         }
 
+        #endregion
+
+        #region Checks if the result exists or not
+
         /// <summary>
-        ///  Returns true if all ids are valid and false if not
+        ///     Returns true if all ids are valid and false if not
         /// </summary>
         /// <param name="examId"></param>
         /// <param name="studentId"></param>
@@ -129,5 +182,8 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
+
     }
 }

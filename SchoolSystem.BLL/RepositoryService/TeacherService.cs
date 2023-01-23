@@ -1,4 +1,6 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
 using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
@@ -6,27 +8,51 @@ using SchoolSystem.DTO.ViewModels.Teacher;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Teacher service that implements ICrud Service interface, I_Valid_Id interface, and has all buisness logic related to teacher 
+    /// </summary>
     public class TeacherService : ICrudService<TeacherViewModel, CreateUpdateTeacherViewModel>, I_Valid_Id<Teacher>
     {
-        private readonly ILogger<TeacherService> _logger;
-        private readonly CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
+        #region Services  
 
+        /// <summary>
+        ///      A readonly field for logger   
+        /// </summary>
+        private readonly ILogger<TeacherService> _logger;
+        /// <summary>
+        ///     A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor 
+        /// </summary>
+        /// <param name="logger"> Logger service </param>
+        /// <param name="CRUD"> CRUD Service </param>
         public TeacherService
         (
             ILogger<TeacherService> logger,
-            CRUD<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD
+            DatabaseActionsService<TeacherViewModel, Teacher, CreateUpdateTeacherViewModel> CRUD
         )
         {
             _CRUD = CRUD;
             _logger = logger;
         }
 
+        #endregion
+
+        #region Get all teachers from teacher table  
+
         /// <summary>
-        /// Get all teachers from database
+        ///     Get all teachers from database
         /// </summary>
-        /// <returns> a list of all teachers</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of all teachers </returns>
+
         public async Task<Response<List<TeacherViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -36,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllTeachers;
         }
 
+        #endregion
+
+        #region Get a teacher by id from teacher table
+
         /// <summary>
-        /// Get a single teacher
+        ///     Get a single teacher
         /// </summary>
-        /// <param name="id"> Id of a teacher</param>
-        /// <returns> The object of a specific teacher</returns>
+        /// <param name="id"> Id of a teacher </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The object of a specific teacher </returns>
+
         public async Task<Response<TeacherViewModel>> GetRecord
         (
             Guid id,
@@ -51,11 +83,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getTeacher;
         }
 
+        #endregion
+
+        #region Create a new teacher in teacher table 
+
         /// <summary>
-        /// Creates a new teacher 
+        ///     Creates a new teacher 
         /// </summary>
         /// <param name="viewModel">Teacher object </param>
-        /// <returns>The created teacher</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The created teacher </returns>
+
         public async Task<Response<TeacherViewModel>> PostRecord
         (
             CreateUpdateTeacherViewModel viewModel,
@@ -66,12 +104,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return postTeacher;
         }
 
+        #endregion
+
+        #region Update an existing teacher form teacher table 
+
         /// <summary>
-        /// Updates a teacher  
+        ///     Updates a teacher  
         /// </summary>
-        /// <param name="id">Id of a teacher</param>
-        /// <param name="viewModel">Object that holds the new values of teacher </param>
-        /// <returns>The updated teacher</returns>
+        /// <param name="id"> Id of a teacher</param>
+        /// <param name="viewModel"> Object that holds the new values of teacher </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated teacher </returns>
+
         public async Task<Response<TeacherViewModel>> PutRecord
         (
             Guid id,
@@ -83,11 +127,16 @@ namespace SchoolSystem.BLL.RepositoryService
             return updateTeacher;
         }
 
+        #endregion
+
+        #region Delete an existing teacher from teacher table 
+
         /// <summary>
-        /// Deletes a teacher 
+        ///     Deletes a teacher 
         /// </summary>
-        /// <param name="id">Id of the teacher</param>
-        /// <returns>A message telling if the teacher was deleted or not</returns>
+        /// <param name="id"> Id of the teacher </param>
+        /// <returns> A message telling if the teacher was deleted or not </returns>
+
         public async Task<Response<TeacherViewModel>> DeleteRecord
         (
             Guid id,
@@ -98,11 +147,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteTeacher;
         }
 
+        #endregion
+
+        #region Check if a teacher exist in teacher table 
+
         /// <summary>
-        /// Returns True or false if the teacher exists in database
+        ///     Returns True or false if the teacher exists in database
         /// </summary>
-        /// <param name="id">Id of the teacher</param>
-        /// <returns>True or false</returns>
+        /// <param name="id"> Id of the teacher </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> True or false </returns>
+
         public async Task<bool> Bool
         (
             Guid id,
@@ -130,5 +185,8 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
+
     }
 }

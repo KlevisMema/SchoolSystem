@@ -1,34 +1,58 @@
-﻿using SchoolSystem.DAL.Models;
-using SchoolSystem.DAL.DataBase;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.TimeTable;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Time table service that implements ICrud Service interface,I_Valid_Id interace , and has all buisness logic related to time table 
+    /// </summary>
     public class TimeTableService : ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel>, I_Valid_Id<TimeTable>
     {
-        private readonly ILogger<TimeTableService> _logger;
-        private readonly CRUD<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> _CRUD;
+        #region Services 
 
+        /// <summary>
+        ///      A readonly field for logger
+        /// </summary>
+        private readonly ILogger<TimeTableService> _logger;
+        /// <summary>
+        ///     A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor
+        /// </summary>
+        /// <param name="CRUD"> CRUD Services </param>
+        /// <param name="logger"> Logger Service </param>
         public TimeTableService
         (
             ILogger<TimeTableService> logger,
-            CRUD<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> CRUD
+            DatabaseActionsService<TimeTableViewModel, TimeTable, CreateUpdateTimeTableViewModel> CRUD
         )
         {
             _CRUD = CRUD;
             _logger = logger;
         }
 
+        #endregion
+
+        #region Get all time tables from timetable table 
+
         /// <summary>
-        /// Get all exams from time tables
+        ///     Get all exams from time tables
         /// </summary>
-        /// <returns> a list of all time tables</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> a list of all time tables </returns>
+
         public async Task<Response<List<TimeTableViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -38,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllTimeTables;
         }
 
+        #endregion
+
+        #region Get a time table from timetable table
+
         /// <summary>
-        /// Get a single time table
+        ///     Get a single time table
         /// </summary>
         /// <param name="id"> Id of a time table</param>
-        /// <returns> The object of a specific time table</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The object of a specific time table </returns>
+
         public async Task<Response<TimeTableViewModel>> GetRecord
         (
             Guid id,
@@ -53,12 +83,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return getTimeTable;
         }
 
+        #endregion
+
+        #region Update a existing time table in timetable table 
+
         /// <summary>
-        /// Updates a time table  
+        ///     Updates a time table  
         /// </summary>
-        /// <param name="id">Id of a time table</param>
-        /// <param name="viewModel">Object that holds the new values of time table </param>
-        /// <returns>The updated time table</returns>
+        /// <param name="id"> Id of a time table </param>
+        /// <param name="viewModel"> Object that holds the new values of time table </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated time table </returns>
+
         public async Task<Response<TimeTableViewModel>> PutRecord
         (
             Guid id,
@@ -70,11 +106,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return updatetTmeTable;
         }
 
+        #endregion
+
+        #region Create a new time table in timetable table 
+
         /// <summary>
-        /// Creates a new time table 
+        ///     Creates a new time table 
         /// </summary>
-        /// <param name="viewModel">time table object </param>
-        /// <returns>The created time table</returns>
+        /// <param name="viewModel"> Time table object </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The created time table </returns>
+
         public async Task<Response<TimeTableViewModel>> PostRecord
         (
             CreateUpdateTimeTableViewModel viewModel,
@@ -85,11 +127,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return postTimeTable;
         }
 
+        #endregion
+
+        #region Delete a time table in timetable table 
+
         /// <summary>
-        /// Deletes a time table 
+        ///     Deletes a time table 
         /// </summary>
-        /// <param name="id">Id of the time table</param>
-        /// <returns>A message telling if the time table was deleted or not</returns>
+        /// <param name="id"> Id of the time table </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A message telling if the time table was deleted or not </returns>
+
         public async Task<Response<TimeTableViewModel>> DeleteRecord
         (
             Guid id,
@@ -100,11 +148,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteTimeTable;
         }
 
+        #endregion
+
+        #region Check if the time table exist in database
+
         /// <summary>
-        /// Returns True or false if the time table exists in database
+        ///     Returns True or false if the time table exists in database
         /// </summary>
-        /// <param name="id">Id of the TimeTable</param>
-        /// <returns>True or false</returns>
+        /// <param name="id"> Id of the TimeTable </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> True or false </returns>
+
         public async Task<bool> Bool
         (
             Guid id,
@@ -132,5 +186,7 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
     }
 }

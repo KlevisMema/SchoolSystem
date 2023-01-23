@@ -2,6 +2,6 @@
 {
     public class CreateUpdateTimeTableViewModel
     {
-        public string Subject { get; set; }
+        public string? Subject { get; set; }
     }
 }

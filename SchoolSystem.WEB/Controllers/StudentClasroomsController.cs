@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using MediatR;
+using FluentValidation;
 using SchoolSystem.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
@@ -6,7 +7,6 @@ using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
-using MediatR;
 using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Commands;
 
@@ -46,6 +46,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="statusCodeResponse">Status code response service</param>
         /// <param name="i_Valid_Clasroom_Id">Clasroom valid id service</param>
         /// <param name="i_Valid_Student_Id">Student valid id service</param>
+        /// <param name="mediator"> Mediator Service </param>
         public StudentClasroomsController
         (
             I_Valid_Id<Student> i_Valid_Student_Id,
@@ -67,6 +68,7 @@ namespace SchoolSystem.API.Controllers
         /// <summary>
         /// Get all student clasrooms
         /// </summary>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>All students with in a clasroom</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
@@ -86,6 +88,7 @@ namespace SchoolSystem.API.Controllers
         /// Get single student clasroom
         /// </summary>
         /// <param name="id">Id of the student</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A student in a clasroom</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
@@ -107,6 +110,7 @@ namespace SchoolSystem.API.Controllers
         /// Update a studentclasroom record in StudentClasroom table
         /// </summary>
         /// <param name="studentClasroom">Data from client</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>The updated record</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
@@ -136,6 +140,7 @@ namespace SchoolSystem.API.Controllers
         /// Create a studentclasroom record in database
         /// </summary>
         /// <param name="studentClasroom">Data from client</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A message telling if the record was created or not</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
@@ -164,6 +169,7 @@ namespace SchoolSystem.API.Controllers
         /// Deletes a studentClasroom form database
         /// </summary>
         /// <param name="id">Id of the student</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A message telling if the record was deleted succsessfully</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]

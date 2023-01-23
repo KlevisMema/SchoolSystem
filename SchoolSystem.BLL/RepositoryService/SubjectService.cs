@@ -1,27 +1,49 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings 
+
+using SchoolSystem.DAL.Models;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.Subject;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Subject service that implements ICrudService interface, and has all the buisness logic related to subject
+    /// </summary>
     public class SubjectService : ICrudService<SubjectViewModel, CreateUpdateSubjectViewModel>
     {
-        private readonly CRUD<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> _CRUD;
+        #region Services 
 
+        /// <summary>
+        ///     A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor
+        /// </summary>
+        /// <param name="CRUD"> CRUD Services </param>
         public SubjectService
         (
-            CRUD<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> CRUD
+            DatabaseActionsService<SubjectViewModel, Subject, CreateUpdateSubjectViewModel> CRUD
         )
         {
             _CRUD = CRUD;
         }
 
+        #endregion
+
+        #region Get all subjects from subject table
+
         /// <summary>
-        /// Get all subjects from database
+        ///     Get all subjects from database
         /// </summary>
-        /// <returns> A list of all subjects</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of all subjects </returns>
+
         public async Task<Response<List<SubjectViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -31,11 +53,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllSubjects;
         }
 
+        #endregion
+
+        #region Get a subject by id from subject table
+
         /// <summary>
-        /// Get a single subject
+        ///     Get a single subject
         /// </summary>
-        /// <param name="id"> Id of a subject</param>
-        /// <returns> The object of a specific subject</returns>
+        /// <param name="id"> Id of a subject </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The object of a specific subject </returns>
+
         public async Task<Response<SubjectViewModel>> GetRecord
         (
             Guid id,
@@ -46,12 +74,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return getSubject;
         }
 
+        #endregion
+
+        #region Update a existing subject in subject table
+
         /// <summary>
-        /// Updates a subject  
+        ///     Updates a subject  
         /// </summary>
-        /// <param name="id">Id of a subject</param>
-        /// <param name="viewModel">Object that holds the new values of subject </param>
-        /// <returns>The updated subject</returns>
+        /// <param name="id"> Id of a subject </param>
+        /// <param name="viewModel"> Object that holds the new values of subject </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated subject </returns>
+
         public async Task<Response<SubjectViewModel>> PutRecord
         (
             Guid id,
@@ -63,11 +97,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return updateSubject;
         }
 
+        #endregion
+
+        #region Create a new subject in subject table 
+
         /// <summary>
-        /// Creates a new subject 
+        ///     Creates a new subject 
         /// </summary>
-        /// <param name="viewModel">subject object </param>
-        /// <returns>The created subject</returns>
+        /// <param name="viewModel"> Subject object </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The created subject</returns>
+
         public async Task<Response<SubjectViewModel>> PostRecord
         (
             CreateUpdateSubjectViewModel viewModel,
@@ -78,11 +118,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return postSubject;
         }
 
+        #endregion
+
+        #region Delete a existing subject by id in subject table
+
         /// <summary>
-        /// Deletes a subject 
+        ///     Deletes a subject 
         /// </summary>
-        /// <param name="id">Id of the subject</param>
-        /// <returns>A message telling if the subject was deleted or not</returns>
+        /// <param name="id"> Id of the subject</param>
+        /// <param name="cancellationToken"> Cancellatio token </param>
+        /// <returns> A message telling if the subject was deleted or not </returns>
+
         public async Task<Response<SubjectViewModel>> DeleteRecord
         (
             Guid id,
@@ -92,5 +138,8 @@ namespace SchoolSystem.BLL.RepositoryService
             var deleteSubject = await _CRUD.DeleteRecord(id, "Subject", cancellationToken);
             return deleteSubject;
         }
+
+        #endregion
+
     }
 }

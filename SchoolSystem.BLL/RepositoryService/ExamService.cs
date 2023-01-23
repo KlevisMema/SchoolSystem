@@ -1,21 +1,41 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
+using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
-using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Exam service that implements ICrud interface, I_Valid_Id interface , and has all buisness logic related to exam
+    /// </summary>
     public class ExamService : ICrudService<ExamViewModel, CreateUpdateExamViewModel>, I_Valid_Id<Exam>
     {
-        private readonly ILogger<ExamService> _logger;
-        private readonly CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
+        #region Services
 
+        /// <summary>
+        ///    A readonly field for Logger
+        /// </summary>
+        private readonly ILogger<ExamService> _logger;
+        /// <summary>
+        ///    A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<ExamViewModel, Exam, CreateUpdateExamViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in controller
+        /// </summary>
+        /// <param name="CRUD"> CRUD Service </param>
+        /// <param name="logger"> Logger service </param>
         public ExamService
         (
-            CRUD<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD,
+            DatabaseActionsService<ExamViewModel, Exam, CreateUpdateExamViewModel> CRUD,
             ILogger<ExamService> logger
         )
         {
@@ -23,10 +43,16 @@ namespace SchoolSystem.BLL.RepositoryService
             _logger = logger;
         }
 
+        #endregion
+
+        #region Get all exams from the exam table
+
         /// <summary>
-        /// Get all exams from database
+        ///     Get all exams from database
         /// </summary>
-        /// <returns> a list of all exams</returns>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A list of all exams</returns>
+
         public async Task<Response<List<ExamViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -36,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllExams;
         }
 
+        #endregion
+
+        #region Get a single exam by id from exam table
+
         /// <summary>
-        /// Get a single teacher
+        ///     Get a single teacher
         /// </summary>
         /// <param name="id"> Id of a exam</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> The object of a specific exam</returns>
+
         public async Task<Response<ExamViewModel>> GetRecord
         (
             Guid id,
@@ -51,12 +83,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return getExam;
         }
 
+        #endregion
+
+        #region Update a existing exam form exam table
+
         /// <summary>
-        /// Updates a exam  
+        ///     Updates a exam  
         /// </summary>
-        /// <param name="id">Id of a exam</param>
-        /// <param name="viewModel">Object that holds the new values of exam </param>
-        /// <returns>The updated exam</returns>
+        /// <param name="id"> Id of a exam</param>
+        /// <param name="viewModel"> Object that holds the new values of exam </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The updated exam </returns>
+
         public async Task<Response<ExamViewModel>> PutRecord
         (
             Guid id,
@@ -68,11 +106,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return updateExam;
         }
 
+        #endregion
+
+        #region Creates a new exam in exam table 
+
         /// <summary>
-        /// Creates a new exam 
+        ///     Creates a new exam 
         /// </summary>
-        /// <param name="viewModel">Exam object </param>
-        /// <returns>The created exam</returns>
+        /// <param name="viewModel"> Exam object </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> The created exam </returns>
+
         public async Task<Response<ExamViewModel>> PostRecord
         (
             CreateUpdateExamViewModel viewModel,
@@ -83,11 +127,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return postExam;
         }
 
+        #endregion
+
+        #region Delete a exam by id in exam table
+
         /// <summary>
-        /// Deletes a exam 
+        ///     Deletes a exam 
         /// </summary>
-        /// <param name="id">Id of the exam</param>
-        /// <returns>A message telling if the exam was deleted or not</returns>
+        /// <param name="id"> Id of the exam </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <returns> A message telling if the exam was deleted or not </returns>
+
         public async Task<Response<ExamViewModel>> DeleteRecord
         (
             Guid id,
@@ -98,11 +148,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteExam;
         }
 
+        #endregion
+
+        #region checks if the exams exists in the exam table or not  
+
         /// <summary>
         ///     Returns True or false if the exam exists in database
         /// </summary>
         /// <param name="id"> Id of the exam </param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> True or false </returns>
+
         public async Task<bool> Bool
         (
             Guid id, 
@@ -130,5 +186,8 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
+
     }
 }

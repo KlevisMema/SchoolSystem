@@ -23,7 +23,7 @@ namespace SchoolSystem.BLL.AuthTokenService
         /// <summary>
         /// Serialize a token in a string fromat (Jwt format)
         /// </summary>
-        /// <param name="logIn">Login object to be used for user validation</param>
+        /// <param name="user"> User View Model object</param>
         /// <returns>Token</returns>
         public string CreateToken(UserViewModel user)
         {

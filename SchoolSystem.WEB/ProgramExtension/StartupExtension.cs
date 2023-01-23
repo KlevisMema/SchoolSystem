@@ -100,7 +100,7 @@ namespace SchoolSystem.API.ProgramExtension
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSetting.GetSection("Issuer").Value,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.GetSection("Key").Value)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.GetSection("Key").Value!)),
                     ValidateAudience = false
                 };
             });
@@ -179,6 +179,7 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<IAccountService, AccountService>();
 
             services.AddTransient<I_Valid_Id<Exam>, ExamService>();
+            services.AddTransient<I_Valid_Id<Issue>, IssueService>();
             services.AddTransient<I_Valid_Id<Teacher>, TeacherService>();
             services.AddTransient<I_Valid_Id<Student>, StudentService>();
             services.AddTransient<I_Valid_Id<Clasroom>, ClasroomService>();
@@ -195,10 +196,12 @@ namespace SchoolSystem.API.ProgramExtension
             services.AddTransient<ICrudService<AttendanceViewModel, CreateUpdateAttendanceViewModel>, AttendanceService>();
             services.AddTransient<ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel>, StudentIssueService>();
             services.AddTransient<ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>, StudentClasroomService>();
+
+            services.AddTransient<GetRecordFromCompositeKeysTable<StudentIssueViewModel>, StudentIssueService>();
             #endregion
 
             #region Generic serivces registration
-            services.AddTransient(typeof(CRUD<,,>));
+            services.AddTransient(typeof(DatabaseActionsService<,,>));
             services.AddTransient(typeof(IControllerStatusCodeResponse<,>), typeof(SchoolSystem.BLL.ResponseService.ControllerStatusCodeResponse<,>));
             services.AddTransient(typeof(StatusCodeResponse<,>));
             #endregion

@@ -11,7 +11,7 @@ namespace SchoolSystem.DAL.DataBase.Configuration.Seeding
 
             var _context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>();
 
-            await _context.Database.EnsureCreatedAsync();
+            await _context!.Database.EnsureCreatedAsync();
         }
     }
 }
