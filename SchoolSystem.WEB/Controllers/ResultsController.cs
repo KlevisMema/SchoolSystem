@@ -21,11 +21,16 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class ResultsController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
-
         #region Validate ids
 
+        /// <summary>
+        ///     Validate Exam id, Student id and subject id
+        /// </summary>
+        /// <param name="ExamId"> Exam id </param>
+        /// <param name="StudentId"> Srudent id </param>
+        /// <param name="SubjectId"> Suvject id </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns></returns>
         private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
             Guid ExamId,
@@ -57,7 +62,16 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        #region Inject services in the ctor 
+        #region Services
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateResultViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
 
         /// <summary>
         ///     Inject Services

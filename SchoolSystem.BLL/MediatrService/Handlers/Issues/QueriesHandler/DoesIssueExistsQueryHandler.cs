@@ -28,7 +28,7 @@ namespace SchoolSystem.BLL.MediatrService.Handlers.Issues.QueriesHandler
             if (issue)
                 return CustomMesageResponse.Succsess();
 
-            return CustomMesageResponse.NotFound(issue, "Invalid exam id");
+            return CustomMesageResponse.NotFound(issue, "Invalid issue id");
         }
     }
 }

@@ -4,7 +4,6 @@ using MediatR;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
 using SchoolSystem.DTO.ViewModels.Subject;
 using SchoolSystem.BLL.MediatrService.Queries.Subject.Queries;
 using SchoolSystem.BLL.MediatrService.Queries.Subject.Commands;
@@ -20,16 +19,22 @@ namespace SchoolSystem.API.Controllers
     [ApiController]
     public class SubjectsController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateSubjectViewModel> _modelValidator;
+        #region Services
 
-        #region Injecting services in the ctr
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateSubjectViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateSubjectViewModel> _modelValidator;
 
         /// <summary>
         /// Inject services
         /// </summary>
-        /// <param name="modelValidator"> ModelVlidator service</param>
-        /// <param name="mediator"> Mediator service</param>
+        /// <param name="modelValidator"> ModelVlidator service </param>
+        /// <param name="mediator"> Mediator service </param>
 
         public SubjectsController
         (

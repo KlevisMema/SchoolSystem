@@ -10,6 +10,12 @@ using SchoolSystem.BLL.ResponseService;
 
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
+    /// <summary>
+    ///     Generic class used to perform CRUD database actions such as Create, Update, Read and Delete.
+    /// </summary>
+    /// <typeparam name="ReturnType"> The return type  </typeparam>
+    /// <typeparam name="ModelType"> Model type you want to perform an action </typeparam>
+    /// <typeparam name="PostUpdateModelType"> Create or update object values </typeparam>
     public class DatabaseActionsService
     <
         ReturnType,

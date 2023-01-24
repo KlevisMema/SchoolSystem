@@ -19,16 +19,22 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class TimeTablesController : ControllerBase
     {
+        #region Services 
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
         private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateTimeTableViewModel
+        /// </summary>
         private readonly IValidator<CreateUpdateTimeTableViewModel> _modelValidator;
 
-        #region Inject services in the TimeTable Ctor
-        
         /// <summary>
         ///     Inject services
         /// </summary>
-        /// <param name="mediator"> Mediator service</param>
-        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="mediator"> Mediator service </param>
+        /// <param name="modelValidator"> Model validator service </param>
 
         public TimeTablesController
         (
@@ -49,7 +55,7 @@ namespace SchoolSystem.API.Controllers
         /// </summary>
         /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> A list of time tables </returns>
-        
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
@@ -74,7 +80,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id"> Id of the time table </param>
         /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> A time table info </returns>
-        
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -134,7 +140,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="timeTable"> Object from client </param>
         /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> A message telling if the time table was created or not </returns>
-        
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TimeTableViewModel))]
@@ -164,7 +170,7 @@ namespace SchoolSystem.API.Controllers
         /// <param name="id"> Id of the time table </param>
         /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> A message telling if the time table was deleted or not </returns>
-        
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]

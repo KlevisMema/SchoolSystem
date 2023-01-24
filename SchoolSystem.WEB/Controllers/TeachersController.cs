@@ -13,21 +13,28 @@ using SchoolSystem.BLL.MediatrService.Actions.Teacher.Commads;
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Teachers API Controller
+    ///     Teachers API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TeachersController : ControllerBase
     {
-        private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
-        private readonly IMediator _mediator;
+        #region Services 
 
-        #region Services injection into ctor
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateTeacherViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateTeacherViewModel> _modelValidator;
+
         /// <summary>
         ///     Inject teacher service 
         /// </summary>
-        /// <param name="mediator"></param>
-        /// <param name="modelValidator"></param>
+        /// <param name="mediator"> Mediator service </param>
+        /// <param name="modelValidator"> Model validator service </param>
 
         public TeachersController
         (

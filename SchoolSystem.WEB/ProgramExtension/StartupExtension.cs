@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.DTO.ViewModels.Issue;
-using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.AuthTokenService;
 using SchoolSystem.BLL.RepositoryService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Result;
@@ -38,7 +38,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.DTO.FluentValidation.StudentIssue;
 using SchoolSystem.DTO.FluentValidation.StudentClasroom;
-using SchoolSystem.BLL.AuthTokenService;
 #endregion
 
 namespace SchoolSystem.API.ProgramExtension
@@ -172,8 +171,6 @@ namespace SchoolSystem.API.ProgramExtension
             #endregion
 
             #region Services registration
-            services.AddTransient<IExists, ResultService>();
-
             services.AddTransient<IOAuthService, OAuthService>();
 
             services.AddTransient<IAccountService, AccountService>();
@@ -203,7 +200,6 @@ namespace SchoolSystem.API.ProgramExtension
             #region Generic serivces registration
             services.AddTransient(typeof(DatabaseActionsService<,,>));
             services.AddTransient(typeof(IControllerStatusCodeResponse<,>), typeof(SchoolSystem.BLL.ResponseService.ControllerStatusCodeResponse<,>));
-            services.AddTransient(typeof(StatusCodeResponse<,>));
             #endregion
 
             #region FluentValidation services registration

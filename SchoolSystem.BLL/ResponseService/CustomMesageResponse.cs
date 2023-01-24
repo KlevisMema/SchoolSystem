@@ -1,7 +1,7 @@
 ﻿namespace SchoolSystem.BLL.ResponseService
 {
     /// <summary>
-    /// Custom resposne message class
+    ///     Custom resposne message class
     /// </summary>
     public class CustomMesageResponse
     {
@@ -15,10 +15,10 @@
         public string CustomMessage { get; set; }
 
         /// <summary>
-        /// Constructor 
+        ///     Constructor 
         /// </summary>
-        /// <param name="exists"></param>
-        /// <param name="customMessage"></param>
+        /// <param name="exists"> Bool parameter </param>
+        /// <param name="customMessage"> Custom string message </param>
         public CustomMesageResponse
         (
             bool exists,
@@ -30,7 +30,7 @@
         }
 
         /// <summary>
-        /// Method that returns true indicating that the process was succsessfull and a custom message 
+        ///     Method that returns true indicating that the process was succsessfull and a custom message 
         /// </summary>
         public static CustomMesageResponse Succsess
         (
@@ -40,8 +40,10 @@
         }
 
         /// <summary>
-        /// Method that returns false indicating that the process falied and a custom message 
+        ///     Method that returns false indicating that the process falied and a custom message 
         /// </summary>
+        /// <param name="customMessage"> Custom string message </param>
+        /// <param name="Exists"> Bool prameter </param>
         public static CustomMesageResponse NotFound
         (
             bool Exists,

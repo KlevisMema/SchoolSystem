@@ -16,7 +16,7 @@ namespace SchoolSystem.BLL.RepositoryService
     /// <summary>
     ///     Result service that implements ICrud interface, IExists interface and, has all buisness logic related to result
     /// </summary>
-    public class ResultService : ICrudService<ResultViewModel, CreateUpdateResultViewModel>, IExists
+    public class ResultService : ICrudService<ResultViewModel, CreateUpdateResultViewModel>
     {
         #region Services 
 
@@ -146,41 +146,6 @@ namespace SchoolSystem.BLL.RepositoryService
         {
             var deleteResult = await _CRUD.DeleteRecord(id, "Result", cancellationToken);
             return deleteResult;
-        }
-
-        #endregion
-
-        #region Checks if the result exists or not
-
-        /// <summary>
-        ///     Returns true if all ids are valid and false if not
-        /// </summary>
-        /// <param name="examId"></param>
-        /// <param name="studentId"></param>
-        /// <param name="subjectId"></param>
-        /// <returns></returns>
-        public async Task<bool> DoesExists
-        (
-            Guid examId,
-            Guid studentId,
-            Guid subjectId
-        )
-        {
-            try
-            {
-                var exam = await _context.Exams.AnyAsync(exam => exam.Id.Equals(examId));
-                var student = await _context.Students.AnyAsync(student => student.Id.Equals(studentId));
-                var subject = await _context.Subjects.AnyAsync(subject => subject.Id.Equals(subjectId));
-
-                if (exam is false || student is false || subject is false)
-                    return false;
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
         }
 
         #endregion

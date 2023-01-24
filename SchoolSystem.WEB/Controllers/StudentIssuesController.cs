@@ -24,7 +24,6 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class StudentIssuesController : ControllerBase
     {
-
         #region Validate ids
 
         private async Task<CustomMesageResponse> ValidateId
@@ -51,7 +50,7 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        #region Inject services in the ctor 
+        #region Services 
 
         private readonly IMediator _mediator;
         private readonly IValidator<CreateUpdateStudentIssueViewModel> _modelValidator;

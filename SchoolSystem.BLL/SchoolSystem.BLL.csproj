@@ -19,11 +19,4 @@
     <ProjectReference Include="..\SchoolSystem.DTO\SchoolSystem.DTO.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="MediatrService\Actions\User\Commands\" />
-    <Folder Include="MediatrService\Actions\User\Queries\" />
-    <Folder Include="MediatrService\Handlers\User\CommandsHandler\" />
-    <Folder Include="MediatrService\Handlers\User\QueriesHandler\" />
-  </ItemGroup>
-
 </Project>

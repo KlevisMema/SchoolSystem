@@ -6,7 +6,7 @@ using SchoolSystem.BLL.ServiceInterfaces;
 namespace SchoolSystem.BLL.ResponseService
 {
     /// <summary>
-    /// Generic method 
+    ///     Generic method that inherits from ControllerBase and implements IControllerStatusCodeResponse interface 
     /// </summary>
     public class ControllerStatusCodeResponse<T, ListT> : ControllerBase, IControllerStatusCodeResponse<T, ListT>
     where T : class

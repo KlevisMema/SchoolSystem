@@ -22,11 +22,15 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class ClasroomsController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateClasroomViewModel> _modelValidator;
-
         #region Validate ids
 
+        /// <summary>
+        ///     Validate teacher id and timetable id 
+        /// </summary>
+        /// <param name="teacherId"> Teacher id </param>
+        /// <param name="timetableId"> Time table id </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns></returns>
         private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
             Guid teacherId,
@@ -50,7 +54,17 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        #region Inject services to Clasrooms ctor
+        #region Services
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateClasroomViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateClasroomViewModel> _modelValidator;
+
 
         /// <summary>
         /// Inject Services

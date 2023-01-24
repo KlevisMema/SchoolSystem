@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Account;
+using SchoolSystem.BLL.RepositoryService.CrudService;
+using SchoolSystem.DAL.DataBase;
+using Microsoft.EntityFrameworkCore;
 
 #endregion
 
@@ -40,6 +43,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         private readonly SignInManager<User> _signInManager;
 
+        private readonly DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> Roles;
+
         /// <summary>
         ///     Inject all services in constructor
         /// </summary>
@@ -54,14 +59,15 @@ namespace SchoolSystem.BLL.RepositoryService
             IOAuthService oAuthService,
             UserManager<User> userManager,
             ILogger<AccountService> logger,
-            SignInManager<User> signInManager
-        )
+            SignInManager<User> signInManager,
+            DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> roles)
         {
             _logger = logger;
             _mapper = mapper;
             _userManager = userManager;
             _oAuthService = oAuthService;
             _signInManager = signInManager;
+            Roles = roles;
         }
 
         #endregion
@@ -93,7 +99,7 @@ namespace SchoolSystem.BLL.RepositoryService
             {
                 _logger.LogError
                 (
-                    ex, 
+                    ex,
                     $" Something went wrong in {nameof(AccountService)} \n" +
                     $"Error, something went wrong !! => \n " +
                     $" Method : {ex.TargetSite} \n" +
@@ -113,12 +119,15 @@ namespace SchoolSystem.BLL.RepositoryService
         /// </summary>
         /// <param name="logIn"> Login object </param>
 
-        public async Task<Response<LoginViewModel>> Login(LoginViewModel logIn)
+        public async Task<Response<LoginViewModel>> Login
+        (
+            LoginViewModel logIn
+        )
         {
             try
             {
                 var result = await _signInManager.PasswordSignInAsync(logIn.Email, logIn.Password, false, false);
-                
+
                 if (result.Succeeded)
                 {
                     var user = await _userManager.FindByEmailAsync(logIn.Email);
@@ -134,7 +143,7 @@ namespace SchoolSystem.BLL.RepositoryService
 
                     return Response<LoginViewModel>.SuccessMessage(_oAuthService.CreateToken(userTransformedObj));
                 }
-                   
+
                 return Response<LoginViewModel>.NotFound("User login attempt failed");
             }
             catch (Exception ex)
@@ -150,6 +159,25 @@ namespace SchoolSystem.BLL.RepositoryService
                 );
                 return Response<LoginViewModel>.ErrorMsg("Iternal server error, please try again later!");
             }
+        }
+
+        #endregion
+
+        #region Get all roles 
+
+        /// <summary>
+        ///     Get all roles from the database 
+        /// </summary>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of roles with role id and role name </returns>
+        public async Task<Response<List<RolesViewModel>>> GetAllRoles
+        (
+            CancellationToken cancellationToken
+        )
+        {
+            var getAllRoles = await Roles.GetAll(cancellationToken);
+
+            return getAllRoles;
         }
 
         #endregion
