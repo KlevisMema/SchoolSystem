@@ -35,6 +35,24 @@ namespace SchoolSystem.BLL.ResponseService
         ///     Executed when the class is called/instansiated with the same number and type of parameters. 
         /// </summary>
         /// <param name="errorMessage"> Custom string message, depends on the type of the operation outcome </param>
+        /// <param name="statusCode"> Http status code </param>
+        /// <param name="success"> Success : true or false, depends on the type of the operation outcome </param>
+        public Response
+        (
+            string errorMessage,
+            bool success,
+            HttpStatusCode statusCode
+        )
+        {
+            Message = errorMessage;
+            Success = success;
+            StatusCode = statusCode;
+        }
+
+        /// <summary>
+        ///     Executed when the class is called/instansiated with the same number and type of parameters. 
+        /// </summary>
+        /// <param name="errorMessage"> Custom string message, depends on the type of the operation outcome </param>
         /// <param name="value"> Object values, depends on the type of the operation outcome </param>
         /// <param name="success"> Success : true or false, depends on the type of the operation outcome </param>
         /// <param name="statusCode"> The status code, depends on the type of the operation outcome </param>
@@ -125,6 +143,19 @@ namespace SchoolSystem.BLL.ResponseService
         )
         {
             return new Response<T>(ThrowMessage, HttpStatusCode.InternalServerError, false);
+        }
+
+        /// <summary>
+        ///     Should be used when an operation went unsuccessfuly
+        /// </summary>
+        /// <param name="message"> Custom string error message to return to the user </param>
+        /// <returns> A response object containing the custom message, and success : false, status code fobidden </returns>
+        public static Response<T> UnSuccessMessage
+        (
+            string message
+        )
+        {
+            return new Response<T>(message, false, HttpStatusCode.Forbidden);
         }
 
         #endregion

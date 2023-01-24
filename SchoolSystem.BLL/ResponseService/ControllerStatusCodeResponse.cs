@@ -22,6 +22,7 @@ namespace SchoolSystem.BLL.ResponseService
                 HttpStatusCode.NotFound => NotFound(obj.Message),
                 HttpStatusCode.BadRequest => BadRequest(obj.Message),
                 HttpStatusCode.OK => Ok(obj.Value is null ? obj.Message : obj.Value),
+                HttpStatusCode.Forbidden => BadRequest(obj.Value is null ? obj.Message : obj.Value),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, obj.Message),
             };
         }
@@ -35,6 +36,7 @@ namespace SchoolSystem.BLL.ResponseService
                 HttpStatusCode.OK => Ok(obj.Value),
                 HttpStatusCode.NotFound => NotFound(obj.Message),
                 HttpStatusCode.BadRequest => BadRequest(obj.Message),
+                HttpStatusCode.Forbidden => BadRequest(obj.Value is null ? obj.Message : obj.Value),
                 _ => StatusCode(StatusCodes.Status500InternalServerError, obj.Message),
             };
         }

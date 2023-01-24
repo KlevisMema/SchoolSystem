@@ -18,9 +18,6 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-
-
-
         #region Services 
 
         /// <summary>
@@ -126,17 +123,31 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        [HttpPost("AssignRoleToNewUser")]
+        #region Assign a role to a user 
+
+        /// <summary>
+        ///     Assign a role to a user 
+        /// </summary>
+        /// <param name="UserId"> User Id </param>
+        /// <param name="RoleId"> Role Id </param>
+        /// <returns> A message telling if the user was added to the role or not </returns>
+
+        [HttpPost("AssignRoleToUser/{UserId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> TeacherOrStudent
+        public async Task<IActionResult> AssignRoleToUser
         (
-            Guid Id
+            [FromRoute] string UserId,
+            string RoleId
         )
         {
-            return NoContent();
+            var assignRoleCommand = new AssignRoleToUserCommand(UserId, RoleId);
+            var result = await mediator.Send(assignRoleCommand);
+
+            return result;
         }
 
+        #endregion
     }
 }

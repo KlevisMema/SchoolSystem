@@ -24,5 +24,12 @@ namespace SchoolSystem.BLL.ServiceInterfaces
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A list of roles with role id and role name </returns>
         Task<Response<List<RolesViewModel>>> GetAllRoles(CancellationToken cancellationToken);
+        /// <summary>
+        ///     Add a user to a role
+        /// </summary>
+        /// <param name="UserId"> User id </param>
+        /// <param name="RoleId"> Role id </param>
+        /// <returns> A message telling if the operation went ok or not </returns>
+        Task<Response<string>> AssignRoleToUser(string UserId, string RoleId);
     }
 }

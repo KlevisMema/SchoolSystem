@@ -107,7 +107,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <param name="customMessage"> Custom message for the response </param>
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A record correspondig to that id </returns>
-         
+
         public async Task<Response<ReturnType>> GetSpecificRecord
         (
             Guid id,
@@ -156,7 +156,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <param name="customMessage"> Custom message for the response </param>
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A string message if record was created or not </returns>
-         
+
         public async Task<Response<ReturnType>> PostRecord
         (
             PostUpdateModelType record,
@@ -202,7 +202,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <param name="customMessage"> Custom message for response </param>
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> The updated record </returns>
-         
+
         public async Task<Response<ReturnType>> PutRecord
         (
             Guid id,
@@ -254,7 +254,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <param name="customMessage"> Custom message for response message </param>
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A message if the record was deleted or not </returns>
-         
+
         public async Task<Response<ReturnType>> DeleteRecord
         (
             Guid id,
@@ -305,7 +305,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         /// <param name="customMessage"> Custom message for the response </param>
         /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> A record correspondig to that id </returns>
-         
+
         public async Task<Response<ReturnType>> GetSpecificRecordCompostieKeyTable
         (
             Guid FirstId,

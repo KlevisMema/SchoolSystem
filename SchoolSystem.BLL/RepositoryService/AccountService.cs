@@ -10,6 +10,8 @@ using SchoolSystem.DTO.ViewModels.Account;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 using SchoolSystem.DAL.DataBase;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using SchoolSystem.DAL.Enums;
 
 #endregion
 
@@ -42,8 +44,14 @@ namespace SchoolSystem.BLL.RepositoryService
         ///    A readonly field for Sign in manager
         /// </summary>
         private readonly SignInManager<User> _signInManager;
-
-        private readonly DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> Roles;
+        /// <summary>
+        ///     A readonly field for role manager
+        /// </summary>
+        private readonly RoleManager<IdentityRole> _roleManager;
+        /// <summary>
+        ///     Database context
+        /// </summary>
+        private readonly DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> _db;
 
         /// <summary>
         ///     Inject all services in constructor
@@ -53,6 +61,8 @@ namespace SchoolSystem.BLL.RepositoryService
         /// <param name="userManager"> User Manager service </param>
         /// <param name="logger"> Logger service </param>
         /// <param name="signInManager"> Sign In service </param>
+        /// <param name="db"> Database context </param>
+        /// <param name="roleManager"> Role manager </param>
         public AccountService
         (
             IMapper mapper,
@@ -60,14 +70,17 @@ namespace SchoolSystem.BLL.RepositoryService
             UserManager<User> userManager,
             ILogger<AccountService> logger,
             SignInManager<User> signInManager,
-            DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> roles)
+            RoleManager<IdentityRole> roleManager,
+            DatabaseActionsService<RolesViewModel, IdentityRole, IdentityRole> db
+        )
         {
+            _db = db;
             _logger = logger;
             _mapper = mapper;
             _userManager = userManager;
+            _roleManager = roleManager;
             _oAuthService = oAuthService;
             _signInManager = signInManager;
-            Roles = roles;
         }
 
         #endregion
@@ -132,7 +145,13 @@ namespace SchoolSystem.BLL.RepositoryService
                 {
                     var user = await _userManager.FindByEmailAsync(logIn.Email);
 
+                    if (user == null)
+                        Response<LoginViewModel>.NotFound("User doesn't exists !!");
+
                     var roles = await _userManager.GetRolesAsync(_mapper.Map<User>(logIn));
+
+                    if (roles.Count == 0)
+                        Response<LoginViewModel>.NotFound("User doesn't have any role !!");
 
                     var userTransformedObj = new UserViewModel()
                     {
@@ -175,11 +194,67 @@ namespace SchoolSystem.BLL.RepositoryService
             CancellationToken cancellationToken
         )
         {
-            var getAllRoles = await Roles.GetAll(cancellationToken);
+            var getAllRoles = await _db.GetAll(cancellationToken);
 
             return getAllRoles;
         }
 
         #endregion
+
+        #region Assing a role to a user 
+
+        /// <summary>
+        ///     Add a user to a role
+        /// </summary>
+        /// <param name="UserId"> User id </param>
+        /// <param name="RoleId"> Role id </param>
+        /// <returns> A message telling if the operation went ok or not </returns>
+
+        public async Task<Response<string>> AssignRoleToUser
+        (
+            string UserId,
+            string RoleId
+        )
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(UserId);
+
+                if (user == null)
+                    return Response<string>.NotFound($"User doesn't exists");
+
+                var role = await _roleManager.FindByIdAsync(RoleId);
+
+                var UserIsInRole = await _userManager.IsInRoleAsync(user, role.Name);
+
+                if (UserIsInRole)
+                    return Response<string>.UnSuccessMessage($"User is already in {role.Name} role");
+
+                if (role == null)
+                    return Response<string>.NotFound($"Role doesn't exists");
+
+                var addUserToRole = await _userManager.AddToRoleAsync(user, role.Name);
+
+                if (addUserToRole.Succeeded)
+                    return Response<string>.SuccessMessage($"User added to role {role.Name}");
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError
+                (
+                   ex,
+                   $"Error, something went wrong !! => \n " +
+                   $" Method : {ex.TargetSite} \n" +
+                   $" Source : {ex.Source} \n" +
+                   $"InnerEx : {ex.InnerException} \n"
+                );
+            }
+
+            return Response<string>.ErrorMsg("Something went wrong !!");
+        }
+
+        #endregion
+
     }
 }
