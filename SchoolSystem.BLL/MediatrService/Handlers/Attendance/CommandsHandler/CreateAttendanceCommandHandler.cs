@@ -41,7 +41,7 @@ namespace SchoolSystem.BLL.MediatrService.Handlers.Attendance.CommandHandler
         }
 
         /// <summary>
-        ///     Handle the create attendances command
+        ///     Handle the create attendance command
         /// </summary>
         /// <param name="request"> Request parameters </param>
         /// <param name="cancellationToken"> Cancellation token </param>

@@ -91,7 +91,7 @@ namespace SchoolSystem.BLL.ResponseService
 
         #endregion
 
-        #region Methods
+        #region Static methods
 
         /// <summary>
         ///     Should be used when an operation ended succsessfuly 

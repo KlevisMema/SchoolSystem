@@ -1,6 +1,10 @@
-﻿using SchoolSystem.DAL.Enums;
+﻿#region Usings
+
+using SchoolSystem.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
+#endregion
 
 namespace SchoolSystem.DAL.BaseModel
 {

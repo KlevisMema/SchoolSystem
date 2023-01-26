@@ -5,6 +5,8 @@
     /// </summary>
     public class CustomMesageResponse
     {
+        #region Properties 
+
         /// <summary>
         ///     Boolean property which will take a value depending of a another function functionality
         /// </summary>
@@ -13,6 +15,10 @@
         ///     String property which will take a custom value depending of another function functionality
         /// </summary>
         public string CustomMessage { get; set; }
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         ///     Constructor 
@@ -28,6 +34,10 @@
             Exists = exists;
             CustomMessage = customMessage;
         }
+
+        #endregion
+
+        #region Static methods
 
         /// <summary>
         ///     Method that returns true indicating that the process was succsessfull and a custom message 
@@ -52,5 +62,8 @@
         {
             return new CustomMesageResponse(Exists, customMessage);
         }
+
+        #endregion
+
     }
 }

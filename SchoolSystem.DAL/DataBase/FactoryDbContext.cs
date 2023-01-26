@@ -1,9 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿#region Usings
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+
+#endregion
 
 namespace SchoolSystem.DAL.DataBase
 {
-    // Runs scaffolding with no errors
+    /// <summary>
+    ///     Helps to Run scaffolding with no errors
+    /// </summary>
     public class FactoryDbContext : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
         public ApplicationDbContext CreateDbContext(string[] args)

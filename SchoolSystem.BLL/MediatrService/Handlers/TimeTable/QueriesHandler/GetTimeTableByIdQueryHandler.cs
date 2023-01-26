@@ -1,17 +1,35 @@
-﻿using MediatR;
+﻿#region Usings
+
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.TimeTable;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.MediatrService.Actions.TimeTable.Queries;
 
+#endregion
+
 namespace SchoolSystem.BLL.MediatrService.Handlers.TimeTable.QueriesHandler
 {
+    /// <summary>
+    ///     Get time table query handler class which implements IRequestHandler which gets the get time table query and object result as response 
+    /// </summary>
     public class GetTimeTableByIdQueryHandler : IRequestHandler<GetTimeTableByIdQuery, ObjectResult>
     {
+        /// <summary>
+        ///     ICrudService interface 
+        /// </summary>
         private readonly ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> _timeTableService;
+        /// <summary>
+        ///     IControllerStatusCodeResponse interface
+        /// </summary>
         private readonly IControllerStatusCodeResponse<TimeTableViewModel, List<TimeTableViewModel>> _statusCodeResponse;
 
+        /// <summary>
+        ///     Services injection
+        /// </summary>
+        /// <param name="timeTableService"> Time table service  </param>
+        /// <param name="statusCodeResponse"> Status code service </param>
         public GetTimeTableByIdQueryHandler
         (
             ICrudService<TimeTableViewModel, CreateUpdateTimeTableViewModel> timeTableService,
@@ -22,9 +40,15 @@ namespace SchoolSystem.BLL.MediatrService.Handlers.TimeTable.QueriesHandler
             _statusCodeResponse = statusCodeResponse;
         }
 
+        /// <summary>
+        ///     Handle the get time table by id query
+        /// </summary>
+        /// <param name="request"> Request parameters </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A Object result response </returns>
         public async Task<ObjectResult> Handle
         (
-            GetTimeTableByIdQuery request, 
+            GetTimeTableByIdQuery request,
             CancellationToken cancellationToken
         )
         {
