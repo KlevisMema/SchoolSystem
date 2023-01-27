@@ -8,8 +8,8 @@ namespace SchoolSystem.DAL.DataBase.Configuration.Entities
     {
         public void Configure(EntityTypeBuilder<Exam> builder)
         {
-            builder.Property(x => x.Name).IsRequired();
-            builder.Property(x => x.Type).IsRequired();
+            builder.Property(x => x.Name).HasMaxLength(50).HasDefaultValue("").IsRequired();
+            builder.Property(x => x.Type).HasDefaultValue(0).IsRequired();
         }
     }
 }

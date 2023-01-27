@@ -84,6 +84,7 @@ namespace SchoolSystem.DAL.DataBase
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new ClasroomConfiguration());
             modelBuilder.ApplyConfiguration(new EamConfiguration());
+            modelBuilder.ApplyConfiguration(new AttendanceConfiguration());
 
             #endregion
 

@@ -8,7 +8,7 @@ namespace SchoolSystem.DAL.DataBase.Configuration.Entities
     {
         public void Configure(EntityTypeBuilder<Clasroom> builder)
         {
-            builder.Property(x => x.Grade).IsRequired();
+            builder.Property(x => x.Grade).HasDefaultValue(0).IsRequired();
             builder.Property(x => x.TeacherId).IsRequired();
             builder.Property(x => x.TimeTableId).IsRequired();
         }
