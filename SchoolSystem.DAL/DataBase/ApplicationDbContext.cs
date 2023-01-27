@@ -82,6 +82,8 @@ namespace SchoolSystem.DAL.DataBase
             #region Seedings
 
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new ClasroomConfiguration());
+            modelBuilder.ApplyConfiguration(new EamConfiguration());
 
             #endregion
 
