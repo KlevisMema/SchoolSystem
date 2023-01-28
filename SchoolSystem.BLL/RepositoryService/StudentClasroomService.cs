@@ -1,4 +1,7 @@
-﻿using SchoolSystem.DAL.Models;
+﻿using AutoMapper;
+using SchoolSystem.DAL.Models;
+using SchoolSystem.DAL.DataBase;
+using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
@@ -8,14 +11,20 @@ namespace SchoolSystem.BLL.RepositoryService
 {
     public class StudentClasroomService : ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel>
     {
+        private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _dbContext;
         private readonly CRUD<StudentClasroomViewModel, StudentClasroom, CreateUpdateStudentClasroomViewModel> _CRUD;
 
         public StudentClasroomService
         (
+            IMapper mapper,
+            ApplicationDbContext dbContext,
             CRUD<StudentClasroomViewModel, StudentClasroom, CreateUpdateStudentClasroomViewModel> CRUD
         )
         {
             _CRUD = CRUD;
+            _mapper = mapper;
+            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -42,8 +51,10 @@ namespace SchoolSystem.BLL.RepositoryService
             CancellationToken cancellationToken
         )
         {
-            var getStudentClasroom = await _CRUD.GetSpecificRecord(id, "Student Clasroom", cancellationToken);
-            return getStudentClasroom;
+            var test = await _dbContext.StudentClasrooms.FirstOrDefaultAsync(x => x.StudentId.Equals(id));
+            return Response<StudentClasroomViewModel>.Ok(_mapper.Map<StudentClasroomViewModel>(test));
+            //var getStudentClasroom = await _CRUD.GetSpecificRecord(id, "Student Clasroom", cancellationToken);
+            //return getStudentClasroom;
         }
 
         /// <summary>

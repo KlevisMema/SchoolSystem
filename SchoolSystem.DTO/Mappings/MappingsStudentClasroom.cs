@@ -8,7 +8,8 @@ namespace SchoolSystem.DTO.Mappings
     {
         public MappingsStudentClasroom()
         {
-            CreateMap<StudentClasroom, StudentClasroomViewModel>();
+            CreateMap<StudentClasroom, StudentClasroomViewModel>()
+                .ForMember(dest => dest.Created, opt => opt.MapFrom(src => DateTime.Now));
             CreateMap<CreateUpdateStudentClasroomViewModel, StudentClasroom>();
         }
     }

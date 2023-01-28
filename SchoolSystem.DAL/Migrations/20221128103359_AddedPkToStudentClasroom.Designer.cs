@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolSystem.DAL.DataBase;
 
@@ -11,9 +12,11 @@ using SchoolSystem.DAL.DataBase;
 namespace SchoolSystem.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221128103359_AddedPkToStudentClasroom")]
+    partial class AddedPkToStudentClasroom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,13 +54,13 @@ namespace SchoolSystem.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0959abb2-f29b-4eb1-bd66-3c4d5c16959c",
+                            Id = "cb48d22b-5246-4c11-8dcc-70ecb259f655",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "eace406f-41ed-4112-879d-7d79542895cb",
+                            Id = "ddc4f462-40a0-4331-b111-2bd2c97430ab",
                             Name = "Student",
                             NormalizedName = "Student"
                         });
@@ -343,6 +346,9 @@ namespace SchoolSystem.DAL.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("StudentId", "ClasroomId");
 

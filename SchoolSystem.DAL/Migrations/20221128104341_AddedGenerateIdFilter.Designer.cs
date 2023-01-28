@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolSystem.DAL.DataBase;
 
@@ -11,9 +12,11 @@ using SchoolSystem.DAL.DataBase;
 namespace SchoolSystem.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221128104341_AddedGenerateIdFilter")]
+    partial class AddedGenerateIdFilter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,13 +54,13 @@ namespace SchoolSystem.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0959abb2-f29b-4eb1-bd66-3c4d5c16959c",
+                            Id = "98f2f880-8d34-4b6e-86bd-ca2ea3074cdf",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "eace406f-41ed-4112-879d-7d79542895cb",
+                            Id = "904d25a7-4b5e-4f7a-ae95-19344f2168bd",
                             Name = "Student",
                             NormalizedName = "Student"
                         });
@@ -343,6 +346,10 @@ namespace SchoolSystem.DAL.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("StudentId", "ClasroomId");
 

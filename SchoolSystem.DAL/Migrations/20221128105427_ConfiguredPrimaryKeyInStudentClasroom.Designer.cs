@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolSystem.DAL.DataBase;
 
@@ -11,9 +12,11 @@ using SchoolSystem.DAL.DataBase;
 namespace SchoolSystem.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221128105427_ConfiguredPrimaryKeyInStudentClasroom")]
+    partial class ConfiguredPrimaryKeyInStudentClasroom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,13 +54,13 @@ namespace SchoolSystem.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0959abb2-f29b-4eb1-bd66-3c4d5c16959c",
+                            Id = "4269868a-8dc3-4d12-b949-d074662befe9",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "eace406f-41ed-4112-879d-7d79542895cb",
+                            Id = "3b5e82f6-b243-48b4-a680-dc6d55bf1249",
                             Name = "Student",
                             NormalizedName = "Student"
                         });
@@ -335,7 +338,8 @@ namespace SchoolSystem.DAL.Migrations
 
             modelBuilder.Entity("SchoolSystem.DAL.Models.StudentClasroom", b =>
                 {
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ClasroomId")
@@ -344,9 +348,14 @@ namespace SchoolSystem.DAL.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("StudentId", "ClasroomId");
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ClasroomId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("StudentClasrooms");
                 });
