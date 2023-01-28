@@ -37,7 +37,7 @@ namespace SchoolSystem.DAL.DataBase
                 .HasMany(c => c.Clasrooms)
                 .WithOne(t => t.Teacher);
 
-            modelBuilder.Entity<Clasroom>()
+            modelBuilder.Entity<Clasroom>() 
                 .HasOne(t => t.Teacher)
                 .WithMany(c => c.Clasrooms);
 
@@ -83,7 +83,7 @@ namespace SchoolSystem.DAL.DataBase
             modelBuilder.Entity<Attendance>()
                 .HasOne(t => t.Teacher)
                 .WithMany(c => c.Attendances)
-                .HasForeignKey(x => x.TeacherId);
+                .HasForeignKey(x=>x.TeacherId);
 
             // M:M Student -> Clasroom
             modelBuilder.Entity<StudentClasroom>()

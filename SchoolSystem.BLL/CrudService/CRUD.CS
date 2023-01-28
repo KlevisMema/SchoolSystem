@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 
+
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
     public class CRUD
@@ -233,7 +234,7 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
                     $" Source : {ex.Source} \n" +
                     $"InnerEx : {ex.InnerException} \n"
                 );
-                return Response<ReturnType>.ErrorMsg("Server error, couldn't delete try again!");
+                return Response<ReturnType>.ErrorMsg("Server error, could't delete try again!");
             }
         }
     }

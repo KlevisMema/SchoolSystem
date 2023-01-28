@@ -1,59 +1,66 @@
-﻿using MediatR;
-using FluentValidation;
+﻿using FluentValidation;
 using SchoolSystem.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
+using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
-using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
-using SchoolSystem.BLL.MediatrService.Actions.Clasroom.Queries;
+using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using MediatR;
 using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.StudentClasroom.Commands;
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    ///     StudentClasroom API Controller
+    /// StudentClasroom API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class StudentClasroomsController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly I_Valid_Id<Student> i_Valid_Student_Id;
+        private readonly I_Valid_Id<Clasroom> i_Valid_Clasroom_Id;
         private readonly IValidator<CreateUpdateStudentClasroomViewModel> _modelValidator;
-
-        private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
-        (
-            Guid clasroomid,
-            Guid studentId,
-            CancellationToken cancellationToken
-        )
+        private readonly StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> _statusCodeResponse;
+        private readonly ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> _studentClasroomService;
+        private async Task<CustomMesageResponse> ValidateId(Guid clasroomid, Guid studentId, CancellationToken cancellationToken)
         {
-            var doesClasroomExists = new DoesClasroomExistsQuery(clasroomid);
-            var resultClasroom = await _mediator.Send(doesClasroomExists, cancellationToken);
+            var clasroom = await i_Valid_Clasroom_Id.Bool(clasroomid, cancellationToken);
+            var student = await i_Valid_Student_Id.Bool(studentId, cancellationToken);
 
-            var doesStudentExists = new DoesStudentExistsQuery(studentId);
-            var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
+            if (!clasroom)
+                return CustomMesageResponse.NotFound(clasroom, "Invalid clasroom id");
+            if (!student)
+                return CustomMesageResponse.NotFound(student, "Invalid student id");
 
-            if (!resultClasroom.Exists)
-                return resultClasroom;
-            if (!resultStudent.Exists)
-                return resultStudent;
-
-            return SchoolSystem.BLL.ResponseService.CustomMesageResponse.Succsess();
+            return CustomMesageResponse.Succsess();
         }
 
         /// <summary>
-        ///     Inject services
+        /// Inject services
         /// </summary>
-        /// <param name="mediator"> Mediator servivce</param>
-        /// <param name="modelValidator"> Model validator service </param>
+        /// <param name="studentClasroomService">Student Clasroom servivce</param>
+        /// <param name="modelValidator">Model validator service</param>
+        /// <param name="statusCodeResponse">Status code response service</param>
+        /// <param name="i_Valid_Clasroom_Id">Clasroom valid id service</param>
+        /// <param name="i_Valid_Student_Id">Student valid id service</param>
         public StudentClasroomsController
         (
+            I_Valid_Id<Student> i_Valid_Student_Id,
+            I_Valid_Id<Clasroom> i_Valid_Clasroom_Id,
             IValidator<CreateUpdateStudentClasroomViewModel> modelValidator,
+            StatusCodeResponse<StudentClasroomViewModel, List<StudentClasroomViewModel>> statusCodeResponse,
+            ICrudService<StudentClasroomViewModel, CreateUpdateStudentClasroomViewModel> studentClasroomService,
             IMediator mediator
         )
         {
             _modelValidator = modelValidator;
+            _statusCodeResponse = statusCodeResponse;
+            this.i_Valid_Student_Id = i_Valid_Student_Id;
+            this.i_Valid_Clasroom_Id = i_Valid_Clasroom_Id;
+            _studentClasroomService = studentClasroomService;
             _mediator = mediator;
         }
 
@@ -154,13 +161,10 @@ namespace SchoolSystem.API.Controllers
         }
 
         /// <summary>
-        ///     Deletes a studentClasroom form database
+        /// Deletes a studentClasroom form database
         /// </summary>
-        /// <param name="id"> Id of the student </param>
-        /// <param name="cancellationToken"> Cancellation Token </param>
-        /// <returns> A message telling if the record was deleted succsessfully </returns>
-        
-
+        /// <param name="id">Id of the student</param>
+        /// <returns>A message telling if the record was deleted succsessfully</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
