@@ -13,22 +13,28 @@ using SchoolSystem.BLL.MediatrService.Actions.Student.Commands;
 namespace SchoolSystem.WEB.Controllers
 {
     /// <summary>
-    /// Student Api Controller
+    ///     Student Api Controller
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateStudentViewModel> _modelValidator;
-
-        #region Inject all services in ctor
+        #region Services
 
         /// <summary>
-        /// Inject Student Services 
+        ///     Mediator 
         /// </summary>
-        /// <param name="modelValidator"></param>
-        /// <param name="mediator"></param>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateStudentViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateStudentViewModel> _modelValidator;
+
+        /// <summary>
+        ///     Inject Student Services 
+        /// </summary>
+        /// <param name="modelValidator"> Model validator service </param>
+        /// <param name="mediator"> Mediator service </param>
 
         public StudentsController
         (
@@ -39,6 +45,7 @@ namespace SchoolSystem.WEB.Controllers
             _mediator = mediator;
             _modelValidator = modelValidator;
         }
+
         #endregion
 
         #region Get all students endpoint

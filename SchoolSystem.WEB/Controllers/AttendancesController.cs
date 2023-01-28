@@ -16,17 +16,21 @@ using SchoolSystem.BLL.MediatrService.Actions.Attendance.Commands;
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Attendance API Controller
+    ///     Attendance API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AttendancesController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateAttendanceViewModel> _modelValidator;
-
         #region Validate ids
 
+        /// <summary>
+        ///     Validate teacherid and studentid
+        /// </summary>
+        /// <param name="teacherId"> Teacher Id </param>
+        /// <param name="studentId"> Student Id </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns></returns>
         private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
             Guid teacherId,
@@ -50,7 +54,16 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        #region Inject services to Attendance ctor
+        #region Services
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateAttendanceViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateAttendanceViewModel> _modelValidator;
 
         /// <summary>
         ///     Inject services 
@@ -73,7 +86,7 @@ namespace SchoolSystem.API.Controllers
         #region Get all attendances endpoint
 
         /// <summary>
-        /// Get all attendances
+        ///     Get all attendances
         /// </summary>
 
         [HttpGet]
@@ -127,7 +140,7 @@ namespace SchoolSystem.API.Controllers
         ///     Update an attendance
         /// </summary>
         /// <param name="id"> Id of the attendance </param>
-        /// <param name="attendance"> attendance object from client </param>
+        /// <param name="attendance"> attendance view model object </param>
         /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns> The updated attendance </returns>
 

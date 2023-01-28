@@ -20,15 +20,22 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class ExamsController : ControllerBase
     {
+        #region Services
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
         private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateExamViewModel
+        /// </summary>
         private readonly IValidator<CreateUpdateExamViewModel> _modelValidator;
 
-        #region Inject services in the ctor
         /// <summary>
         ///     Inject services 
         /// </summary>
         /// <param name="mediator"> Mediator service</param>
-        /// <param name="modelValidator">Model validation service</param>
+        /// <param name="modelValidator"> Model validatior service </param>
 
         public ExamsController
         (

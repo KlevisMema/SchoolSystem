@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#region Usings
+
+using System.Text;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -6,8 +8,13 @@ using System.IdentityModel.Tokens.Jwt;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.DTO.ViewModels.Account;
 
+#endregion
+
 namespace SchoolSystem.BLL.AuthTokenService
 {
+    /// <summary>
+    ///     A class which it's purpose is to generate a token and return it, it implements the IOAuthService interface
+    /// </summary>
     public class OAuthService : IOAuthService
     {
         private readonly IOptions<JwtConfig> _jwtOptions;
@@ -23,7 +30,7 @@ namespace SchoolSystem.BLL.AuthTokenService
         /// <summary>
         /// Serialize a token in a string fromat (Jwt format)
         /// </summary>
-        /// <param name="logIn">Login object to be used for user validation</param>
+        /// <param name="user"> User View Model object</param>
         /// <returns>Token</returns>
         public string CreateToken(UserViewModel user)
         {

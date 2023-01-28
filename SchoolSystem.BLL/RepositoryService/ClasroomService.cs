@@ -1,4 +1,6 @@
-﻿using SchoolSystem.DAL.Models;
+﻿#region Usings
+
+using SchoolSystem.DAL.Models;
 using Microsoft.Extensions.Logging;
 using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.BLL.ServiceInterfaces;
@@ -6,27 +8,51 @@ using SchoolSystem.DTO.ViewModels.Clasroom;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.RepositoryService.CrudService;
 
+#endregion
+
 namespace SchoolSystem.BLL.RepositoryService
 {
+    /// <summary>
+    ///     Clasroom service that implements ICrud interface and I_Valid_Id interface, and has all buisness logic related to Clasroom
+    /// </summary>
     public class ClasroomService : ICrudService<ClasroomViewModel, CreateUpdateClasroomViewModel>, I_Valid_Id<Clasroom>
     {
-        private readonly ILogger<ClasroomService> _logger;
-        private readonly CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> _CRUD;
+        #region Services
 
+        /// <summary>
+        ///   A readonly field for Loger 
+        /// </summary>
+        private readonly ILogger<ClasroomService> _logger;
+        /// <summary>
+        ///   A readonly field for database actions -> Create,Update,Delete,Get Actions
+        /// </summary>
+        private readonly DatabaseActionsService<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> _CRUD;
+
+        /// <summary>
+        ///     Inject services in constructor
+        /// </summary>
+        /// <param name="logger"> Logger service </param>
+        /// <param name="CRUD"> CRUD Service </param>
         public ClasroomService
         (
             ILogger<ClasroomService> logger,
-            CRUD<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD
+            DatabaseActionsService<ClasroomViewModel, Clasroom, CreateUpdateClasroomViewModel> CRUD
         )
         {
             _CRUD = CRUD;
             _logger = logger;
         }
 
+        #endregion
+
+        #region Get all clasrooms from clasroom table 
+
         /// <summary>
-        /// Get all clasrooms
+        ///     Get all clasrooms
         /// </summary>
+        /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> a list of all time clasrooms</returns>
+
         public async Task<Response<List<ClasroomViewModel>>> GetRecords
         (
             CancellationToken cancellationToken
@@ -36,11 +62,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return getAllClasrooms;
         }
 
+        #endregion 
+
+        #region Get a clasroom by id from clasroom table 
+
         /// <summary>
-        /// Get a single clasroom
+        ///     Get a single clasroom
         /// </summary>
         /// <param name="id"> Id of a clasroom</param>
+        /// <param name="cancellationToken"> Cancellation token </param>
         /// <returns> The object of a specific clasroom</returns>
+
         public async Task<Response<ClasroomViewModel>> GetRecord
         (
             Guid id,
@@ -51,12 +83,18 @@ namespace SchoolSystem.BLL.RepositoryService
             return getClasroom;
         }
 
+        #endregion
+
+        #region Update a existing clasroom in clasroom table 
+
         /// <summary>
-        /// Updates a clasroom  
+        ///     Updates a clasroom  
         /// </summary>
-        /// <param name="id">Id of a clasroom </param>
-        /// <param name="viewModel">Object that holds the new values of clasroom </param>
-        /// <returns>The updated clasroom</returns>
+        /// <param name="id"> Id of a clasroom </param>
+        /// <param name="viewModel"> Object that holds the new values of clasroom </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated clasroom </returns>
+
         public async Task<Response<ClasroomViewModel>> PutRecord
         (
             Guid id,
@@ -68,11 +106,16 @@ namespace SchoolSystem.BLL.RepositoryService
             return updatetClasroom;
         }
 
+        #endregion
+
+        #region Creates a new clasroom in clasroom table 
+
         /// <summary>
-        /// Creates a new clasroom 
+        ///     Creates a new clasroom 
         /// </summary>
-        /// <param name="viewModel">clasroom object </param>
-        /// <returns>The created clasroom</returns>
+        /// <param name="viewModel"> Clasroom object </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The created clasroom </returns>
         public async Task<Response<ClasroomViewModel>> PostRecord
         (
             CreateUpdateClasroomViewModel viewModel,
@@ -83,11 +126,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return postClasroom;
         }
 
+        #endregion
+
+        #region Delete a clasroom by id in clasroom table 
+
         /// <summary>
-        /// Deletes a clasroom 
+        ///     Deletes a clasroom by id
         /// </summary>
-        /// <param name="id">Id of the clasroom</param>
-        /// <returns>A message telling if the clasroom was deleted or not</returns>
+        /// <param name="id"> Id of the clasroom </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A message telling if the clasroom was deleted or not </returns>
+
         public async Task<Response<ClasroomViewModel>> DeleteRecord
         (
             Guid id,
@@ -98,10 +147,17 @@ namespace SchoolSystem.BLL.RepositoryService
             return deleteClasroom;
         }
 
+        #endregion
+
+        #region Checks of the clasroom exists in clasroom table  
+
         /// <summary>
-        ///     Returns true or false if the clasroom exists or not
+        ///     Checks if the clasroom exists or not
         /// </summary>
-        /// <param name="id">Id of the clasroom</param>
+        /// <param name="id"> Id of the clasroom </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> True or False </returns>
+
         public async Task<bool> Bool
         (
             Guid id,
@@ -129,5 +185,8 @@ namespace SchoolSystem.BLL.RepositoryService
                 return false;
             }
         }
+
+        #endregion
+
     }
 }

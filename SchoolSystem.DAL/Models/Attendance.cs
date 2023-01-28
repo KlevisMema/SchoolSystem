@@ -4,7 +4,7 @@ namespace SchoolSystem.DAL.Models
 {
     public class Attendance
     {
-        public Guid Id { get; set; }   
+        public Guid Id { get; set; }
         public DateTime Date { get; set; }
         public Status Status { get; set; }
 

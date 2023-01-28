@@ -1,4 +1,5 @@
-﻿using SchoolSystem.DAL.Enums;
+﻿using Newtonsoft.Json;
+using SchoolSystem.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace SchoolSystem.DTO.ViewModels.Account
@@ -8,7 +9,7 @@ namespace SchoolSystem.DTO.ViewModels.Account
         [Required]
         [EmailAddress]
         public string? Email { get; set; }
-        
+
         [Required]
         public string? FirstName { get; set; }
 
@@ -27,7 +28,7 @@ namespace SchoolSystem.DTO.ViewModels.Account
 
         [Required]
         [Compare("Password")]
-        public string? PasswordConfirmation { get; set;}
+        public string? PasswordConfirmation { get; set; }
 
         [Required]
         [Phone]

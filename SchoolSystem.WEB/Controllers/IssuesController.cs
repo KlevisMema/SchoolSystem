@@ -21,10 +21,16 @@ namespace SchoolSystem.API.Controllers
     [Route("api/[controller]")]
     public class IssuesController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateIssueViewModel> _modelValidator;
+        #region Services
 
-        #region Inject services in the ctor 
+        /// <summary>
+        ///     Mediator
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateIssueViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateIssueViewModel> _modelValidator;
 
         /// <summary>
         /// Inject services

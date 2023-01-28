@@ -1,13 +1,22 @@
-﻿using AutoMapper;
+﻿#region Usings
+
+using AutoMapper;
 using SchoolSystem.DAL.DataBase;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SchoolSystem.BLL.ResponseService;
 
+#endregion
 
 namespace SchoolSystem.BLL.RepositoryService.CrudService
 {
-    public class CRUD
+    /// <summary>
+    ///     Generic class used to perform CRUD database actions such as Create, Update, Read and Delete.
+    /// </summary>
+    /// <typeparam name="ReturnType"> The return type  </typeparam>
+    /// <typeparam name="ModelType"> Model type you want to perform an action </typeparam>
+    /// <typeparam name="PostUpdateModelType"> Create or update object values </typeparam>
+    public class DatabaseActionsService
     <
         ReturnType,
         ModelType,
@@ -17,15 +26,32 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
         where ReturnType : class
         where PostUpdateModelType : class
     {
-        private readonly IMapper _mapper;
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<CRUD<ReturnType, ModelType, PostUpdateModelType>> _logger;
+        #region Inject services
 
-        public CRUD
+        /// <summary>
+        ///     Mapper interface
+        /// </summary>
+        private readonly IMapper _mapper;
+        /// <summary>
+        ///     Database context
+        /// </summary>
+        private readonly ApplicationDbContext _context;
+        /// <summary>
+        ///     Logger 
+        /// </summary>
+        private readonly ILogger<DatabaseActionsService<ReturnType, ModelType, PostUpdateModelType>> _logger;
+
+        /// <summary>
+        ///     Inject services in controller
+        /// </summary>
+        /// <param name="mapper"> Mapper service </param>
+        /// <param name="context"> Database service </param>
+        /// <param name="logger"> Logger service </param>
+        public DatabaseActionsService
         (
             IMapper mapper,
             ApplicationDbContext context,
-            ILogger<CRUD<ReturnType, ModelType, PostUpdateModelType>> logger
+            ILogger<DatabaseActionsService<ReturnType, ModelType, PostUpdateModelType>> logger
         )
         {
             _mapper = mapper;
@@ -33,10 +59,16 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
             _context = context;
         }
 
+        #endregion
+
+        #region Get all records from a table
+
         /// <summary>
-        /// Get all records from an entity in database.
+        ///     Get all records from an entity in database.
         /// </summary>
-        /// <returns>A list of records</returns>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A list of records </returns>
+
         public async Task<Response<List<ReturnType>>> GetAll
         (
             CancellationToken cancellationToken
@@ -64,12 +96,18 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
             }
         }
 
+        #endregion
+
+        #region Get a specific record from a table
+
         /// <summary>
-        /// Get a specific record from an entity in database.
+        ///     Get a specific record from an entity in database.
         /// </summary>
-        /// <param name="id">Id of the that entity </param>
-        /// <param name="customMessage">Custom message for the response </param>
-        /// <returns>A record correspondig to that id</returns>
+        /// <param name="id"> Id of the that entity </param>
+        /// <param name="customMessage"> Custom message for the response </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A record correspondig to that id </returns>
+
         public async Task<Response<ReturnType>> GetSpecificRecord
         (
             Guid id,
@@ -107,12 +145,18 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
             }
         }
 
+        #endregion
+
+        #region Create a new record in a specific table
+
         /// <summary>
-        /// Create a record of an entity
+        ///     Create a record of an entity
         /// </summary>
-        /// <param name="record">Object type with records</param>
-        /// <param name="customMessage">Custom message for the response</param>
-        /// <returns>A string message if record was created or not</returns>
+        /// <param name="record"> Object type with records </param>
+        /// <param name="customMessage"> Custom message for the response </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A string message if record was created or not </returns>
+
         public async Task<Response<ReturnType>> PostRecord
         (
             PostUpdateModelType record,
@@ -146,13 +190,19 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
             }
         }
 
+        #endregion
+
+        #region Update an existing record from a specific table 
+
         /// <summary>
-        /// Upadate a record of an Entity 
+        ///     Upadate a record of an Entity 
         /// </summary>
         /// <param name="id">Id of that entity</param>
-        /// <param name="recordFromClient">Object type with records</param>
-        /// <param name="customMessage">Custom message for response </param>
-        /// <returns>The updated record</returns>
+        /// <param name="recordFromClient"> Object type with records </param>
+        /// <param name="customMessage"> Custom message for response </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> The updated record </returns>
+
         public async Task<Response<ReturnType>> PutRecord
         (
             Guid id,
@@ -193,12 +243,18 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
             }
         }
 
+        #endregion
+
+        #region Delete a record form a specific table
+
         /// <summary>
-        /// Delete a record from database
+        ///     Delete a record from database
         /// </summary>
-        /// <param name="id">Id of the entity to be deleted</param>
-        /// <param name="customMessage">Custom message for response message</param>
-        /// <returns>A message if the record was deleted or not </returns>
+        /// <param name="id"> Id of the entity to be deleted </param>
+        /// <param name="customMessage"> Custom message for response message </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A message if the record was deleted or not </returns>
+
         public async Task<Response<ReturnType>> DeleteRecord
         (
             Guid id,
@@ -237,5 +293,57 @@ namespace SchoolSystem.BLL.RepositoryService.CrudService
                 return Response<ReturnType>.ErrorMsg("Server error, could't delete try again!");
             }
         }
+
+        #endregion
+
+        #region Get a specific record from a specific table which is a composite key table
+
+        /// <summary>
+        ///     Get a specific record from an entity in database of a composite key table.
+        /// </summary>
+        /// <param name="id"> Id of the that entity </param>
+        /// <param name="customMessage"> Custom message for the response </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A record correspondig to that id </returns>
+
+        public async Task<Response<ReturnType>> GetSpecificRecordCompostieKeyTable
+        (
+            Guid FirstId,
+            Guid SecondId,
+            string customMessage,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                ModelType recordFromDb = await _context.Set<ModelType>().FindAsync(FirstId, SecondId, cancellationToken);
+
+                ArgumentNullException.ThrowIfNull(recordFromDb);
+
+                ReturnType transformObjectToReturnType = _mapper.Map<ReturnType>(recordFromDb);
+
+                return Response<ReturnType>.Ok(transformObjectToReturnType);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex, $"Argument null exeption {typeof(ModelType)} || {ex.ParamName} ||");
+
+                return Response<ReturnType>.NotFound($"{customMessage} doesn't exists");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError
+                (
+                    ex,
+                    $"Error, something went wrong !! => \n " +
+                    $" Method : {ex.TargetSite} \n" +
+                    $" Source : {ex.Source} \n" +
+                    $"InnerEx : {ex.InnerException} \n"
+                );
+                return Response<ReturnType>.ErrorMsg("Server error, try again later !!");
+            }
+        }
+
+        #endregion
     }
 }

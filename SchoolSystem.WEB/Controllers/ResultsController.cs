@@ -5,30 +5,32 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.DTO.ViewModels.Result;
-using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Result.Commands;
 using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
-using SchoolSystem.BLL.MediatrService.Actions.Teacher.Queries;
 using SchoolSystem.BLL.MediatrService.Actions.Exam.Queries;
-using SchoolSystem.DAL.Models;
 
 #endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Results API Controller
+    ///     Results API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ResultsController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
-
         #region Validate ids
 
+        /// <summary>
+        ///     Validate Exam id, Student id and subject id
+        /// </summary>
+        /// <param name="ExamId"> Exam id </param>
+        /// <param name="StudentId"> Srudent id </param>
+        /// <param name="SubjectId"> Suvject id </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns></returns>
         private async Task<SchoolSystem.BLL.ResponseService.CustomMesageResponse> ValidateId
         (
             Guid ExamId,
@@ -40,16 +42,18 @@ namespace SchoolSystem.API.Controllers
             var doesExamExists = new DoesExamExistsQuery(ExamId);
             var resultExam = await _mediator.Send(doesExamExists, cancellationToken);
 
+            if (!resultExam.Exists)
+                return resultExam;
+
             var doesStudentExists = new DoesStudentExistsQuery(StudentId);
             var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
+
+            if (!resultStudent.Exists)
+                return resultStudent;
 
             var doesSubjectExists = new DoesStudentExistsQuery(SubjectId);
             var resultSubject = await _mediator.Send(doesSubjectExists, cancellationToken);
 
-            if (!resultExam.Exists)
-                return resultExam;
-            if (!resultStudent.Exists)
-                return resultStudent;
             if (!resultSubject.Exists)
                 return resultSubject;
 
@@ -58,7 +62,16 @@ namespace SchoolSystem.API.Controllers
 
         #endregion
 
-        #region Inject services in the ctor 
+        #region Services
+
+        /// <summary>
+        ///     Mediator 
+        /// </summary>
+        private readonly IMediator _mediator;
+        /// <summary>
+        ///     Model validator for CreateUpdateResultViewModel
+        /// </summary>
+        private readonly IValidator<CreateUpdateResultViewModel> _modelValidator;
 
         /// <summary>
         ///     Inject Services
@@ -103,6 +116,7 @@ namespace SchoolSystem.API.Controllers
         #endregion
 
         #region Get result by id endpoint
+
         /// <summary>
         ///     Get a specific result
         /// </summary>

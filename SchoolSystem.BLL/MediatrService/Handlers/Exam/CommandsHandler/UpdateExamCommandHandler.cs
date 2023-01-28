@@ -1,17 +1,35 @@
-﻿using MediatR;
+﻿#region Usings
+
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SchoolSystem.DTO.ViewModels.Exam;
 using SchoolSystem.BLL.ServiceInterfaces;
 using SchoolSystem.BLL.RepositoryServiceInterfaces;
 using SchoolSystem.BLL.MediatrService.Actions.Exam.Commands;
 
+#endregion
+
 namespace SchoolSystem.BLL.MediatrService.Handlers.Exam.CommandsHandler
 {
-    internal class UpdateExamCommandHandler : IRequestHandler<UpdateExamCommand, ObjectResult>
+    /// <summary>
+    ///     Update exam command handler class which implements IRequestHandler which gets the get update exam command and object result as response 
+    /// </summary>
+    public class UpdateExamCommandHandler : IRequestHandler<UpdateExamCommand, ObjectResult>
     {
+        /// <summary>
+        ///     ICrudService interface 
+        /// </summary>
         private readonly ICrudService<ExamViewModel, CreateUpdateExamViewModel> _examService;
+        /// <summary>
+        ///     IControllerStatusCodeResponse interface
+        /// </summary>
         private readonly IControllerStatusCodeResponse<ExamViewModel, List<ExamViewModel>> _statusCodeResponse;
 
+        /// <summary>
+        ///     Services injection
+        /// </summary>
+        /// <param name="examService"> Exam service  </param>
+        /// <param name="statusCodeResponse"> Status code service </param>
         public UpdateExamCommandHandler
         (
             ICrudService<ExamViewModel, CreateUpdateExamViewModel> examService,
@@ -22,6 +40,12 @@ namespace SchoolSystem.BLL.MediatrService.Handlers.Exam.CommandsHandler
             _statusCodeResponse = statusCodeResponse;
         }
 
+        /// <summary>
+        ///     Handle the update exam command
+        /// </summary>
+        /// <param name="request"> Request parameters </param>
+        /// <param name="cancellationToken"> Cancellation token </param>
+        /// <returns> A Object result response </returns>
         public async Task<ObjectResult> Handle
         (
             UpdateExamCommand request,

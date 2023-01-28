@@ -1,59 +1,86 @@
-﻿using FluentValidation;
+﻿#region Usings
+
+using MediatR;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using SchoolSystem.API.ControllerRespose;
+using SchoolSystem.BLL.ResponseService;
 using SchoolSystem.DTO.ViewModels.StudentIssues;
 using SchoolSystem.DTO.ViewModels.StudentClasroom;
-using SchoolSystem.BLL.RepositoryServiceInterfaces;
+using SchoolSystem.BLL.MediatrService.Actions.Issues.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.Student.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.StudentIssue.Queries;
+using SchoolSystem.BLL.MediatrService.Actions.StudentIssue.Commands;
+using SchoolSystem.BLL.MediatrService.Actions.Result.Commands;
 
+#endregion
 
 namespace SchoolSystem.API.Controllers
 {
     /// <summary>
-    /// Student Issues API Controller
+    ///     Student Issues API Controller
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class StudentIssuesController : ControllerBase
     {
-        private readonly IValidator<CreateUpdateStudentIssueViewModel> _modelValidator;
-        private readonly StatusCodeResponse<StudentIssueViewModel, List<StudentIssueViewModel>> _statusCodeResponse;
-        private readonly ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel> _studentIssueService;
-        private async Task<CustomMesageResponse> ValidateId(Guid studentId, Guid issueId)
-        {
-            //var teacher = await _Teacher_Valid_Id.Bool(teacherId);
-            //var student = await _Student_Valid_Id.Bool(studentId);
+        #region Validate ids
 
-            //if (!teacher)
-            //    return CustomMesageResponse.NotFound(teacher, "Invalid teacher id");
-            //if (!student)
-            //    return CustomMesageResponse.NotFound(student, "Invalid student id");
+        private async Task<CustomMesageResponse> ValidateId
+        (
+            Guid studentId,
+            Guid issueId,
+            CancellationToken cancellationToken
+        )
+        {
+            var doesIssueExists = new DoesIssueExistsQuery(issueId);
+            var resultIssue = await _mediator.Send(doesIssueExists, cancellationToken);
+
+            if (!resultIssue.Exists)
+                return resultIssue;
+
+            var doesStudentExists = new DoesStudentExistsQuery(studentId);
+            var resultStudent = await _mediator.Send(doesStudentExists, cancellationToken);
+
+            if (!resultStudent.Exists)
+                return resultStudent;
 
             return CustomMesageResponse.Succsess();
         }
 
-        /// <summary>
-        /// Inject services
-        /// </summary>
-        /// <param name="modelValidator">Model validator service</param>
-        /// <param name="statusCodeResponse">Status code response service</param>
-        /// <param name="studentIssueService">Student issue service</param>
-        public StudentIssuesController
-        (
-            IValidator<CreateUpdateStudentIssueViewModel> modelValidator,
-            StatusCodeResponse<StudentIssueViewModel, List<StudentIssueViewModel>> statusCodeResponse,
-            ICrudService<StudentIssueViewModel, CreateUpdateStudentIssueViewModel> studentIssueService
-        )
-        {
-            _modelValidator = modelValidator;
-            _statusCodeResponse = statusCodeResponse;
-            _studentIssueService = studentIssueService;
-        }
+        #endregion
+
+        #region Services 
+
+        private readonly IMediator _mediator;
+        private readonly IValidator<CreateUpdateStudentIssueViewModel> _modelValidator;
 
         /// <summary>
-        /// Get all student student issues
+        ///     Inject Services
         /// </summary>
+        /// <param name="mediator"> Mediator service </param>
+        /// <param name="modelValidator"> Validator service </param>
+
+        public StudentIssuesController
+        (
+            IMediator mediator,
+            IValidator<CreateUpdateStudentIssueViewModel> modelValidator
+        )
+        {
+            _mediator = mediator;
+            _modelValidator = modelValidator;
+        }
+
+        #endregion
+
+        #region Get all student issues endpoint
+
+        /// <summary>
+        ///     Get all student student issues
+        /// </summary>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A list of student issues</returns>
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
@@ -63,35 +90,52 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var studentIssues = await _studentIssueService.GetRecords(cancellationToken);
-            return _statusCodeResponse.ControllerResponse(studentIssues);
+            var GetAllQuery = new GetAllStudentIssuesByIdQuery();
+            var result = await _mediator.Send(GetAllQuery, cancellationToken);
+            return result;
         }
 
+        #endregion
+
+        #region Get student issues by id endpoint
+
         /// <summary>
-        /// Get single student issues
+        ///     Get single student issues
         /// </summary>
-        /// <param name="id">Id of the student</param>
+        /// <param name="IssueId">Id of the Issue</param>
+        /// <param name="StudentId">Id of the Student</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A student issue</returns>
-        [HttpGet("{id}")]
+
+        [HttpGet("GetStudentIssue")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<ActionResult<StudentIssueViewModel>> GetStudentIssue
         (
-            [FromRoute] Guid id,
+             Guid StudentId,
+             Guid IssueId,
             CancellationToken cancellationToken
         )
         {
-            var studentIssue = await _studentIssueService.GetRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(studentIssue);
+            var GetByIDQuery = new GetStudentIssuesByIdQuery(IssueId, StudentId);
+            var result = await _mediator.Send(GetByIDQuery, cancellationToken);
+            return result;
         }
+
+        #endregion
+
+        #region Update student issue endpoint
 
         /// <summary>
         /// Update a student issue
         /// </summary>
         /// <param name="studentIssue">Data from client</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
+        /// <param name="StudentId"> Student Id </param>
         /// <returns>The updated record</returns>
+
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -99,11 +143,12 @@ namespace SchoolSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentClasroomViewModel))]
         public async Task<IActionResult> PutStudentIssue
         (
+            [FromRoute] Guid StudentId,
             [FromForm] CreateUpdateStudentIssueViewModel studentIssue,
             CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
+            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId, cancellationToken);
             if (!Ids.Exists)
                 return NotFound(Ids.CustomMessage);
 
@@ -111,15 +156,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var updateStudentIssue = await _studentIssueService.PutRecord(studentIssue.StudentId, studentIssue, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(updateStudentIssue);
+            var UpdateCommad = new UpdateStudentIssueCommand(StudentId, studentIssue);
+            var resultUpdate = await _mediator.Send(UpdateCommad, cancellationToken);
+            return resultUpdate;
         }
+
+        #endregion
+
+        #region Create Student issue endpoint
 
         /// <summary>
         /// Create a student issue
         /// </summary>
         /// <param name="studentIssue">Data from client</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A message telling if the record was created or not</returns>
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
@@ -130,7 +182,7 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId);
+            var Ids = await ValidateId(studentIssue.StudentId, studentIssue.IssueId, cancellationToken);
             if (!Ids.Exists)
                 return NotFound(Ids.CustomMessage);
 
@@ -138,15 +190,22 @@ namespace SchoolSystem.API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(Results.ValidationProblem(validationResult.ToDictionary()));
 
-            var createStudentIssue = await _studentIssueService.PostRecord(studentIssue, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(createStudentIssue);
+            var CreateCommad = new CreateStudentIssueCommand(studentIssue);
+            var resultCreate = await _mediator.Send(CreateCommad, cancellationToken);
+            return resultCreate;
         }
+
+        #endregion
+
+        #region Delete Result endpoint
 
         /// <summary>
         /// Deletes a student issue
         /// </summary>
         /// <param name="id">Id of the student</param>
+        /// <param name="cancellationToken"> Cancellation Token </param>
         /// <returns>A message telling if the record was deleted succsessfully</returns>
+
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -158,8 +217,11 @@ namespace SchoolSystem.API.Controllers
             CancellationToken cancellationToken
         )
         {
-            var deleteStudentIssue = await _studentIssueService.DeleteRecord(id, cancellationToken);
-            return _statusCodeResponse.ControllerResponse(deleteStudentIssue);
+            var DeleteCommad = new DeleteStudentIssueCommand(id);
+            var resultDelete = await _mediator.Send(DeleteCommad, cancellationToken);
+            return resultDelete;
         }
+
+        #endregion
     }
 }

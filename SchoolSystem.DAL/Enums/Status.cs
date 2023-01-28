@@ -1,9 +1,15 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿#region Usings
+
+using System.Text.Json.Serialization;
+
+#endregion
 
 namespace SchoolSystem.DAL.Enums
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    /// <summary>
+    ///     Status enum starting from 1.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Status
     {
         Present = 1,
