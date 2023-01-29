@@ -1,4 +1,5 @@
-﻿using SchoolSystem.DAL.Models;
+﻿using SchoolSystem.DAL.Enums;
+using SchoolSystem.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +9,7 @@ namespace SchoolSystem.DAL.DataBase.Configuration.Entities
     {
         public void Configure(EntityTypeBuilder<Attendance> builder)
         {
-            builder.Property(x => x.Status).HasDefaultValue(2).IsRequired();
+            builder.Property(x => x.Status).HasDefaultValue(Status.Missing).IsRequired();
             builder.Property(x => x.Date).IsRequired();
             builder.Property(x => x.TeacherId).IsRequired();
             builder.Property(x => x.StudentId).IsRequired();

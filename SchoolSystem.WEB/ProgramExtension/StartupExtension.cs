@@ -59,6 +59,18 @@ namespace SchoolSystem.API.ProgramExtension
             IConfiguration configuration
         )
         {
+            #region CORS
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
+
+            #endregion
+
             #region Database registration
             services.AddDbContext<ApplicationDbContext>
             (
